@@ -12,7 +12,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Левая часть с анимацией */}
       <div className="hidden md:flex w-1/2 items-center justify-center bg-white p-8">
-        <AnimatedHexTree />
+        {/* <AnimatedHexTree /> */}
       </div>
 
       {/* Правая часть */}
@@ -110,91 +110,91 @@ export default function LoginPage() {
   );
 }
 
-const AnimatedHexTree = () => {
-  const [activated, setActivated] = useState(false);
+// const AnimatedHexTree = () => {
+//   const [activated, setActivated] = useState(false);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => setActivated(true), 100);
-    return () => clearTimeout(timeout);
-  }, []);
+//   useEffect(() => {
+//     const timeout = setTimeout(() => setActivated(true), 100);
+//     return () => clearTimeout(timeout);
+//   }, []);
 
-  return (
-    <div className="relative w-[340px] h-[480px] flex items-center justify-center">
-      {/* Горизонтальные линии */}
-      <div className="absolute inset-0">
-        <div
-          className={`absolute left-[50%] top-[100px] h-[60px] w-[2px] ${
-            activated ? 'bg-blue-600' : 'bg-gray-300'
-          } transition-all duration-700`}
-        ></div>
-        <div
-          className={`absolute left-[50%] top-[260px] h-[60px] w-[2px] ${
-            activated ? 'bg-blue-600' : 'bg-gray-300'
-          } transition-all duration-700 delay-200`}
-        ></div>
-      </div>
+//   return (
+//     <div className="relative w-[340px] h-[480px] flex items-center justify-center">
+//       {/* Горизонтальные линии */}
+//       <div className="absolute inset-0">
+//         <div
+//           className={`absolute left-[50%] top-[100px] h-[60px] w-[2px] ${
+//             activated ? 'bg-blue-600' : 'bg-gray-300'
+//           } transition-all duration-700`}
+//         ></div>
+//         <div
+//           className={`absolute left-[50%] top-[260px] h-[60px] w-[2px] ${
+//             activated ? 'bg-blue-600' : 'bg-gray-300'
+//           } transition-all duration-700 delay-200`}
+//         ></div>
+//       </div>
 
-      {/* Верхние hex-блоки */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 flex gap-4">
-        {['Lessons', 'Calendar', 'Dormitory'].map((item, i) => (
-          <div
-            key={item}
-            className={`w-20 h-20 rounded-xl text-sm flex items-center justify-center border transition-all duration-500 ${
-              activated
-                ? 'bg-blue-100 border-blue-500 text-blue-700'
-                : 'bg-gray-200 border-gray-300 text-gray-600'
-            }`}
-            style={{ transitionDelay: `${i * 0.15}s` }}
-          >
-            {item}
-          </div>
-        ))}
-      </div>
+//       {/* Верхние hex-блоки */}
+//       <div className="absolute top-0 left-1/2 -translate-x-1/2 flex gap-4">
+//         {['Lessons', 'Calendar', 'Dormitory'].map((item, i) => (
+//           <div
+//             key={item}
+//             className={`w-20 h-20 rounded-xl text-sm flex items-center justify-center border transition-all duration-500 ${
+//               activated
+//                 ? 'bg-blue-100 border-blue-500 text-blue-700'
+//                 : 'bg-gray-200 border-gray-300 text-gray-600'
+//             }`}
+//             style={{ transitionDelay: `${i * 0.15}s` }}
+//           >
+//             {item}
+//           </div>
+//         ))}
+//       </div>
 
-      {/* Средние hex-блоки */}
-      <div className="absolute top-[120px] left-1/2 -translate-x-1/2 flex gap-4">
-        {['Student clubs', 'YSJ', 'HelpDesk', 'KPI'].map((item, i) => (
-          <div
-            key={item}
-            className={`w-20 h-20 rounded-xl text-sm flex items-center justify-center border transition-all duration-500 ${
-              activated
-                ? 'bg-blue-100 border-blue-500 text-blue-700'
-                : 'bg-gray-200 border-gray-300 text-gray-600'
-            }`}
-            style={{ transitionDelay: `${0.5 + i * 0.15}s` }}
-          >
-            {item}
-          </div>
-        ))}
-      </div>
+//       {/* Средние hex-блоки */}
+//       <div className="absolute top-[120px] left-1/2 -translate-x-1/2 flex gap-4">
+//         {['Student clubs', 'YSJ', 'HelpDesk', 'KPI'].map((item, i) => (
+//           <div
+//             key={item}
+//             className={`w-20 h-20 rounded-xl text-sm flex items-center justify-center border transition-all duration-500 ${
+//               activated
+//                 ? 'bg-blue-100 border-blue-500 text-blue-700'
+//                 : 'bg-gray-200 border-gray-300 text-gray-600'
+//             }`}
+//             style={{ transitionDelay: `${0.5 + i * 0.15}s` }}
+//           >
+//             {item}
+//           </div>
+//         ))}
+//       </div>
 
-      {/* Центральный логотип YU */}
-      <div
-        className={`absolute top-[240px] left-1/2 -translate-x-1/2 w-24 h-24 rounded-xl border-2 flex items-center justify-center text-xl font-bold ${
-          activated
-            ? 'border-blue-600 text-blue-600 bg-white'
-            : 'border-gray-300 text-gray-500 bg-white'
-        } transition-all duration-500 delay-[900ms]`}
-      >
-        YU
-      </div>
+//       {/* Центральный логотип YU */}
+//       <div
+//         className={`absolute top-[240px] left-1/2 -translate-x-1/2 w-24 h-24 rounded-xl border-2 flex items-center justify-center text-xl font-bold ${
+//           activated
+//             ? 'border-blue-600 text-blue-600 bg-white'
+//             : 'border-gray-300 text-gray-500 bg-white'
+//         } transition-all duration-500 delay-[900ms]`}
+//       >
+//         YU
+//       </div>
 
-      {/* Нижние круги */}
-      <div className="absolute top-[330px] left-1/2 -translate-x-1/2 flex gap-4">
-        {['OIS', 'Bitrix24', 'Canvas'].map((item, i) => (
-          <div
-            key={item}
-            className={`w-14 h-14 rounded-full text-xs flex items-center justify-center border transition-all duration-500 ${
-              activated
-                ? 'bg-blue-100 border-blue-500 text-blue-700'
-                : 'bg-gray-200 border-gray-300 text-gray-600'
-            }`}
-            style={{ transitionDelay: `${1 + i * 0.15}s` }}
-          >
-            {item}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+//       {/* Нижние круги */}
+//       <div className="absolute top-[330px] left-1/2 -translate-x-1/2 flex gap-4">
+//         {['OIS', 'Bitrix24', 'Canvas'].map((item, i) => (
+//           <div
+//             key={item}
+//             className={`w-14 h-14 rounded-full text-xs flex items-center justify-center border transition-all duration-500 ${
+//               activated
+//                 ? 'bg-blue-100 border-blue-500 text-blue-700'
+//                 : 'bg-gray-200 border-gray-300 text-gray-600'
+//             }`}
+//             style={{ transitionDelay: `${1 + i * 0.15}s` }}
+//           >
+//             {item}
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };

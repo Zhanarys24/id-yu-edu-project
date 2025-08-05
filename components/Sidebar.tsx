@@ -22,7 +22,7 @@ export default function Sidebar({ active }: { active?: string }) {
     { icon: <GraduationCap size={18}/>, label: 'Образование', href: '/main/education' },
     { icon: <BookOpen size={18}/>, label: 'Наука', href: '/main/science' },
     { icon: <Users size={18}/>, label: 'Воспитание', href: '/main/upbringing' },
-    { icon: <FileText size={18}/>, label: 'E‑услуги', href: '/services' },
+    { icon: <FileText size={18}/>, label: 'E‑услуги', href: '/main/E-services' },
     { icon: <Bot size={18}/>, label: 'YessenovBot', href: '/main/yessenovbot' },
     { icon: <User size={18}/>, label: 'Администрирование', href: '/admin' },
   ]
