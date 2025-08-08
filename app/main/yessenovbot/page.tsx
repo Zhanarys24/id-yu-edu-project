@@ -32,7 +32,7 @@ export default function YessenovBotPage() {
           {/* Введение: заголовок, описание и карточки */}
           <div className="overflow-y-auto pr-2 mb-4 flex flex-col items-center text-center">
             <h1 className="text-2xl font-semibold text-gray-800 mt-6 mb-2">
-              Добро пожаловать в YessenovBot
+              Добро пожаловать в YessenovAI
             </h1>
             <p className="text-gray-500 mb-8 max-w-md">
               Ваш личный ИИ-ассистент для быстрых ответов и поддержки. Начнём?

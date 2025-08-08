@@ -5,13 +5,13 @@ import Layout from '@/components/Layout'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function DashboardPage() {
+export default function EducationPage() {
   return (
     <Layout>
-      <h1 className="text-2xl font-semibold text-gray-800 mb-2">Образование</h1>
-      <p className="text-gray-500 mb-6">Доступ ко всем учебным ресурсам и материалам</p>
+      <h1 className="text-[22px] font-semibold text-gray-800 mb-3">Образование</h1>
+      <p className="text-[15px] text-gray-500 mb-5">Доступ ко всем учебным ресурсам и материалам</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <EduCard
           image="/canvas.png"
           title="Canvas"
@@ -47,20 +47,22 @@ function EduCard({
   href: string
 }) {
   return (
-    <div className="bg-white rounded-lg px-4 py-3 shadow-sm flex flex-col justify-between h-44 w-full max-w-full sm:max-w-[260px] lg:max-w-[320px] overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <Image src={image} alt={title} width={40} height={40} />
-        <p className="font-semibold text-base">{title}</p>
+    <div className="bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52 w-full max-w-full sm:max-w-[290px] lg:max-w-[350px] overflow-hidden">
+      <div className="flex items-center gap-4 mb-2">
+        <Image
+          src={image}
+          alt={title}
+          width={65}
+          height={65}
+          className="rounded-[10%]"
+        />
+        <p className="font-semibold text-[17px]">{title}</p>
       </div>
 
-      {/* Body */}
-      <p className="text-sm text-gray-500 flex-1 mb-3">{description}</p>
+      <p className="text-[14px] text-gray-500 flex-1 mb-4">{description}</p>
 
-      {/* Divider */}
       <div className="border-t border-gray-200 mb-2" />
 
-      {/* Footer */}
       <div className="text-right">
         <Link
           href={href}

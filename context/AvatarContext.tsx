@@ -2,22 +2,27 @@
 
 import { createContext, useState, useContext } from 'react'
 
-const AvatarContext = createContext<{
+const UserContext = createContext<{
   avatar: string
   setAvatar: (url: string) => void
+  userName: string
+  setUserName: (name: string) => void
 }>({
   avatar: '/avatar.jpg',
   setAvatar: () => {},
+  userName: 'Альбина Тілекбай',
+  setUserName: () => {},
 })
 
 export function AvatarProvider({ children }: { children: React.ReactNode }) {
   const [avatar, setAvatar] = useState('/avatar.jpg')
+  const [userName, setUserName] = useState('Альбина Тілекбай')
 
   return (
-    <AvatarContext.Provider value={{ avatar, setAvatar }}>
+    <UserContext.Provider value={{ avatar, setAvatar, userName, setUserName }}>
       {children}
-    </AvatarContext.Provider>
+    </UserContext.Provider>
   )
 }
 
-export const useAvatar = () => useContext(AvatarContext)
+export const useAvatar = () => useContext(UserContext)

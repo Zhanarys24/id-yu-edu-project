@@ -1,4 +1,4 @@
-import { Bell } from 'lucide-react'
+import { Bell, ChevronDown } from 'lucide-react'
 
 export default function Header() {
   return (

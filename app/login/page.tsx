@@ -1,200 +1,469 @@
 'use client';
-
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import Image from "next/image";
+import { useState } from 'react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-white">
-      {/* Левая часть с анимацией */}
-      <div className="hidden md:flex w-1/2 items-center justify-center bg-white p-8">
-        {/* <AnimatedHexTree /> */}
-      </div>
+  // Массив с путями к вашим PNG-изображениям
+  const fallingImages = [
+    '/OJS-logo.png',
+    '/canvas.png',
+    '/platonus.png',
+    '/studentclubs-logo.png',
+    '/lessons.png',
+    '/dormitory-logo.png'
+    // Добавьте свои изображения
+  ];
 
-      {/* Правая часть */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-16 py-20">
-        {/* Язык */}
-        <div className="flex justify-end">
-          <button className="border px-3 py-1 rounded text-sm text-gray-600 hover:bg-gray-100">
-            Русский ▾
-          </button>
-        </div>
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
 
-        {/* Контент формы */}
-        <div className="w-full max-w-lg mx-auto mt-6">
-          <h1 className="text-3xl font-semibold mb-6 text-blue-600">
-            Вход в аккаунт YU ID
-          </h1>
+  const handleEmailLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Email login');
+  };
 
-          {/* Табы */}
-          <div className="flex border-b border-gray-300 text-sm text-gray-500 font-medium mb-6">
-            {['Gmail/ИИН', 'eGov QR', 'ЭЦП'].map((tab, i) => (
-              <button
-                key={i}
-                className={`mr-6 pb-2 ${
-                  i === 0
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'hover:text-blue-600'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+  const handleECPLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedFile) {
+      console.log('ECP login');
+    }
+  };
 
-          {/* Форма */}
-          <form className="space-y-5">
+  const handleAnonymousLogin = () => {
+    console.log('Anonymous login');
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 0: // Gmail/ИИН
+        return (
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm mb-1 text-gray-700">
+              <label className="block text-sm font-medium mb-2 text-gray-700">
                 Введите почту yu.edu.kz или ИИН
               </label>
               <input
                 type="text"
                 placeholder="example@yu.edu.kz"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-3/4 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm mb-1 text-gray-700">Пароль</label>
-              <div className="relative">
+              <label className="block text-sm font-medium mb-2 text-gray-700">
+                Пароль
+              </label>
+              <div className="relative w-3/4">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="********"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="•••••••••••••••••••••"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  👁
+                  {showPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                    </svg>
+                  )}
                 </button>
+              </div>
+              <div className="text-right mt-2 w-3/4">
+                <a href="#" className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors">
+                  Забыли пароль?
+                </a>
               </div>
             </div>
 
-            <div className="text-right">
-              <Link href="#" className="text-sm text-blue-600 hover:underline">
-                Забыли пароль?
-              </Link>
-            </div>
-
             <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition"
+              type="button"
+              onClick={handleEmailLogin}
+              className="w-3/4 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               Войти
             </button>
-          </form>
+          </div>
+        );
+      
+      case 1: // eGov QR
+        return (
+          <div className="space-y-6">
+            <div className="text-xs text-gray-600 mb-4">
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col w-64"> 
+                  <span className="text-xs font-medium">Откройте мобильное приложение</span>
+                  <span className="text-sm text-blue-600 font-semibold">eGov Mobile / eGov Business</span>
+                </div>
+                <div className="text-gray-500 text-sm">&gt;</div>
+                <div className="w-40">
+                  <span className="text-xs text-gray-600">Нажмите QR-сканер в верхнем углу</span>
+                </div>
+                <div className="text-gray-500 text-sm">&gt;</div>
+                <div className="w-48">
+                  <span className="text-sm text-gray-600">Наведите камеру на экран</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-center">
+              <div className="w-80 h-80 bg-gray-200 rounded-lg flex items-center justify-center">
+                <span className="text-gray-500">QR код</span>
+              </div>
+            </div>
 
-          <div className="border-t my-6"></div>
+            <div className="flex items-start bg-gray-50 rounded-lg p-4 w-full max-w-3xl">
+              <svg
+                className="w-4 h-4 text-gray-400 mt-1 mr-3 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Продолжая пользоваться сервисом YU ID Вы даете согласие на сбор, обработку и хранение Ваших персональных данных в объеме, содержащемся в сертификате
+                (электронная цифровая подпись) НУЦ, для целей отображения данных об электронной подписи.
+              </p>
+            </div>
+          </div>
+        );
+      
+      case 2: // ЭЦП
+        return (
+          <div className="space-y-6">
+            <div className="flex items-start p-4 bg-gray-50 rounded-lg w-full max-w-3xl">
+              <svg
+                className="w-4 h-4 text-gray-400 mt-1 mr-3 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Продолжая пользоваться сервисом YU ID, Вы даете согласие на сбор, обработку и хранение Ваших персональных данных в объеме, содержащемся в сертификате
+                (электронная цифровая подпись) НУЦ, для целей отображения данных об электронной подписи.
+              </p>
+            </div>
 
-          <button className="w-full border border-blue-600 text-blue-600 py-3 rounded-lg hover:bg-blue-50 transition">
-            Войти анонимно в YU Solution
+            <div className="w-full max-w-3xl">
+              <label htmlFor="certificate-upload" className="block">
+                <div
+                  className={`w-full border-2 border-dashed rounded-lg p-1 text-center cursor-pointer transition-colors ${
+                    selectedFile
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                  }`}
+                >
+                  <div className="flex flex-col items-center space-y-2">
+                    <svg
+                      className="w-10 h-10 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+
+                    {selectedFile ? (
+                      <>
+                        <p className="text-base font-medium text-green-600">
+                          Сертификат успешно выбран
+                        </p>
+                        <p className="text-sm text-gray-500 break-all">{selectedFile.name}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-base font-medium text-gray-700">
+                          Выбрать сертификат
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Перетащите файл или нажмите для выбора
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </label>
+              <input
+                id="certificate-upload"
+                type="file"
+                className="hidden"
+                accept=".p12,.pfx,.jks,.cer,.crt,.pem,.png"
+                onChange={handleFileSelect}
+              />
+            </div>
+
+            <button
+              type="button"
+              className="w-full max-w-3xl bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!selectedFile}
+              onClick={handleECPLogin}
+            >
+              Войти
+            </button>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
+      {/* Left side - Animated Background с PNG */}
+      <div className="hidden lg:flex w-1/2 items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100">
+        {/* Слой 1: Падающие PNG изображения */}
+        <div className="absolute inset-0">
+          {fallingImages.map((imgSrc, i) => (
+            <div
+              key={`img-${i}`}
+              className="absolute animate-falling-items flex items-center justify-center"
+              style={{
+                width: '80px',
+                height: '80px',
+                left: `${10 + (i * 12) % 80}%`,
+                top: '-100px',
+                animationDelay: `${i * 2}s`,
+                animationDuration: `${8 + Math.random() * 4}s`,
+              }}
+            >
+              <Image 
+                src={imgSrc}
+                alt=""
+                width={64}
+                height={64}
+                className="object-contain drop-shadow-md floating-item"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Слой 2: Цветные блоки */}
+        <div className="absolute inset-0">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={`shape-${i}`}
+              className="absolute bg-white/60 rounded-2xl shadow-md backdrop-blur-sm border border-indigo-100 animate-falling-items-slow flex items-center justify-center"
+              style={{
+                width: '100px',
+                height: '100px',
+                left: `${20 + (i * 15) % 70}%`,
+                top: '-120px',
+                animationDelay: `${i * 3 + 1}s`,
+                animationDuration: `${12 + Math.random() * 6}s`,
+              }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-xl"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Слой 3: Мелкие элементы */}
+        <div className="absolute inset-0">
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={`dot-${i}`}
+              className="absolute bg-white/40 rounded-lg shadow-sm animate-falling-small"
+              style={{
+                width: '40px',
+                height: '40px',
+                left: `${5 + (i * 8) % 90}%`,
+                top: '-60px',
+                animationDelay: `${i * 1.5}s`,
+                animationDuration: `${6 + Math.random() * 3}s`,
+              }}
+            ></div>
+          ))}
+        </div>
+
+        {/* Welcome блок */}
+        <div className="relative w-[600px] max-w-3xl bg-white/60 backdrop-blur-s rounded-3xl shadow-xl border-none p-8 h-[820px] flex flex-col justify-center overflow-hidden">
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 opacity-70 pointer-events-none"></div>
+          
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-200/30 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-56 h-56 bg-indigo-200/30 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div className="relative z-10 text-center">
+            <div className="mb-8">
+              
+                {/* <div className="w-[200px] h-[200px] flex-shrink-0 mx-auto mb-12 rounded-3xl flex items-center justify-center overflow-hidden bg-transparent shadow-none opacity-0">
+                              дивка для лого но уже чуть прозрачная 
+                </div> */}
+
+              <div className="w-[250px] h-[250px] flex-shrink-0 mx-auto mb-12 rounded-3xl flex items-center justify-center overflow-hidden bg-transparent shadow-none">
+                <Image
+                  src="/yessenov.png"
+                  alt="Yessenov University"
+                  width={175}
+                  height={175}
+                  className="object-contain"
+                />
+              </div>
+
+            </div>
+
+            <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent leading-tight drop-shadow-sm">
+              Добро пожаловать в YU
+            </h2>
+            <p className="text-lg text-slate-600 leading-relaxed font-medium">
+              Все сервисы университета в одном месте
+            </p>
+          </div>
+
+          {/* Волны внизу */}
+          <div className="absolute bottom-0 left-0 w-full pointer-events-none">
+            <svg className="wave absolute bottom-0 left-0 w-[200%] h-78" viewBox="0 0 1440 320" preserveAspectRatio="none">
+              <path fill="rgba(99,102,241,0.08)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,149.3C960,160,1056,160,1152,138.7C1248,117,1344,107,1392,101.3L1440,96L1440,320L0,320Z"></path>
+            </svg>
+            <svg className="wave2 absolute bottom-0 left-0 w-[200%] h-78" viewBox="0 0 1440 320" preserveAspectRatio="none">
+              <path fill="rgba(59,130,246,0.12)" d="M0,160L48,149.3C96,139,192,117,288,122.7C384,128,480,160,576,176C672,192,768,192,864,170.7C960,149,1056,107,1152,96C1248,85,1344,107,1392,117.3L1440,128L1440,320L0,320Z"></path>
+            </svg>
+          </div>
+        </div>
+
+        {/* Стили анимаций */}
+        <style jsx global>{`
+          @keyframes waveMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .wave {
+            animation: waveMove 10s linear infinite;
+            opacity: 0.85;
+          }
+          .wave2 {
+            animation: waveMove 7s linear infinite reverse;
+            opacity: 1;
+          }
+          @keyframes falling-items {
+            0% { transform: translateY(-100px) rotateZ(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(calc(100vh + 100px)) rotateZ(360deg); opacity: 0; }
+          }
+          @keyframes falling-items-slow {
+            0% { transform: translateY(-120px) rotateZ(0deg) scale(0.8); opacity: 0; }
+            15% { opacity: 1; transform: translateY(0px) rotateZ(45deg) scale(1); }
+            85% { opacity: 1; }
+            100% { transform: translateY(calc(100vh + 120px)) rotateZ(405deg) scale(0.8); opacity: 0; }
+          }
+          @keyframes falling-small {
+            0% { transform: translateY(-60px) rotateZ(0deg); opacity: 0; }
+            20% { opacity: 0.7; }
+            80% { opacity: 0.7; }
+            100% { transform: translateY(calc(100vh + 60px)) rotateZ(720deg); opacity: 0; }
+          }
+          @keyframes floating {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+          }
+          .animate-falling-items { animation: falling-items infinite linear; }
+          .animate-falling-items-slow { animation: falling-items-slow infinite ease-in-out; }
+          .animate-falling-small { animation: falling-small infinite linear; }
+          .floating-item { animation: floating 6s ease-in-out infinite; }
+        `}</style>
+      </div>
+
+      {/* Right side - Login form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-start px-6 lg:pl-30 lg:pr-16 pt-8 pb-8 bg-white">
+        <div className="flex justify-end mb-12">
+          <button className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">
+            <span>Русский</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
+        </div>
 
-          <p className="text-xs text-gray-500 text-center mt-3">
-            Воспользуйтесь анонимным входом, чтобы оставить идею, оценку или сообщить о проблеме.
-          </p>
+        <div className="w-full max-w-xl ml-2">
+          <h1 className="text-2xl lg:text-3xl mb-8 text-blue-600">
+            Вход в аккаунт YU ID
+          </h1>
+
+          <div className="flex border-b border-gray-200 mb-8">
+            {[
+              { id: 0, label: 'Gmail/ИИН' },
+              { id: 1, label: 'eGov QR' },
+              { id: 2, label: 'ЭЦП' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`mr-8 pb-3 text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {renderTabContent()}
+
+          {activeTab === 0 && (
+            <>
+              <div className="border-t border-gray-200 my-8"></div>
+
+              <button 
+                className="w-3/4 border border-blue-600 text-blue-600 py-3 px-4 rounded-lg hover:bg-blue-50 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                onClick={handleAnonymousLogin}
+              >
+                Войти анонимно в YU Otiniš
+              </button>
+
+              <div className="flex items-start mt-4 p-3 bg-gray-50 rounded-lg w-3/4">
+                <svg className="w-4 h-4 text-gray-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Воспользуйтесь анонимным входом, чтобы оставить идею, оценку или сообщить о проблеме.
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-// const AnimatedHexTree = () => {
-//   const [activated, setActivated] = useState(false);
-
-//   useEffect(() => {
-//     const timeout = setTimeout(() => setActivated(true), 100);
-//     return () => clearTimeout(timeout);
-//   }, []);
-
-//   return (
-//     <div className="relative w-[340px] h-[480px] flex items-center justify-center">
-//       {/* Горизонтальные линии */}
-//       <div className="absolute inset-0">
-//         <div
-//           className={`absolute left-[50%] top-[100px] h-[60px] w-[2px] ${
-//             activated ? 'bg-blue-600' : 'bg-gray-300'
-//           } transition-all duration-700`}
-//         ></div>
-//         <div
-//           className={`absolute left-[50%] top-[260px] h-[60px] w-[2px] ${
-//             activated ? 'bg-blue-600' : 'bg-gray-300'
-//           } transition-all duration-700 delay-200`}
-//         ></div>
-//       </div>
-
-//       {/* Верхние hex-блоки */}
-//       <div className="absolute top-0 left-1/2 -translate-x-1/2 flex gap-4">
-//         {['Lessons', 'Calendar', 'Dormitory'].map((item, i) => (
-//           <div
-//             key={item}
-//             className={`w-20 h-20 rounded-xl text-sm flex items-center justify-center border transition-all duration-500 ${
-//               activated
-//                 ? 'bg-blue-100 border-blue-500 text-blue-700'
-//                 : 'bg-gray-200 border-gray-300 text-gray-600'
-//             }`}
-//             style={{ transitionDelay: `${i * 0.15}s` }}
-//           >
-//             {item}
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* Средние hex-блоки */}
-//       <div className="absolute top-[120px] left-1/2 -translate-x-1/2 flex gap-4">
-//         {['Student clubs', 'YSJ', 'HelpDesk', 'KPI'].map((item, i) => (
-//           <div
-//             key={item}
-//             className={`w-20 h-20 rounded-xl text-sm flex items-center justify-center border transition-all duration-500 ${
-//               activated
-//                 ? 'bg-blue-100 border-blue-500 text-blue-700'
-//                 : 'bg-gray-200 border-gray-300 text-gray-600'
-//             }`}
-//             style={{ transitionDelay: `${0.5 + i * 0.15}s` }}
-//           >
-//             {item}
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* Центральный логотип YU */}
-//       <div
-//         className={`absolute top-[240px] left-1/2 -translate-x-1/2 w-24 h-24 rounded-xl border-2 flex items-center justify-center text-xl font-bold ${
-//           activated
-//             ? 'border-blue-600 text-blue-600 bg-white'
-//             : 'border-gray-300 text-gray-500 bg-white'
-//         } transition-all duration-500 delay-[900ms]`}
-//       >
-//         YU
-//       </div>
-
-//       {/* Нижние круги */}
-//       <div className="absolute top-[330px] left-1/2 -translate-x-1/2 flex gap-4">
-//         {['OIS', 'Bitrix24', 'Canvas'].map((item, i) => (
-//           <div
-//             key={item}
-//             className={`w-14 h-14 rounded-full text-xs flex items-center justify-center border transition-all duration-500 ${
-//               activated
-//                 ? 'bg-blue-100 border-blue-500 text-blue-700'
-//                 : 'bg-gray-200 border-gray-300 text-gray-600'
-//             }`}
-//             style={{ transitionDelay: `${1 + i * 0.15}s` }}
-//           >
-//             {item}
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
