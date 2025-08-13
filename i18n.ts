@@ -22,6 +22,8 @@ i18n
     backend: {
       // Load from public folder
       loadPath: '/locales/{{lng}}/{{ns}}.json',
+      // Cache-busting for translation updates
+      queryStringParams: { v: '1.0.1' },
     },
     react: { useSuspense: false },
   })

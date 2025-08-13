@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:web": "next build --no-lint",
+    "android": "npm run build:web && npx cap copy android && npx cap open android",
+    "ios": "npm run build:web && npx cap copy ios && npx cap open ios",
     "start": "next start",
     "export": "next export"
   },

@@ -5,32 +5,51 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { ChevronRight, ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 
 export default function EservicesPage() {
+  const { t } = useTranslation('common')
   const [activeTab, setActiveTab] = useState<'services' | 'history'>('services')
-  const [openAccordion, setOpenAccordion] = useState<string | null>(null)
+  const [openAccordion, setOpenAccordion] = useState<'certificates' | 'applications' | null>(null)
 
-  const toggleAccordion = (name: string) => {
+  const toggleAccordion = (name: 'certificates' | 'applications') => {
     setOpenAccordion((prev) => (prev === name ? null : name))
   }
 
-  const historyData = [
+  const getTypeLabel = (type: 'certificate' | 'application') => {
+    const key = `eservices.types.${type}`
+    const translated = t(key)
+    if (translated === key) {
+      return type === 'certificate'
+        ? t('eservices.sections.certificates')
+        : t('eservices.sections.applications')
+    }
+    return translated
+  }
+
+  const historyData: Array<{
+    service: string
+    type: 'certificate' | 'application'
+    status: 'approved' | 'pending' | 'rejected'
+    date: string
+  }> = [
     {
-      service: 'Справка об обучении',
-      type: 'Справка',
-      status: 'Одобрено',
+      service: t('eservices.certs.studyProof.title'),
+      type: 'certificate',
+      status: 'approved',
       date: '03.08.2025',
     },
     {
-      service: 'Академический отпуск',
-      type: 'Заявление',
-      status: 'На рассмотрении',
+      service: t('eservices.apps.academicLeave.title'),
+      type: 'application',
+      status: 'pending',
       date: '01.08.2025',
     },
     {
-      service: 'Перевод на грант',
-      type: 'Заявление',
-      status: 'Отклонено',
+      service: t('eservices.apps.grantTransfer.title'),
+      type: 'application',
+      status: 'rejected',
       date: '28.07.2025',
     },
   ]
@@ -40,8 +59,8 @@ export default function EservicesPage() {
       <div className="p-4 sm:p-6 bg-white rounded-xl shadow-sm">
         {/* Заголовок */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">E-услуги</h1>
-          <p className="text-gray-500 text-sm">Онлайн-сервисы для запросов, справок и поддержки</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('eservices.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('eservices.subtitle')}</p>
         </div>
 
         {/* Карточки */}
@@ -49,23 +68,26 @@ export default function EservicesPage() {
           <ServiceCard
             image="/white.png"
             overlayImage="/bitrix24 1.png"
-            title="Битрикс24"
-            description="Внутренний документооборот"
+            title={t('eservices.bitrix24')}
+            description={t('eservices.bitrixDesc')}
             link="#"
+            actionLabel={t('eservices.actions.login')}
           />
           <ServiceCard
             image="/blue.png"
             overlayImage="/helpdesk.png"
             title="HelpDesk"
-            description="Техническая поддержка"
+            description={t('eservices.helpdeskDesc')}
             link="#"
+            actionLabel={t('eservices.actions.login')}
           />
           <ServiceCard
             image="/blue.png"
             overlayImage="/service.png"
             title="Service"
-            description="Решение производственных проблем"
+            description={t('eservices.serviceDesc')}
             link="#"
+            actionLabel={t('eservices.actions.login')}
           />
         </div>
 
@@ -77,7 +99,7 @@ export default function EservicesPage() {
             }`}
             onClick={() => setActiveTab('services')}
           >
-            Услуги
+            {t('eservices.tabs.services')}
           </button>
           <button
             className={`pb-2 ${
@@ -85,7 +107,7 @@ export default function EservicesPage() {
             }`}
             onClick={() => setActiveTab('history')}
           >
-            История
+            {t('eservices.tabs.history')}
           </button>
         </div>
 
@@ -93,59 +115,59 @@ export default function EservicesPage() {
         {activeTab === 'services' && (
           <div className="space-y-3">
             <AccordionItem
-              title="Справки"
-              isOpen={openAccordion === 'Справки'}
-              onToggle={() => toggleAccordion('Справки')}
+              title={t('eservices.sections.certificates')}
+              isOpen={openAccordion === 'certificates'}
+              onToggle={() => toggleAccordion('certificates')}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <ServiceCard
                   image="/white.png"
                   overlayImage="/certificate.png"
-                  title="Справка об обучении"
-                  description="Запрос справки о текущем обучении"
+                  title={t('eservices.certs.studyProof.title')}
+                  description={t('eservices.certs.studyProof.desc')}
                   link="/services/study-proof"
-                  actionLabel="Подать справку"
+                  actionLabel={t('eservices.actions.applyCertificate')}
                 />
                 <ServiceCard
                   image="/white.png"
                   overlayImage="/point.png"
-                  title="Транскрипт"
-                  description="Заказать академический транскрипт"
+                  title={t('eservices.certs.transcript.title')}
+                  description={t('eservices.certs.transcript.desc')}
                   link="/services/transcript"
-                  actionLabel="Подать справку"
+                  actionLabel={t('eservices.actions.applyCertificate')}
                 />
               </div>
             </AccordionItem>
 
             <AccordionItem
-              title="Заявления"
-              isOpen={openAccordion === 'Заявления'}
-              onToggle={() => toggleAccordion('Заявления')}
+              title={t('eservices.sections.applications')}
+              isOpen={openAccordion === 'applications'}
+              onToggle={() => toggleAccordion('applications')}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <ServiceCard
                   image="/white.png"
                   overlayImage="/gap-year.png"
-                  title="Академический отпуск"
-                  description="Подача заявления на академ. отпуск"
+                  title={t('eservices.apps.academicLeave.title')}
+                  description={t('eservices.apps.academicLeave.desc')}
                   link="/services/academic-leave"
-                  actionLabel="Подать заявление"
+                  actionLabel={t('eservices.actions.applyApplication')}
                 />
                 <ServiceCard
                   image="/white.png"
                   overlayImage="/grant.png"
-                  title="Перевод на грант"
-                  description="Заявление на перевод с платного на грант"
+                  title={t('eservices.apps.grantTransfer.title')}
+                  description={t('eservices.apps.grantTransfer.desc')}
                   link="/services/grant-transfer"
-                  actionLabel="Подать заявление"
+                  actionLabel={t('eservices.actions.applyApplication')}
                 />
                 <ServiceCard
                   image="/white.png"
                   overlayImage="/termination.png"
-                  title="Отчисление"
-                  description="Подача заявления на отчисление"
+                  title={t('eservices.apps.expel.title')}
+                  description={t('eservices.apps.expel.desc')}
                   link="/services/expel"
-                  actionLabel="Подать заявление"
+                  actionLabel={t('eservices.actions.applyApplication')}
                 />
               </div>
             </AccordionItem>
@@ -163,17 +185,17 @@ export default function EservicesPage() {
                   <h3 className="font-semibold text-gray-800">{item.service}</h3>
                   <span className="text-sm text-gray-400">{item.date}</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-1">Тип: {item.type}</p>
+                <p className="text-sm text-gray-600 mb-1">{t('eservices.history.type')}: {getTypeLabel(item.type)}</p>
                 <span
                   className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                    item.status === 'Одобрено'
+                    item.status === 'approved'
                       ? 'bg-green-100 text-green-700'
-                      : item.status === 'Отклонено'
+                      : item.status === 'rejected'
                       ? 'bg-red-100 text-red-700'
                       : 'bg-yellow-100 text-yellow-700'
                   }`}
                 >
-                  {item.status}
+                  {t(`eservices.status.${item.status}`)}
                 </span>
               </div>
             ))}
@@ -199,6 +221,7 @@ function ServiceCard({
   link: string
   actionLabel?: string
 }) {
+  const { t } = useTranslation('common')
   return (
     <div className="bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52 w-full overflow-hidden">
       <div>
@@ -225,7 +248,7 @@ function ServiceCard({
           rel={link.startsWith('http') ? 'noopener noreferrer' : undefined}
           className="text-sm text-blue-600 font-medium hover:underline whitespace-nowrap inline-flex items-center gap-1"
         >
-          {actionLabel || 'Войти'} <ChevronRight size={16} />
+          {actionLabel || t('eservices.actions.login')} <ChevronRight size={16} />
         </Link>
       </div>
     </div>

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">YU_ID</string>
-    <string name="title_activity_main">YU_ID</string>
-    <string name="package_name">com.YU_ID.app</string>
-    <string name="custom_url_scheme">com.YU_ID.app</string>
+    <string name="app_name">YU ID</string>
+    <string name="title_activity_main">YU ID</string>
+    <string name="package_name">com.yu.id</string>
+    <string name="custom_url_scheme">com.yu.id</string>
 </resources>

@@ -1,31 +1,22 @@
+// Header 
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
 import Link from 'next/link'
 import { Bell, X } from 'lucide-react'
 
 const initialNotifications = [
-  { id: 1, text: '' },
-  { id: 2, text: '' },
-  { id: 3, text: '' },
+  { id: 1, text: 'Новое сообщение от Алексея' },
+  { id: 2, text: 'Обновлен статус заказа' },
+  { id: 3, text: 'Напоминание о встрече завтра' },
 ]
 
 export default function Header() {
   const { t, i18n } = useTranslation('common')
   const [isOpen, setIsOpen] = useState(false) // notifications modal
-  
-  const translatedNotifications = useMemo(
-    () => [
-      { id: 1, text: t('notifications.items.1') },
-      { id: 2, text: t('notifications.items.2') },
-      { id: 3, text: t('notifications.items.3') },
-    ],
-    [i18n.language]
-  )
-
-  const [notifications, setNotifications] = useState(() => translatedNotifications)
+  const [notifications, setNotifications] = useState(initialNotifications)
   const [isAppMapOpen, setIsAppMapOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [locale, setLocale] = useState('ru')
@@ -59,14 +50,6 @@ export default function Header() {
 
   const toggleModal = () => setIsOpen(!isOpen)
   const clearNotifications = () => setNotifications([])
-
-  // Обновлять текст уведомлений при смене языка, если список не очищен
-  useEffect(() => {
-    if (notifications.length > 0) {
-      setNotifications(translatedNotifications)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [translatedNotifications])
 
   const menuItems = [
     { label: t('menu.news'), href: '/main/news' },

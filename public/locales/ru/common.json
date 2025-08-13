@@ -1,5 +1,17 @@
 {
-
+  "common": {
+    "edit": "Редактировать",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "add": "Добавить",
+    "delete": "Удалить",
+    "more": "Подробнее",
+    "noImage": "Нет изображения",
+    "chooseImage": "Выбрать изображение",
+    "title": "Заголовок",
+    "description": "Описание",
+    "shortDescription": "Краткое описание"
+  },
 
   "news": {
     "pageTitle": "Новости",
@@ -335,6 +347,7 @@
     },
     "actions": { "applyCertificate": "Подать справку", "applyApplication": "Подать заявление","login": "Войти" },
     "history": { "type": "Тип" },
+    "types": { "certificate": "Справка", "application": "Заявление" },
     "status": { "approved": "Одобрено", "rejected": "Отклонено", "pending": "На рассмотрении" }
   },
   "science": {

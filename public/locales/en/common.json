@@ -1,4 +1,17 @@
 {
+  "common": {
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "delete": "Delete",
+    "more": "More",
+    "noImage": "No image",
+    "chooseImage": "Choose image",
+    "title": "Title",
+    "description": "Description",
+    "shortDescription": "Short description"
+  },
 
   "news": {
     "pageTitle": "News",
@@ -333,6 +346,7 @@
     },
     "actions": { "applyCertificate": "Submit request", "applyApplication": "Submit application","login": "Sign in" },
     "history": { "type": "Type" },
+    "types": { "certificate": "Certificate", "application": "Application" },
     "status": { "approved": "Approved", "rejected": "Rejected", "pending": "Pending" }
   },
   "science": {

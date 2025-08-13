@@ -7,11 +7,13 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'
+import { EventClickArg } from '@fullcalendar/core'
 import { format, parseISO, isSameDay, addMinutes } from 'date-fns'
 import { ru, enUS } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
+
 
 // Интерфейсы для типизации
 interface Event {
@@ -517,20 +519,19 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
-            headerToolbar={{ 
-              left: 'prev,next today', 
-              center: 'title', 
-              right: 'dayGridMonth,timeGridWeek,timeGridDay' 
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay'
             }}
-            events={events}
+            events={events.map(e => ({ ...e, id: String(e.id) }))} // id всегда строка
             eventDidMount={(info) => {
-              // Дополнительная отладка для отображения событий
-              console.log('Событие отображено:', info.event.title, info.event.start)
+              console.log('Событие отображено:', info.event.title, info.event.start);
             }}
             dateClick={handleDateClick}
             locale={i18n.language === 'kz' ? 'kk' : i18n.language}
             height="auto"
-            loading={loading}
+            loading={(isLoading) => setLoading(isLoading)} // функция вместо boolean
             eventDisplay="block"
             displayEventTime={true}
             eventTimeFormat={{
@@ -539,6 +540,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
               meridiem: false
             }}
           />
+
         </main>
 
         {modalOpen && (

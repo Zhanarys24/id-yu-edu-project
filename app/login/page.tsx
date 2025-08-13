@@ -1,8 +1,195 @@
 'use client';
 import Image from "next/image";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
+
+// Выносим анимированный фон в отдельный компонент
+const AnimatedBackground = () => {
+  const fallingImages = [
+    '/OJS-logo.png',
+    '/canvas.png',
+    '/platonus.png',
+    '/studentclubs-logo.png',
+    '/lessons.png',
+    '/dormitory-logo.png'
+  ];
+
+  // Мемоизируем элементы анимации, чтобы они не пересоздавались
+  const animatedElements = useMemo(() => ({
+    images: fallingImages.map((imgSrc, i) => ({
+      id: `img-${i}`,
+      src: imgSrc,
+      style: {
+        width: '80px',
+        height: '80px',
+        left: `${10 + (i * 12) % 80}%`,
+        top: '-100px',
+        animationDelay: `${i * 2}s`,
+        animationDuration: `${8 + Math.random() * 4}s`,
+      }
+    })),
+    shapes: [...Array(6)].map((_, i) => ({
+      id: `shape-${i}`,
+      style: {
+        width: '100px',
+        height: '100px',
+        left: `${20 + (i * 15) % 70}%`,
+        top: '-120px',
+        animationDelay: `${i * 3 + 1}s`,
+        animationDuration: `${12 + Math.random() * 6}s`,
+      }
+    })),
+    dots: [...Array(12)].map((_, i) => ({
+      id: `dot-${i}`,
+      style: {
+        width: '40px',
+        height: '40px',
+        left: `${5 + (i * 8) % 90}%`,
+        top: '-60px',
+        animationDelay: `${i * 1.5}s`,
+        animationDuration: `${6 + Math.random() * 3}s`,
+      }
+    }))
+  }), []); // Пустой массив зависимостей - элементы создаются только один раз
+
+  return (
+    <div className="hidden lg:flex w-1/2 items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100">
+      {/* Слой 1: Падающие PNG изображения */}
+      <div className="absolute inset-0">
+        {animatedElements.images.map((item) => (
+          <div
+            key={item.id}
+            className="absolute animate-falling-items flex items-center justify-center"
+            style={item.style}
+          >
+            <Image 
+              src={item.src}
+              alt=""
+              width={64}
+              height={64}
+              className="object-contain drop-shadow-md floating-item"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Слой 2: Цветные блоки */}
+      <div className="absolute inset-0">
+        {animatedElements.shapes.map((item) => (
+          <div
+            key={item.id}
+            className="absolute bg-white/60 rounded-2xl shadow-md backdrop-blur-sm border border-indigo-100 animate-falling-items-slow flex items-center justify-center"
+            style={item.style}
+          >
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-xl"></div>
+          </div>
+        ))}
+      </div>
+
+      {/* Слой 3: Мелкие элементы */}
+      <div className="absolute inset-0">
+        {animatedElements.dots.map((item) => (
+          <div
+            key={item.id}
+            className="absolute bg-white/40 rounded-lg shadow-sm animate-falling-small"
+            style={item.style}
+          ></div>
+        ))}
+      </div>
+
+      {/* Welcome блок */}
+      <WelcomeBlock />
+
+      {/* Стили анимаций */}
+      <style jsx global>{`
+        @keyframes waveMove {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .wave {
+          animation: waveMove 10s linear infinite;
+          opacity: 0.85;
+        }
+        .wave2 {
+          animation: waveMove 7s linear infinite reverse;
+          opacity: 1;
+        }
+        @keyframes falling-items {
+          0% { transform: translateY(-100px) rotateZ(0deg); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateY(calc(100vh + 100px)) rotateZ(360deg); opacity: 0; }
+        }
+        @keyframes falling-items-slow {
+          0% { transform: translateY(-120px) rotateZ(0deg) scale(0.8); opacity: 0; }
+          15% { opacity: 1; transform: translateY(0px) rotateZ(45deg) scale(1); }
+          85% { opacity: 1; }
+          100% { transform: translateY(calc(100vh + 120px)) rotateZ(405deg) scale(0.8); opacity: 0; }
+        }
+        @keyframes falling-small {
+          0% { transform: translateY(-60px) rotateZ(0deg); opacity: 0; }
+          20% { opacity: 0.7; }
+          80% { opacity: 0.7; }
+          100% { transform: translateY(calc(100vh + 60px)) rotateZ(720deg); opacity: 0; }
+        }
+        @keyframes floating {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        .animate-falling-items { animation: falling-items infinite linear; }
+        .animate-falling-items-slow { animation: falling-items-slow infinite ease-in-out; }
+        .animate-falling-small { animation: falling-small infinite linear; }
+        .floating-item { animation: floating 6s ease-in-out infinite; }
+      `}</style>
+    </div>
+  );
+};
+
+// Выносим Welcome блок в отдельный компонент для лучшей производительности
+const WelcomeBlock = () => {
+  const { t } = useTranslation('common');
+  
+  return (
+    <div className="relative w-[600px] max-w-3xl bg-white/60 backdrop-blur-s rounded-3xl shadow-xl border-none p-8 h-[820px] flex flex-col justify-center overflow-hidden">
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 opacity-70 pointer-events-none"></div>
+      
+      <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-200/30 rounded-full blur-2xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-56 h-56 bg-indigo-200/30 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div className="relative z-10 text-center">
+        <div className="mb-8">
+          <div className="w-[250px] h-[250px] flex-shrink-0 mx-auto mb-12 rounded-3xl flex items-center justify-center overflow-hidden bg-transparent shadow-none">
+            <Image
+              src="/yessenov.png"
+              alt="Yessenov University"
+              width={175}
+              height={175}
+              className="object-contain"
+            />
+          </div>
+        </div>
+
+        <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent leading-tight drop-shadow-sm">
+          {t('login.welcome')}
+        </h2>
+        <p className="text-lg text-slate-600 leading-relaxed font-medium">
+          {t('login.subtitle')}
+        </p>
+      </div>
+
+      {/* Волны внизу */}
+      <div className="absolute bottom-0 left-0 w-full pointer-events-none">
+        <svg className="wave absolute bottom-0 left-0 w-[200%] h-78" viewBox="0 0 1440 320" preserveAspectRatio="none">
+          <path fill="rgba(99,102,241,0.08)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,149.3C960,160,1056,160,1152,138.7C1248,117,1344,107,1392,101.3L1440,96L1440,320L0,320Z"></path>
+        </svg>
+        <svg className="wave2 absolute bottom-0 left-0 w-[200%] h-78" viewBox="0 0 1440 320" preserveAspectRatio="none">
+          <path fill="rgba(59,130,246,0.12)" d="M0,160L48,149.3C96,139,192,117,288,122.7C384,128,480,160,576,176C672,192,768,192,864,170.7C960,149,1056,107,1152,96C1248,85,1344,107,1392,117.3L1440,128L1440,320L0,320Z"></path>
+        </svg>
+      </div>
+    </div>
+  );
+};
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation('common');
@@ -36,16 +223,6 @@ export default function LoginPage() {
       document.documentElement.lang = selectedLocale;
     }
   };
-
-  // Массив с путями к вашим PNG-изображениям
-  const fallingImages = [
-    '/OJS-logo.png',
-    '/canvas.png',
-    '/platonus.png',
-    '/studentclubs-logo.png',
-    '/lessons.png',
-    '/dormitory-logo.png'
-  ];
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -280,153 +457,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
-      {/* Left side - Animated Background с PNG */}
-      <div className="hidden lg:flex w-1/2 items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100">
-        {/* Слой 1: Падающие PNG изображения */}
-        <div className="absolute inset-0">
-          {fallingImages.map((imgSrc, i) => (
-            <div
-              key={`img-${i}`}
-              className="absolute animate-falling-items flex items-center justify-center"
-              style={{
-                width: '80px',
-                height: '80px',
-                left: `${10 + (i * 12) % 80}%`,
-                top: '-100px',
-                animationDelay: `${i * 2}s`,
-                animationDuration: `${8 + Math.random() * 4}s`,
-              }}
-            >
-              <Image 
-                src={imgSrc}
-                alt=""
-                width={64}
-                height={64}
-                className="object-contain drop-shadow-md floating-item"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Слой 2: Цветные блоки */}
-        <div className="absolute inset-0">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={`shape-${i}`}
-              className="absolute bg-white/60 rounded-2xl shadow-md backdrop-blur-sm border border-indigo-100 animate-falling-items-slow flex items-center justify-center"
-              style={{
-                width: '100px',
-                height: '100px',
-                left: `${20 + (i * 15) % 70}%`,
-                top: '-120px',
-                animationDelay: `${i * 3 + 1}s`,
-                animationDuration: `${12 + Math.random() * 6}s`,
-              }}
-            >
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-xl"></div>
-            </div>
-          ))}
-        </div>
-
-        {/* Слой 3: Мелкие элементы */}
-        <div className="absolute inset-0">
-          {[...Array(12)].map((_, i) => (
-            <div
-              key={`dot-${i}`}
-              className="absolute bg-white/40 rounded-lg shadow-sm animate-falling-small"
-              style={{
-                width: '40px',
-                height: '40px',
-                left: `${5 + (i * 8) % 90}%`,
-                top: '-60px',
-                animationDelay: `${i * 1.5}s`,
-                animationDuration: `${6 + Math.random() * 3}s`,
-              }}
-            ></div>
-          ))}
-        </div>
-
-        {/* Welcome блок */}
-        <div className="relative w-[600px] max-w-3xl bg-white/60 backdrop-blur-s rounded-3xl shadow-xl border-none p-8 h-[820px] flex flex-col justify-center overflow-hidden">
-          <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 opacity-70 pointer-events-none"></div>
-          
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-200/30 rounded-full blur-2xl pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-56 h-56 bg-indigo-200/30 rounded-full blur-2xl pointer-events-none"></div>
-
-          <div className="relative z-10 text-center">
-            <div className="mb-8">
-              <div className="w-[250px] h-[250px] flex-shrink-0 mx-auto mb-12 rounded-3xl flex items-center justify-center overflow-hidden bg-transparent shadow-none">
-                <Image
-                  src="/yessenov.png"
-                  alt="Yessenov University"
-                  width={175}
-                  height={175}
-                  className="object-contain"
-                />
-              </div>
-            </div>
-
-            <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent leading-tight drop-shadow-sm">
-              {t('login.welcome')}
-            </h2>
-            <p className="text-lg text-slate-600 leading-relaxed font-medium">
-              {t('login.subtitle')}
-            </p>
-          </div>
-
-          {/* Волны внизу */}
-          <div className="absolute bottom-0 left-0 w-full pointer-events-none">
-            <svg className="wave absolute bottom-0 left-0 w-[200%] h-78" viewBox="0 0 1440 320" preserveAspectRatio="none">
-              <path fill="rgba(99,102,241,0.08)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,149.3C960,160,1056,160,1152,138.7C1248,117,1344,107,1392,101.3L1440,96L1440,320L0,320Z"></path>
-            </svg>
-            <svg className="wave2 absolute bottom-0 left-0 w-[200%] h-78" viewBox="0 0 1440 320" preserveAspectRatio="none">
-              <path fill="rgba(59,130,246,0.12)" d="M0,160L48,149.3C96,139,192,117,288,122.7C384,128,480,160,576,176C672,192,768,192,864,170.7C960,149,1056,107,1152,96C1248,85,1344,107,1392,117.3L1440,128L1440,320L0,320Z"></path>
-            </svg>
-          </div>
-        </div>
-
-        {/* Стили анимаций */}
-        <style jsx global>{`
-          @keyframes waveMove {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-          .wave {
-            animation: waveMove 10s linear infinite;
-            opacity: 0.85;
-          }
-          .wave2 {
-            animation: waveMove 7s linear infinite reverse;
-            opacity: 1;
-          }
-          @keyframes falling-items {
-            0% { transform: translateY(-100px) rotateZ(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(calc(100vh + 100px)) rotateZ(360deg); opacity: 0; }
-          }
-          @keyframes falling-items-slow {
-            0% { transform: translateY(-120px) rotateZ(0deg) scale(0.8); opacity: 0; }
-            15% { opacity: 1; transform: translateY(0px) rotateZ(45deg) scale(1); }
-            85% { opacity: 1; }
-            100% { transform: translateY(calc(100vh + 120px)) rotateZ(405deg) scale(0.8); opacity: 0; }
-          }
-          @keyframes falling-small {
-            0% { transform: translateY(-60px) rotateZ(0deg); opacity: 0; }
-            20% { opacity: 0.7; }
-            80% { opacity: 0.7; }
-            100% { transform: translateY(calc(100vh + 60px)) rotateZ(720deg); opacity: 0; }
-          }
-          @keyframes floating {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-          }
-          .animate-falling-items { animation: falling-items infinite linear; }
-          .animate-falling-items-slow { animation: falling-items-slow infinite ease-in-out; }
-          .animate-falling-small { animation: falling-small infinite linear; }
-          .floating-item { animation: floating 6s ease-in-out infinite; }
-        `}</style>
-      </div>
+      {/* Left side - Animated Background */}
+      <AnimatedBackground />
 
       {/* Right side - Login form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-start px-6 lg:pl-30 lg:pr-16 pt-8 pb-8 bg-white">

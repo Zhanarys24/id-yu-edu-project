@@ -1,4 +1,17 @@
 {
+  "common": {
+    "edit": "Өңдеу",
+    "save": "Сақтау",
+    "cancel": "Бас тарту",
+    "add": "Қосу",
+    "delete": "Жою",
+    "more": "Толығырақ",
+    "noImage": "Сурет жоқ",
+    "chooseImage": "Суретті таңдау",
+    "title": "Тақырып",
+    "description": "Сипаттама",
+    "shortDescription": "Қысқаша сипаттама"
+},
 
   "news": {
     "pageTitle": "Жаңалықтар",
@@ -334,6 +347,7 @@
     },
     "actions": { "applyCertificate": "Анықтама беру", "applyApplication": "Өтініш беру", "login": "Кіру"},
     "history": { "type": "Түрі" },
+    "types": { "certificate": "Анықтама", "application": "Өтініш" },
     "status": { "approved": "Мақұлданды", "rejected": "Қабылданбады", "pending": "Қарауда" }
   },
   "science": {

@@ -1,14 +1,12 @@
-import type { NextConfig } from 'next';
-import nextI18NextConfig from './next-i18next.config';
+import type { CapacitorConfig } from '@capacitor/cli';
 
-const nextConfig: NextConfig = {
-  ...nextI18NextConfig,
-  eslint: {
-    ignoreDuringBuilds: true, // отключаем ESLint при билде
-  },
-  typescript: {
-    ignoreBuildErrors: true, // отключаем остановку из-за ошибок типов
-  },
+const config: CapacitorConfig = {
+  appId: 'com.company.app', // замени на свой
+  appName: 'YU_ID',
+  webDir: '.next', // теперь указываем .next, а не out
+  server: {
+    androidScheme: 'https'
+  }
 };
 
-export default nextConfig;
+export default config;

@@ -1,4 +1,4 @@
-package com.YU_ID.app;
+package com.yu.id;
 
 import com.getcapacitor.BridgeActivity;
 
