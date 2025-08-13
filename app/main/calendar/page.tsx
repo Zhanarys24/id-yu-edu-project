@@ -8,8 +8,10 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'
 import { format, parseISO, isSameDay, addMinutes } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { ru, enUS } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 
 // Интерфейсы для типизации
 interface Event {
@@ -34,6 +36,7 @@ interface User {
 const API_BASE = 'http://localhost:8080/api' // настройка для FastAPI
 
 export default function CalendarPage() {
+  const { t, i18n } = useTranslation('common')
   // Состояния для модального окна
   const [modalOpen, setModalOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -69,6 +72,19 @@ export default function CalendarPage() {
     'Ақтау, Technopark'
   ]
 
+const lang = i18n?.language || 'ru' // дефолт, если undefined
+
+const weekValue = t('calendarPage.weekdaysShort', { returnObjects: true }) as unknown
+const weekdaysShort: string[] = Array.isArray(weekValue)
+  ? (weekValue as string[])
+  : lang.startsWith('en')
+    ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    : lang === 'kz'
+      ? ['Дс', 'Сс', 'Ср', 'Бс', 'Жм', 'Сб', 'Жс']
+      : ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+
+
+  
   // Загрузка данных при монтировании компонента
   useEffect(() => {
     const fetchData = async () => {
@@ -153,24 +169,24 @@ export default function CalendarPage() {
 
   // Валидация формы
   const validateForm = (): string | null => {
-    if (!eventTitle.trim()) return 'Введите название мероприятия'
-    if (!newEvent.start) return 'Выберите дату'
-    if (!eventStart) return 'Выберите время начала'
-    if (!eventEnd) return 'Выберите время окончания'
-    if (!eventPlace) return 'Выберите место проведения'
+    if (!eventTitle.trim()) return t('calendarPage.errors.titleRequired')
+    if (!newEvent.start) return t('calendarPage.errors.dateRequired')
+    if (!eventStart) return t('calendarPage.errors.startTimeRequired')
+    if (!eventEnd) return t('calendarPage.errors.endTimeRequired')
+    if (!eventPlace) return t('calendarPage.errors.placeRequired')
     
     // Проверка времени
     if (eventStart >= eventEnd) {
-      return 'Время окончания должно быть позже времени начала'
+      return t('calendarPage.errors.endAfterStart')
     }
     
     // Проверка для онлайн встреч
     if (isOnline) {
       if (participants.length === 0) {
-        return 'Добавьте участников для онлайн встречи'
+        return t('calendarPage.errors.participantsRequired')
       }
       if (!eventLink.trim()) {
-        return 'Добавьте ссылку для онлайн встречи'
+        return t('calendarPage.errors.linkRequired')
       }
     }
     
@@ -218,7 +234,7 @@ export default function CalendarPage() {
 
     // Проверка доступности времени и места
     if (!isTimeSlotAvailable(fullStart, fullEnd, eventPlace)) {
-      alert('Это время и место уже занято!')
+      alert(t('calendarPage.errors.slotBusy'))
       return
     }
 
@@ -271,16 +287,16 @@ export default function CalendarPage() {
         
         resetForm()
         setModalOpen(false)
-        alert('Событие успешно создано!')
+        alert(t('calendarPage.successCreated'))
         
       } else {
         const errorText = await res.text()
         console.error('Ошибка сервера:', errorText)
-        alert('Ошибка при создании события: ' + errorText)
+        alert(t('calendarPage.createError') + ': ' + errorText)
       }
     } catch (error) {
       console.error('Ошибка при отправке запроса:', error)
-      alert('Ошибка соединения с сервером')
+      alert(t('calendarPage.connectionError'))
     } finally {
       setLoading(false)
     }
@@ -385,16 +401,16 @@ export default function CalendarPage() {
   }
 
   return (
-    <Layout active="Мероприятия">
+    <Layout active="calendar">
       <div className="calendar-page">
         <aside className="calendar-left">
-          <h1 className="calendar-title">Мероприятия</h1>
+          <h1 className="calendar-title">{t('calendarPage.title')}</h1>
           <button 
             className="calendar-booking-btn" 
             onClick={() => setModalOpen(true)}
             disabled={loading}
           >
-            {loading ? 'Загрузка...' : '+ Забронировать'}
+            {loading ? t('common.loading') : t('calendarPage.book')}
           </button>
 
           <div className="calendar-datepicker centered">
@@ -407,7 +423,7 @@ export default function CalendarPage() {
                 <ChevronLeft size={28} />
               </button>
               <span className="month-label">
-                {format(miniCalendarDate, 'LLLL yyyy', { locale: ru })}
+                {format(miniCalendarDate, 'LLLL yyyy', { locale: (lang.startsWith('en') ? enUS : ru) })}
               </span>
               <button 
                 onClick={() => changeMonth(1)} 
@@ -421,9 +437,9 @@ export default function CalendarPage() {
             <table>
               <thead>
                 <tr>
-                  {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(d => 
+                  {weekdaysShort.map((d: string) => (
                     <th key={d}>{d}</th>
-                  )}
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -455,11 +471,11 @@ export default function CalendarPage() {
           </div>
 
           <div className="nearest-events">
-            <h3>Ближайшие события</h3>
+            <h3>{t('calendarPage.nearestTitle')}</h3>
             {loading ? (
-              <p>Загрузка...</p>
+              <p>{t('common.loading')}</p>
             ) : nearestEvents.length === 0 ? (
-              <p>Сегодня мероприятий нет</p>
+              <p>{t('calendarPage.noEventsToday')}</p>
             ) : (
               nearestEvents.map((event, idx) => (
                 <div key={event.id || idx} className="event-item">
@@ -476,7 +492,7 @@ export default function CalendarPage() {
 
         <main className="calendar-right">
           <div className="calendar-header-bar">
-            <h2>Календарь событий</h2>
+            <h2>{t('calendarPage.headerTitle')}</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button 
                 onClick={reloadEvents} 
@@ -490,10 +506,10 @@ export default function CalendarPage() {
                   cursor: loading ? 'not-allowed' : 'pointer'
                 }}
               >
-                {loading ? 'Загрузка...' : 'Обновить события'}
+                {loading ? t('common.loading') : t('calendarPage.refresh')}
               </button>
               <span style={{ fontSize: '14px', color: '#666', alignSelf: 'center' }}>
-                Событий: {events.length}
+                {t('calendarPage.eventsCount')}: {events.length}
               </span>
             </div>
           </div>
@@ -512,7 +528,7 @@ export default function CalendarPage() {
               console.log('Событие отображено:', info.event.title, info.event.start)
             }}
             dateClick={handleDateClick}
-            locale="ru"
+            locale={i18n.language === 'kz' ? 'kk' : i18n.language}
             height="auto"
             loading={loading}
             eventDisplay="block"
@@ -529,10 +545,10 @@ export default function CalendarPage() {
           <div className="modal-overlay">
             <div className="modal">
               <div className="form-group">
-                <label>Название мероприятия *</label>
+                <label>{t('calendarPage.form.title')} *</label>
                 <input
                   type="text"
-                  placeholder="Введите название мероприятия"
+                  placeholder={t('calendarPage.form.titlePlaceholder')}
                   value={eventTitle}
                   onChange={(e) => setEventTitle(e.target.value)}
                   disabled={loading}
@@ -541,7 +557,7 @@ export default function CalendarPage() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Дата</label>
+                  <label>{t('calendarPage.form.date')}</label>
                   <input 
                     type="date" 
                     value={newEvent.start} 
@@ -550,7 +566,7 @@ export default function CalendarPage() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Время начала</label>
+                  <label>{t('calendarPage.form.startTime')}</label>
                   <input 
                     type="time" 
                     value={eventStart} 
@@ -559,7 +575,7 @@ export default function CalendarPage() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Время окончания</label>
+                  <label>{t('calendarPage.form.endTime')}</label>
                   <input 
                     type="time" 
                     value={eventEnd} 
@@ -571,20 +587,20 @@ export default function CalendarPage() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Цвет *</label>
+                  <label>{t('calendarPage.form.color')} *</label>
                   <select 
                     value={eventColor} 
                     onChange={(e) => setEventColor(e.target.value)}
                     disabled={loading}
                   >
-                    <option value="blue">Голубой</option>
-                    <option value="green">Зелёный</option>
-                    <option value="yellow">Жёлтый</option>
-                    <option value="red">Красный</option>
+                    <option value="blue">{t('calendarPage.form.colors.blue')}</option>
+                    <option value="green">{t('calendarPage.form.colors.green')}</option>
+                    <option value="yellow">{t('calendarPage.form.colors.yellow')}</option>
+                    <option value="red">{t('calendarPage.form.colors.red')}</option>
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Место проведения *</label>
+                  <label>{t('calendarPage.form.place')} *</label>
                   <select 
                     value={eventPlace} 
                     onChange={(e) => setEventPlace(e.target.value)}
@@ -598,7 +614,7 @@ export default function CalendarPage() {
               </div>
 
               <div className="toggle-container">
-                <label>Онлайн встреча</label>
+                <label>{t('calendarPage.form.isOnline')}</label>
                 <div className="toggle-switch">
                   <input
                     type="checkbox"
@@ -614,10 +630,10 @@ export default function CalendarPage() {
               {isOnline && (
                 <>
                   <div className="form-group">
-                    <label>Ссылка на мероприятие *</label>
+                    <label>{t('calendarPage.form.link')} *</label>
                     <input
                       type="url"
-                      placeholder="Вставьте ссылку на встречу"
+                      placeholder={t('calendarPage.form.linkPlaceholder')}
                       value={eventLink}
                       onChange={(e) => setEventLink(e.target.value)}
                       disabled={loading}
@@ -625,7 +641,7 @@ export default function CalendarPage() {
                   </div>
 
                   <div className="form-group">
-                    <label>Участники *</label>
+                    <label>{t('calendarPage.form.participants')} *</label>
                     <div className="custom-dropdown">
                       <div 
                         className="selected-list" 
@@ -633,14 +649,14 @@ export default function CalendarPage() {
                       >
                         {participants.length > 0 
                           ? participants.map(p => p.name).join(', ') 
-                          : <span style={{ color: '#aaa' }}>Участники не выбраны</span>
+                          : <span style={{ color: '#aaa' }}>{t('calendarPage.form.noParticipants')}</span>
                         }
                         <span className="arrow">{dropdownOpen ? '▲' : '▼'}</span>
                       </div>
                       {dropdownOpen && (
                         <div className="options">
                           {users.length === 0 ? (
-                            <div className="no-users">Пока нет участников</div>
+                            <div className="no-users">{t('calendarPage.form.noUsers')}</div>
                           ) : (
                             users.map(user => (
                               <label key={user.id}>
@@ -670,14 +686,14 @@ export default function CalendarPage() {
                   onClick={handleAdd}
                   disabled={loading}
                 >
-                  {loading ? 'Добавление...' : 'Добавить'}
+                  {loading ? t('calendarPage.form.adding') : t('calendarPage.form.add')}
                 </button>
                 <button 
                   className="cancel-btn" 
                   onClick={handleCloseModal}
                   disabled={loading}
                 >
-                  Отмена
+                  {t('calendarPage.form.cancel')}
                 </button>
               </div>
             </div>

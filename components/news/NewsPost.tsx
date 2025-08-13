@@ -1,6 +1,8 @@
 'use client'
 
 import Image from 'next/image'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 import { useEffect, useRef, useState } from 'react'
 import {
   HeartIcon as OutlineHeart,
@@ -19,13 +21,14 @@ export default function NewsPost({
   description: string
   date: string
 }) {
+  const { t } = useTranslation('common')
   const [showModal, setShowModal] = useState(false)
   const [liked, setLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(42)
   const [comments, setComments] = useState<string[]>([
-    'Крутая новость!',
-    'Жду подробностей!',
-    'Приятно видеть прогресс университета.',
+    t('news.exampleComment1'),
+    t('news.exampleComment2'),
+    t('news.exampleComment3'),
   ])
   const [newComment, setNewComment] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -71,7 +74,7 @@ export default function NewsPost({
             >
               {liked ? <SolidHeart className="w-6 h-6" /> : <OutlineHeart className="w-6 h-6" />}
             </button>
-            <span className="text-sm text-gray-500">{likesCount} лайков</span>
+            <span className="text-sm text-gray-500">{likesCount} {t('news.likes')}</span>
             <button
               onClick={() => setShowModal(true)}
               className="hover:text-blue-500 transition ml-auto"
@@ -133,7 +136,7 @@ export default function NewsPost({
                   <input
                     ref={inputRef}
                     type="text"
-                    placeholder="Напишите комментарий..."
+                    placeholder={t('news.commentPlaceholder')}
                     className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                     value={newComment}
                     onChange={e => setNewComment(e.target.value)}
@@ -143,7 +146,7 @@ export default function NewsPost({
                     onClick={handleAddComment}
                     className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded"
                   >
-                    Отправить
+                    {t('news.send')}
                   </button>
                 </div>
               </div>

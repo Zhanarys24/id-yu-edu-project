@@ -37,15 +37,15 @@ export default function EservicesPage() {
 
   return (
     <Layout active="E-services">
-      <div className="p-6 bg-white rounded-xl shadow-sm">
+      <div className="p-4 sm:p-6 bg-white rounded-xl shadow-sm">
         {/* Заголовок */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-800">E-услуги</h1>
           <p className="text-gray-500 text-sm">Онлайн-сервисы для запросов, справок и поддержки</p>
         </div>
 
-        {/* Основные карточки */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Карточки */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <ServiceCard
             image="/white.png"
             overlayImage="/bitrix24 1.png"
@@ -70,7 +70,7 @@ export default function EservicesPage() {
         </div>
 
         {/* Табы */}
-        <div className="flex gap-6 border-b border-gray-200 mb-4 mt-6 sm:mt-8 text-sm font-medium">
+        <div className="flex gap-6 border-b border-gray-200 mb-4 mt-6 sm:mt-8 text-sm font-medium overflow-x-auto">
           <button
             className={`pb-2 ${
               activeTab === 'services' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
@@ -89,7 +89,7 @@ export default function EservicesPage() {
           </button>
         </div>
 
-        {/* Контент под табами */}
+        {/* Контент */}
         {activeTab === 'services' && (
           <div className="space-y-3">
             <AccordionItem
@@ -97,7 +97,7 @@ export default function EservicesPage() {
               isOpen={openAccordion === 'Справки'}
               onToggle={() => toggleAccordion('Справки')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <ServiceCard
                   image="/white.png"
                   overlayImage="/certificate.png"
@@ -122,7 +122,7 @@ export default function EservicesPage() {
               isOpen={openAccordion === 'Заявления'}
               onToggle={() => toggleAccordion('Заявления')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <ServiceCard
                   image="/white.png"
                   overlayImage="/gap-year.png"
@@ -184,7 +184,6 @@ export default function EservicesPage() {
   )
 }
 
-// Компонент карточки
 function ServiceCard({
   image,
   overlayImage,
@@ -201,10 +200,10 @@ function ServiceCard({
   actionLabel?: string
 }) {
   return (
-    <div className="bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52 w-full max-w-full sm:max-w-[290px] lg:max-w-[340px] overflow-hidden">
+    <div className="bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52 w-full overflow-hidden">
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <div className="relative w-17 h-17">
+          <div className="relative w-16 h-16 flex-shrink-0">
             <Image src={image} alt={title} fill className="object-contain" />
             {overlayImage && (
               <div className="absolute inset-0 flex items-center justify-center z-10">
@@ -217,7 +216,7 @@ function ServiceCard({
         <p className="text-sm text-gray-500">{description}</p>
       </div>
 
-      <div className="border-t border-gray-200 mt-10 mb-2" />
+      <div className="border-t border-gray-200 mt-3 mb-2" />
 
       <div className="text-right">
         <Link
@@ -233,8 +232,6 @@ function ServiceCard({
   )
 }
 
-
-// Компонент аккордеона
 function AccordionItem({
   title,
   isOpen,

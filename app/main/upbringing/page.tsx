@@ -1,31 +1,37 @@
 'use client'
 
 import { ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 import Layout from '@/components/Layout'
 import Image from 'next/image'
 import Link from 'next/link'
 
 // Главная страница раздела "Воспитание"
 export default function VospitaniePage() {
+  const { t } = useTranslation('common')
   return (
-    <Layout active="Воспитание">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-2">Воспитание</h1>
-      <p className="text-gray-500 mb-6">Заявки на общежитие, секции, клубы</p>
+    <Layout active="upbringing">
+      <h1 className="text-2xl font-semibold text-gray-800 mb-2">{t('upbringing.title')}</h1>
+      <p className="text-gray-500 mb-6">{t('upbringing.subtitle')}</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+      {/* Адаптивная сетка */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
         <EduCard
           image="/YSJ.png"
           overlay="/dormitory-logo.png"
-          title="Кураторство"
-          description="Инструменты для работы с кураторами и студентами"
+          title="Dormitory"
+          description={t('upbringing.curatorship.desc')}
           href="/curators"
+          ctaLabel={t('education.sign_in')}
         />
         <EduCard
           image="/YSJ.png"
           overlay="/studentclubs-logo.png"
-          title="Воспитательные мероприятия"
-          description="Планирование и отчётность воспитательных мероприятий"
+          title="Studentclubs"
+          description={t('upbringing.events.desc')}
           href="/events"
+          ctaLabel={t('education.sign_in')}
         />
       </div>
     </Layout>
@@ -39,15 +45,23 @@ function EduCard({
   title,
   description,
   href,
+  ctaLabel,
 }: {
   image: string
   overlay?: string
   title: string
   description: string
   href: string
+  ctaLabel: string
 }) {
   return (
-    <div className="bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52 w-full max-w-full sm:max-w-[290px] lg:max-w-[340px] overflow-hidden">
+    <div
+      className="
+        bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52 
+        w-full max-w-full sm:max-w-[300px] lg:max-w-[420px] xl:max-w-[340px] 
+        overflow-hidden
+      "
+    >
       <div>
         <div className="flex items-center gap-3 mb-2 relative">
           <div className="relative w-17 h-17">
@@ -70,7 +84,7 @@ function EduCard({
           href={href}
           className="text-sm text-blue-600 font-medium hover:underline whitespace-nowrap inline-flex items-center gap-1"
         >
-          Войти <ChevronRight size={16} />
+          {ctaLabel} <ChevronRight size={16} />
         </Link>
       </div>
     </div>

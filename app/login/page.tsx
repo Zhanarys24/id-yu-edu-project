@@ -1,13 +1,41 @@
 'use client';
 import Image from "next/image";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
 
 export default function LoginPage() {
+  const { t, i18n } = useTranslation('common');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [locale, setLocale] = useState('ru');
+
+  // Инициализация языка (точно как в Header)
+  useEffect(() => {
+    const savedLocale = localStorage.getItem('locale');
+    const initial = savedLocale || i18n.language || 'ru';
+    setLocale(initial);
+    if (i18n.language !== initial) {
+      i18n.changeLanguage(initial);
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = initial;
+    }
+  }, [i18n]);
+
+  // Функция смены языка (точно как в Header)
+  const changeLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLocale = e.target.value;
+    setLocale(selectedLocale);
+    localStorage.setItem('locale', selectedLocale);
+    i18n.changeLanguage(selectedLocale);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = selectedLocale;
+    }
+  };
 
   // Массив с путями к вашим PNG-изображениям
   const fallingImages = [
@@ -17,7 +45,6 @@ export default function LoginPage() {
     '/studentclubs-logo.png',
     '/lessons.png',
     '/dormitory-logo.png'
-    // Добавьте свои изображения
   ];
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,11 +77,11 @@ export default function LoginPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">
-                Введите почту yu.edu.kz или ИИН
+                {t('login.emailOrIinLabel')}
               </label>
               <input
                 type="text"
-                placeholder="example@yu.edu.kz"
+                placeholder={t('login.emailPlaceholder')}
                 className="w-3/4 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -63,12 +90,12 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">
-                Пароль
+                {t('login.passwordLabel')}
               </label>
               <div className="relative w-3/4">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="•••••••••••••••••••••"
+                  placeholder={t('login.passwordPlaceholder')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -92,7 +119,7 @@ export default function LoginPage() {
               </div>
               <div className="text-right mt-2 w-3/4">
                 <a href="#" className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors">
-                  Забыли пароль?
+                  {t('login.forgotPassword')}
                 </a>
               </div>
             </div>
@@ -102,7 +129,7 @@ export default function LoginPage() {
               onClick={handleEmailLogin}
               className="w-3/4 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              Войти
+              {t('login.signInButton')}
             </button>
           </div>
         );
@@ -113,23 +140,23 @@ export default function LoginPage() {
             <div className="text-xs text-gray-600 mb-4">
               <div className="flex items-center gap-4">
                 <div className="flex flex-col w-64"> 
-                  <span className="text-xs font-medium">Откройте мобильное приложение</span>
+                  <span className="text-xs font-medium">{t('login.egovStep1')}</span>
                   <span className="text-sm text-blue-600 font-semibold">eGov Mobile / eGov Business</span>
                 </div>
                 <div className="text-gray-500 text-sm">&gt;</div>
                 <div className="w-40">
-                  <span className="text-xs text-gray-600">Нажмите QR-сканер в верхнем углу</span>
+                  <span className="text-xs text-gray-600">{t('login.egovStep2')}</span>
                 </div>
                 <div className="text-gray-500 text-sm">&gt;</div>
                 <div className="w-48">
-                  <span className="text-sm text-gray-600">Наведите камеру на экран</span>
+                  <span className="text-sm text-gray-600">{t('login.egovStep3')}</span>
                 </div>
               </div>
             </div>
             
             <div className="flex justify-center">
               <div className="w-80 h-80 bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">QR код</span>
+                <span className="text-gray-500">{t('login.qrCodePlaceholder')}</span>
               </div>
             </div>
 
@@ -148,8 +175,7 @@ export default function LoginPage() {
                 />
               </svg>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Продолжая пользоваться сервисом YU ID Вы даете согласие на сбор, обработку и хранение Ваших персональных данных в объеме, содержащемся в сертификате
-                (электронная цифровая подпись) НУЦ, для целей отображения данных об электронной подписи.
+                {t('login.dataProcessingConsent')}
               </p>
             </div>
           </div>
@@ -173,8 +199,7 @@ export default function LoginPage() {
                 />
               </svg>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Продолжая пользоваться сервисом YU ID, Вы даете согласие на сбор, обработку и хранение Ваших персональных данных в объеме, содержащемся в сертификате
-                (электронная цифровая подпись) НУЦ, для целей отображения данных об электронной подписи.
+                {t('login.dataProcessingConsent')}
               </p>
             </div>
 
@@ -205,17 +230,17 @@ export default function LoginPage() {
                     {selectedFile ? (
                       <>
                         <p className="text-base font-medium text-green-600">
-                          Сертификат успешно выбран
+                          {t('login.certificateSelected')}
                         </p>
                         <p className="text-sm text-gray-500 break-all">{selectedFile.name}</p>
                       </>
                     ) : (
                       <>
                         <p className="text-base font-medium text-gray-700">
-                          Выбрать сертификат
+                          {t('login.selectCertificate')}
                         </p>
                         <p className="text-sm text-gray-500">
-                          Перетащите файл или нажмите для выбора
+                          {t('login.dragOrClick')}
                         </p>
                       </>
                     )}
@@ -237,7 +262,7 @@ export default function LoginPage() {
               disabled={!selectedFile}
               onClick={handleECPLogin}
             >
-              Войти
+              {t('login.signInButton')}
             </button>
           </div>
         );
@@ -246,6 +271,12 @@ export default function LoginPage() {
         return null;
     }
   };
+
+  const tabs = [
+    { id: 0, label: t('login.tabs.emailIin') },
+    { id: 1, label: t('login.tabs.egovQr') },
+    { id: 2, label: t('login.tabs.ecp') }
+  ];
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
@@ -324,11 +355,6 @@ export default function LoginPage() {
 
           <div className="relative z-10 text-center">
             <div className="mb-8">
-              
-                {/* <div className="w-[200px] h-[200px] flex-shrink-0 mx-auto mb-12 rounded-3xl flex items-center justify-center overflow-hidden bg-transparent shadow-none opacity-0">
-                              дивка для лого но уже чуть прозрачная 
-                </div> */}
-
               <div className="w-[250px] h-[250px] flex-shrink-0 mx-auto mb-12 rounded-3xl flex items-center justify-center overflow-hidden bg-transparent shadow-none">
                 <Image
                   src="/yessenov.png"
@@ -338,14 +364,13 @@ export default function LoginPage() {
                   className="object-contain"
                 />
               </div>
-
             </div>
 
             <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent leading-tight drop-shadow-sm">
-              Добро пожаловать в YU
+              {t('login.welcome')}
             </h2>
             <p className="text-lg text-slate-600 leading-relaxed font-medium">
-              Все сервисы университета в одном месте
+              {t('login.subtitle')}
             </p>
           </div>
 
@@ -405,26 +430,28 @@ export default function LoginPage() {
 
       {/* Right side - Login form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-start px-6 lg:pl-30 lg:pr-16 pt-8 pb-8 bg-white">
+        {/* Language Selector - точно как в Header */}
         <div className="flex justify-end mb-12">
-          <button className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">
-            <span>Русский</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+          <select
+            className="text-sm border border-gray-300 rounded px-2 py-1"
+            onChange={changeLanguage}
+            value={locale}
+            aria-label={t('aria.languageSelect')}
+            suppressHydrationWarning
+          >
+            <option value="ru">Русский</option>
+            <option value="kz">Қазақша</option>
+            <option value="en">English</option>
+          </select>
         </div>
 
         <div className="w-full max-w-xl ml-2">
           <h1 className="text-2xl lg:text-3xl mb-8 text-blue-600">
-            Вход в аккаунт YU ID
+            {t('login.title')}
           </h1>
 
           <div className="flex border-b border-gray-200 mb-8">
-            {[
-              { id: 0, label: 'Gmail/ИИН' },
-              { id: 1, label: 'eGov QR' },
-              { id: 2, label: 'ЭЦП' }
-            ].map((tab) => (
+            {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -449,7 +476,7 @@ export default function LoginPage() {
                 className="w-3/4 border border-blue-600 text-blue-600 py-3 px-4 rounded-lg hover:bg-blue-50 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 onClick={handleAnonymousLogin}
               >
-                Войти анонимно в YU Otiniš
+                {t('login.anonymousLogin')}
               </button>
 
               <div className="flex items-start mt-4 p-3 bg-gray-50 rounded-lg w-3/4">
@@ -457,7 +484,7 @@ export default function LoginPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-xs text-gray-600 leading-relaxed">
-                  Воспользуйтесь анонимным входом, чтобы оставить идею, оценку или сообщить о проблеме.
+                  {t('login.anonymousLoginDescription')}
                 </p>
               </div>
             </>

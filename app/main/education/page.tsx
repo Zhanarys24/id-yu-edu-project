@@ -4,31 +4,39 @@ import { ChevronRight } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 
 export default function EducationPage() {
-  return (
-    <Layout>
-      <h1 className="text-[22px] font-semibold text-gray-800 mb-3">Образование</h1>
-      <p className="text-[15px] text-gray-500 mb-5">Доступ ко всем учебным ресурсам и материалам</p>
+  const { t } = useTranslation('common')
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+  return (
+    <Layout active={'education'}>
+      <h1 className="text-[22px] font-semibold text-gray-800 mb-3">{t('education.education')}</h1>
+      <p className="text-[15px] text-gray-500 mb-5">{t('education.education_desc')}</p>
+
+      {/* Адаптивная сетка */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
         <EduCard
           image="/canvas.png"
-          title="Canvas"
-          description="Доступ к курсам и заданиям"
+          title={t('education.canvas')}
+          description={t('education.education_desc')}
           href="https://canvas.instructure.com"
+          ctaLabel={t('education.sign_in')}
         />
         <EduCard
           image="/platonus.png"
-          title="Platonus"
-          description="Система для автоматизации учебного процесса"
+          title={t('education.platonus')}
+          description={t('education.platonus_desc')}
           href="https://platonus.kz"
+          ctaLabel={t('education.sign_in')}
         />
         <EduCard
           image="/lessons.png"
-          title="Lessons"
-          description="Проведение видеоконференций с помощью Google Meet"
+          title="lessons"
+          description={t('education.lessons_desc')}
           href="https://meet.google.com"
+          ctaLabel={t('education.sign_in')}
         />
       </div>
     </Layout>
@@ -40,14 +48,22 @@ function EduCard({
   title,
   description,
   href,
+  ctaLabel,
 }: {
   image: string
   title: string
   description: string
   href: string
+  ctaLabel: string
 }) {
   return (
-    <div className="bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52 w-full max-w-full sm:max-w-[290px] lg:max-w-[350px] overflow-hidden">
+    <div
+      className="
+        bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52
+        w-full max-w-full sm:max-w-[300px] lg:max-w-[420px] xl:max-w-[350px]
+        overflow-hidden transition-transform
+      "
+    >
       <div className="flex items-center gap-4 mb-2">
         <Image
           src={image}
@@ -70,7 +86,7 @@ function EduCard({
           rel="noopener noreferrer"
           className="text-sm text-blue-600 font-medium hover:underline whitespace-nowrap inline-flex items-center gap-1"
         >
-          Войти <ChevronRight size={16} />
+          {ctaLabel} <ChevronRight size={16} />
         </Link>
       </div>
     </div>

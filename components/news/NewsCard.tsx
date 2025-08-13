@@ -2,6 +2,8 @@
 
 import Image from 'next/image'
 import { Calendar, Tag, ExternalLink } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 
 interface NewsItem {
   id: number
@@ -18,6 +20,7 @@ interface NewsCardProps {
 }
 
 export default function NewsCard({ news }: NewsCardProps) {
+  const { t } = useTranslation('common')
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
       <div className="relative h-40">
@@ -56,7 +59,7 @@ export default function NewsCard({ news }: NewsCardProps) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-blue-600 text-xs font-medium hover:text-blue-700 transition-colors"
           >
-            <span>Читать дальше</span>
+            <span>{t('news.readMore')}</span>
             <ExternalLink size={12} />
           </a>
         </div>

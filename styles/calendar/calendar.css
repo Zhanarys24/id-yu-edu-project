@@ -531,3 +531,229 @@ td.today-cell {
   background-color: #1d4ed8;
   color: white;
 }
+/* Базовые стили для всех устройств */
+.calendar-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+.calendar-left, .calendar-right {
+  padding: 1rem;
+}
+
+/* Мобильные устройства (до 768px) */
+@media (max-width: 768px) {
+  .calendar-page {
+    flex-direction: column;
+  }
+  
+  .calendar-left {
+    order: 2;
+    padding: 1rem 0.5rem;
+  }
+  
+  .calendar-right {
+    order: 1;
+    padding: 0.5rem;
+  }
+  
+  .calendar-title {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  
+  .calendar-booking-btn {
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.8rem;
+  }
+  
+  .calendar-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .calendar-header-bar h2 {
+    font-size: 1.3rem;
+  }
+  
+  /* Адаптация FullCalendar для мобильных */
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .fc .fc-toolbar-title {
+    font-size: 1.2rem;
+  }
+  
+  .fc .fc-button {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Мини-календарь для мобильных */
+  .calendar-datepicker table {
+    font-size: 0.8rem;
+  }
+  
+  .calendar-datepicker th, 
+  .calendar-datepicker td {
+    padding: 0.2rem;
+  }
+  
+  .day-cell {
+    min-height: 30px;
+  }
+  
+  /* Модальное окно для мобильных */
+  .modal {
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .form-group {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Планшеты (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .calendar-page {
+    flex-direction: row;
+  }
+  
+  .calendar-left {
+    width: 35%;
+    padding: 1rem;
+  }
+  
+  .calendar-right {
+    width: 65%;
+    padding: 1rem;
+  }
+  
+  .calendar-datepicker table {
+    font-size: 0.9rem;
+  }
+  
+  /* Уменьшаем отступы в мини-календаре */
+  .calendar-datepicker th, 
+  .calendar-datepicker td {
+    padding: 0.3rem;
+  }
+  
+  /* Адаптация FullCalendar для планшетов */
+  .fc .fc-toolbar {
+    flex-wrap: wrap;
+  }
+  
+  .fc .fc-toolbar-title {
+    font-size: 1.3rem;
+    order: 1;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .fc-toolbar-chunk {
+    order: 2;
+  }
+}
+
+/* Ноутбуки и десктопы (1024px и больше) */
+@media (min-width: 1024px) {
+  .calendar-left {
+    width: 300px;
+    border-right: 1px solid #eee;
+  }
+  
+  .calendar-right {
+    flex: 1;
+  }
+  
+  /* Оптимизация FullCalendar для больших экранов */
+  .fc .fc-toolbar {
+    flex-direction: row;
+  }
+  
+  .fc .fc-toolbar-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Общие адаптивные стили для всех устройств */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Адаптация выпадающего списка участников */
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.options {
+  position: absolute;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  z-index: 10;
+  padding: 0.5rem;
+}
+
+/* Оптимизация для touch устройств */
+button, input, select {
+  min-height: 44px; /* Рекомендованный размер для touch */
+}
+
+/* Адаптация событий в календаре */
+.fc-event {
+  font-size: 0.8rem;
+  padding: 2px 4px;
+}
+
+@media (max-width: 768px) {
+  .fc-event {
+    font-size: 0.7rem;
+    padding: 1px 2px;
+  }
+}

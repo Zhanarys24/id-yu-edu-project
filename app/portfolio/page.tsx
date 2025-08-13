@@ -1,24 +1,27 @@
 'use client'
 
+import { Suspense, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 import Layout from '@/components/Layout'
 import clsx from 'clsx'
 
-const sections = [
-  { label: 'Общая информация', key: 'general' },
-  { label: 'Научная деятельность', key: 'publications' },
-  { label: 'Преподавание', key: 'teaching' },
-  { label: 'Достижения', key: 'achievements' },
-  { label: 'Дополнительно', key: 'additional' },
-]
-
-export default function PortfolioPage() {
+function PortfolioContent() {
+  const { t } = useTranslation()
   const searchParams = useSearchParams()
   const router = useRouter()
 
   const defaultTab = searchParams.get('tab') || 'general'
   const [activeTab, setActiveTab] = useState(defaultTab)
+
+  const sections = [
+    { label: t('portfolio.general'), key: 'general' },
+    { label: t('portfolio.publications'), key: 'publications' },
+    { label: t('portfolio.teaching'), key: 'teaching' },
+    { label: t('portfolio.achievements'), key: 'achievements' },
+    { label: t('portfolio.additional'), key: 'additional' },
+  ]
 
   useEffect(() => {
     const current = searchParams.get('tab')
@@ -33,7 +36,7 @@ export default function PortfolioPage() {
   }
 
   return (
-    <Layout active="Портфолио">
+    <Layout active={t('groups.portfolio')}>
       <div className="space-y-6">
         {/* Навигация по портфолио */}
         <div className="flex flex-wrap gap-2 bg-white p-4 rounded-xl shadow-sm">
@@ -76,20 +79,62 @@ export default function PortfolioPage() {
   )
 }
 
-// ---- Секции (можно заменить реальными компонентами) ----
+export default function PortfolioPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PortfolioContent />
+    </Suspense>
+  )
+}
+
+// ---- Секции ----
 
 function GeneralSection() {
-  return <p>Общая информация о преподавателе</p>
+  const { t } = useTranslation()
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-900">{t('portfolio.general')}</h2>
+      <p className="text-gray-600">{t('portfolio.generalContent')}</p>
+    </div>
+  )
 }
+
 function PublicationsSection() {
-  return <p>Список научных публикаций</p>
+  const { t } = useTranslation()
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-900">{t('portfolio.publications')}</h2>
+      <p className="text-gray-600">{t('portfolio.publicationsContent')}</p>
+    </div>
+  )
 }
+
 function TeachingSection() {
-  return <p>Информация о преподавательской деятельности</p>
+  const { t } = useTranslation()
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-900">{t('portfolio.teaching')}</h2>
+      <p className="text-gray-600">{t('portfolio.teachingContent')}</p>
+    </div>
+  )
 }
+
 function AchievementsSection() {
-  return <p>Достижения, награды и конкурсы</p>
+  const { t } = useTranslation()
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-900">{t('portfolio.achievements')}</h2>
+      <p className="text-gray-600">{t('portfolio.achievementsContent')}</p>
+    </div>
+  )
 }
+
 function AdditionalSection() {
-  return <p>Дополнительная информация</p>
+  const { t } = useTranslation()
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-900">{t('portfolio.additional')}</h2>
+      <p className="text-gray-600">{t('portfolio.additionalContent')}</p>
+    </div>
+  )
 }

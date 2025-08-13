@@ -5,34 +5,37 @@ import Layout from '@/components/Layout'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
+import '@/i18n' 
 import { 
   Edit3, X, User, Lock, Phone, Info, Award, BookOpen,
-  Camera, Save, Upload, Mail, UserCheck, Shield, Eye, EyeOff
+  Camera, Save, Upload, Mail, UserCheck, Shield, Eye, EyeOff, FileText
 } from 'lucide-react'
 import { useAvatar } from '@/context/AvatarContext'
 import clsx from 'clsx'
 
-const sections = [
-  { id: 'Аватар', icon: <User size={18} />, label: 'Профиль' },
-  { id: 'Смена пароля', icon: <Lock size={18} />, label: 'Безопасность' },
-  { id: 'Контакты', icon: <Phone size={18} />, label: 'Контакты' },
-  { id: 'Обо мне', icon: <Info size={18} />, label: 'О себе' },
-  { id: 'Сертификаты', icon: <Award size={18} />, label: 'Сертификаты' },
-  { id: 'Курсы', icon: <BookOpen size={18} />, label: 'Курсы' },
-]
-
 export default function SiteSettingsPage() {
+  const { t } = useTranslation('common')
   const [activeSection, setActiveSection] = useState('Аватар')
+
+  const sections = [
+    { id: 'Аватар', icon: <User size={18} />, label: t('settings.sections.profile') },
+    { id: 'Смена пароля', icon: <Lock size={18} />, label: t('settings.sections.security') },
+    { id: 'Контакты', icon: <Phone size={18} />, label: t('settings.sections.contacts') },
+    { id: 'Обо мне', icon: <Info size={18} />, label: t('settings.sections.about') },
+    { id: 'Сертификаты', icon: <Award size={18} />, label: t('settings.sections.certificates') },
+    { id: 'Курсы', icon: <BookOpen size={18} />, label: t('settings.sections.courses') },
+  ]
 
   const activeData = sections.find(s => s.id === activeSection)
 
   return (
-    <Layout active="Настройки">
+    <Layout active={t('account.settings')}>
       <div className="max-w-6xl mx-auto">
         {/* Заголовок */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Настройки профиля</h1>
-          <p className="text-gray-600">Управляйте своими личными данными и настройками</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('settings.title')}</h1>
+          <p className="text-gray-600">{t('settings.subtitle')}</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -100,6 +103,7 @@ export default function SiteSettingsPage() {
 // ------------------- Секции ------------------------
 
 function AvatarSection() {
+  const { t } = useTranslation('common')
   const { avatar, setAvatar, userName } = useAvatar()
   const [newAvatar, setNewAvatar] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -148,17 +152,17 @@ function AvatarSection() {
         </div>
         <div className="mt-4">
           <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
-          <p className="text-gray-600">Преподаватель</p>
+          <p className="text-gray-600">{t('profile.teacher')}</p>
         </div>
       </div>
 
       <div className="bg-gray-50 rounded-xl p-4">
-        <h4 className="font-medium text-gray-900 mb-2">Рекомендации для фото:</h4>
+        <h4 className="font-medium text-gray-900 mb-2">{t('settings.avatar.recommendations')}</h4>
         <ul className="text-sm text-gray-600 space-y-1">
-          <li>• Используйте квадратное изображение (1:1)</li>
-          <li>• Минимальный размер: 400x400 пикселей</li>
-          <li>• Поддерживаемые форматы: JPG, PNG, GIF</li>
-          <li>• Максимальный размер файла: 5 МБ</li>
+          <li>• {t('settings.avatar.square')}</li>
+          <li>• {t('settings.avatar.minSize')}</li>
+          <li>• {t('settings.avatar.formats')}</li>
+          <li>• {t('settings.avatar.maxSize')}</li>
         </ul>
       </div>
 
@@ -169,7 +173,7 @@ function AvatarSection() {
           className="flex items-center gap-2"
         >
           <Save size={16} />
-          {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
+          {isLoading ? t('settings.avatar.saving') : t('settings.avatar.save')}
         </Button>
       </div>
     </div>
@@ -177,6 +181,7 @@ function AvatarSection() {
 }
 
 function PasswordSection() {
+  const { t } = useTranslation('common')
   const [showPasswords, setShowPasswords] = useState({
     old: false,
     new: false,
@@ -201,9 +206,9 @@ function PasswordSection() {
         <div className="flex gap-3">
           <Shield className="text-blue-600 mt-0.5" size={20} />
           <div>
-            <h4 className="font-medium text-blue-900">Безопасность вашего аккаунта</h4>
+            <h4 className="font-medium text-blue-900">{t('settings.password.securityTitle')}</h4>
             <p className="text-sm text-blue-700 mt-1">
-              Используйте сложный пароль длиной не менее 8 символов с цифрами и специальными символами
+              {t('settings.password.securityDesc')}
             </p>
           </div>
         </div>
@@ -212,11 +217,11 @@ function PasswordSection() {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Текущий пароль
+            {t('settings.password.current')}
           </label>
           <div className="flex items-center gap-2">
             <Input 
-              placeholder="Введите текущий пароль" 
+              placeholder={t('settings.password.currentPlaceholder')} 
               type={showPasswords.old ? "text" : "password"}
               value={passwords.old}
               onChange={(e) => setPasswords(prev => ({...prev, old: e.target.value}))}
@@ -233,11 +238,11 @@ function PasswordSection() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Новый пароль
+            {t('settings.password.new')}
           </label>
           <div className="flex items-center gap-2">
             <Input 
-              placeholder="Введите новый пароль" 
+              placeholder={t('settings.password.newPlaceholder')} 
               type={showPasswords.new ? "text" : "password"}
               value={passwords.new}
               onChange={(e) => setPasswords(prev => ({...prev, new: e.target.value}))}
@@ -254,11 +259,11 @@ function PasswordSection() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Подтвердите новый пароль
+            {t('settings.password.confirm')}
           </label>
           <div className="flex items-center gap-2">
             <Input 
-              placeholder="Повторите новый пароль" 
+              placeholder={t('settings.password.confirmPlaceholder')} 
               type={showPasswords.confirm ? "text" : "password"}
               value={passwords.confirm}
               onChange={(e) => setPasswords(prev => ({...prev, confirm: e.target.value}))}
@@ -278,7 +283,7 @@ function PasswordSection() {
       <div className="flex justify-end">
         <Button className="flex items-center gap-2">
           <Save size={16} />
-          Изменить пароль
+          {t('settings.password.change')}
         </Button>
       </div>
     </div>
@@ -286,34 +291,36 @@ function PasswordSection() {
 }
 
 function ContactSection() {
+  const { t } = useTranslation('common')
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <UserCheck size={16} className="inline mr-1" />
-            Имя
+            {t('settings.contacts.firstName')}
           </label>
-          <Input placeholder="Введите имя" />
+          <Input placeholder={t('settings.contacts.firstNamePlaceholder')} />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <UserCheck size={16} className="inline mr-1" />
-            Фамилия
+            {t('settings.contacts.lastName')}
           </label>
-          <Input placeholder="Введите фамилию" />
+          <Input placeholder={t('settings.contacts.lastNamePlaceholder')} />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <Phone size={16} className="inline mr-1" />
-            Телефон
+            {t('settings.contacts.phone')}
           </label>
           <Input placeholder="+7 (___) ___-__-__" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <Mail size={16} className="inline mr-1" />
-            Email
+            {t('settings.contacts.email')}
           </label>
           <Input placeholder="example@yessenov.edu.kz" />
         </div>
@@ -322,7 +329,7 @@ function ContactSection() {
       <div className="flex justify-end">
         <Button className="flex items-center gap-2">
           <Save size={16} />
-          Сохранить контакты
+          {t('settings.contacts.save')}
         </Button>
       </div>
     </div>
@@ -330,23 +337,24 @@ function ContactSection() {
 }
 
 function AboutSection() {
+  const { t } = useTranslation('common')
   const [text, setText] = useState('')
 
   return (
     <div className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Расскажите о себе
+          {t('settings.about.title')}
         </label>
         <textarea
           rows={8}
           value={text}
           onChange={(e) => setText(e.target.value)}
           className="w-full border border-gray-300 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-          placeholder="Опишите свои интересы, достижения, хобби..."
+          placeholder={t('settings.about.placeholder')}
         />
         <div className="flex justify-between items-center mt-2">
-          <p className="text-xs text-gray-500">Максимум 500 символов</p>
+          <p className="text-xs text-gray-500">{t('settings.about.maxChars')}</p>
           <p className="text-xs text-gray-500">{text.length}/500</p>
         </div>
       </div>
@@ -354,7 +362,7 @@ function AboutSection() {
       <div className="flex justify-end">
         <Button className="flex items-center gap-2">
           <Save size={16} />
-          Сохранить описание
+          {t('settings.about.save')}
         </Button>
       </div>
     </div>
@@ -362,6 +370,7 @@ function AboutSection() {
 }
 
 function UploadSection({ type }: { type: 'certificates' | 'courses' }) {
+  const { t } = useTranslation('common')
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [dragActive, setDragActive] = useState(false)
@@ -405,7 +414,7 @@ function UploadSection({ type }: { type: 'certificates' | 'courses' }) {
     return () => urls.forEach((url) => URL.revokeObjectURL(url))
   }, [files])
 
-  const title = type === 'certificates' ? 'сертификатов' : 'материалов курсов'
+  const title = t(`settings.upload.${type}`)
 
   return (
     <div className="space-y-6">
@@ -422,14 +431,14 @@ function UploadSection({ type }: { type: 'certificates' | 'courses' }) {
       >
         <Upload className="mx-auto text-gray-400 mb-4" size={48} />
         <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Загрузите файлы {title}
+          {t('settings.upload.uploadFiles')} {title}
         </h3>
         <p className="text-gray-600 mb-4">
-          Перетащите файлы сюда или нажмите для выбора
+          {t('settings.upload.dragText')}
         </p>
         <label className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer transition-colors">
           <Upload size={16} />
-          Выбрать файлы
+          {t('settings.upload.choose')}
           <input 
             type="file" 
             multiple 
@@ -439,7 +448,7 @@ function UploadSection({ type }: { type: 'certificates' | 'courses' }) {
           />
         </label>
         <p className="text-xs text-gray-500 mt-2">
-          Поддерживаемые форматы: JPG, PNG, PDF (до 10 МБ каждый)
+          {t('settings.upload.supportedFormats')}
         </p>
       </div>
 
@@ -447,7 +456,7 @@ function UploadSection({ type }: { type: 'certificates' | 'courses' }) {
       {files.length > 0 && (
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">
-            Загруженные файлы ({files.length})
+            {t('settings.upload.uploadedFiles')} ({files.length})
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {previews.map((src, idx) => (
@@ -467,7 +476,7 @@ function UploadSection({ type }: { type: 'certificates' | 'courses' }) {
                     <div className="flex items-center justify-center h-full bg-gray-100">
                       <div className="text-center">
                         <FileText className="mx-auto text-gray-400 mb-2" size={32} />
-                        <p className="text-xs text-gray-600">PDF файл</p>
+                        <p className="text-xs text-gray-600">{t('settings.upload.pdfFile')}</p>
                       </div>
                     </div>
                   )}
@@ -477,7 +486,7 @@ function UploadSection({ type }: { type: 'certificates' | 'courses' }) {
                     {files[idx]?.name}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {(files[idx]?.size / 1024 / 1024).toFixed(2)} МБ
+                    {(files[idx]?.size / 1024 / 1024).toFixed(2)} {t('settings.upload.mb')}
                   </p>
                 </div>
                 <button
@@ -498,7 +507,7 @@ function UploadSection({ type }: { type: 'certificates' | 'courses' }) {
           className="flex items-center gap-2"
         >
           <Save size={16} />
-          Сохранить файлы
+          {t('settings.upload.save')}
         </Button>
       </div>
     </div>

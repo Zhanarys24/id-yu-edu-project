@@ -1,0 +1,404 @@
+{
+
+  "news": {
+    "pageTitle": "News",
+    "pageDescription": "Latest news and university events",
+    "viewAll": "View all news",
+    "categories": {
+      "rating": "Rating",
+      "international": "International cooperation",
+      "science": "Scientific cooperation",
+      "management": "Management",
+      "cooperation": "Cooperation",
+      "opening": "Opening",
+      "achievements": "Achievements",
+      "olympiad": "Olympiad"
+    },
+
+    "items": {
+      "1": {
+        "title": "QS World University Rankings 2026 Results",
+        "description": "Caspian State University of Technologies and Engineering named after Sh. Yessenov showed high results in the QS World University Rankings 2026."
+      },
+      "2": {
+        "title": "Azerbaijan and Kazakhstan: Strengthening ties in the Year of Constitution and Sovereignty",
+        "description": "The university implements joint projects to strengthen academic and cultural ties between Azerbaijan and Kazakhstan."
+      },
+      "3": {
+        "title": "Joint meeting of KINI and DKU representatives",
+        "description": "Issues of scientific cooperation between Caspian International University and University of Copenhagen Denmark were discussed."
+      },
+      "4": {
+        "title": "Anti-corruption management system",
+        "description": "A new anti-corruption management system has been implemented at the university, its effectiveness has been discussed."
+      },
+      "5": {
+        "title": "Meeting with COEST delegation",
+        "description": "Negotiations on future cooperation and joint projects took place between the university administration and the COEST delegation."
+      },
+      "6": {
+        "title": "Opening of Shynabay Akkenzheev auditorium",
+        "description": "The university solemnly opened a new auditorium named after the famous Kazakhstani scientist Shynabay Akkenzheev."
+      },
+      "7": {
+        "title": "Kazakhstani students won at the world competition!",
+        "description": "Students of Yessenov University won in an international technology competition, increasing the prestige of the university."
+      },
+      "8": {
+        "title": "XVII Republican subject olympiad",
+        "description": "In the second stage of the XVII Republican subject olympiad, held at the university, students demonstrated their knowledge."
+      }
+    }
+  },
+
+  "login": {
+    "title": "Sign in to YU ID account",
+    "welcome": "Welcome to YU",
+    "subtitle": "All university services in one place",
+    "tabs": {
+      "emailIin": "Gmail/IIN",
+      "egovQr": "eGov QR",
+      "ecp": "EDS"
+    },
+    "emailOrIinLabel": "Enter yu.edu.kz email or IIN",
+    "emailPlaceholder": "example@yu.edu.kz",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "•••••••••••••••••••••",
+    "forgotPassword": "Forgot password?",
+    "signInButton": "Sign In",
+    "egovStep1": "Open mobile application",
+    "egovStep2": "Click QR scanner in the top corner",
+    "egovStep3": "Point camera at screen",
+    "qrCodePlaceholder": "QR code",
+    "dataProcessingConsent": "By continuing to use the YU ID service, you consent to the collection, processing and storage of your personal data in the amount contained in the certificate (electronic digital signature) of the NCA, for the purposes of displaying electronic signature data.",
+    "selectCertificate": "Select certificate",
+    "certificateSelected": "Certificate successfully selected",
+    "dragOrClick": "Drag file or click to select",
+    "anonymousLogin": "Sign in anonymously to YU Otiniš",
+    "anonymousLoginDescription": "Use anonymous login to leave an idea, rating or report a problem."
+  },
+  "aria": {
+    "languageSelect": "Language selection"
+  },
+  
+  "education": {
+    "sign_in": "Sign in"
+  },
+
+  "yessenovai": {
+    "welcome": "Welcome to YessenovAI",
+    "description": "Your personal AI assistant for quick answers and support. Shall we start?",
+    "inputPlaceholder": "Enter a message...",
+    "attachFile": "Attach file",
+    "newChat": "New chat",
+    "newChatTitle": "New chat",
+    "activeChats": "Active chats",
+    "documentQuestions": "Questions about documents",
+    "popularQuestionsTitle": "Popular questions",
+    "version": "YessenovAI v1.0",
+    "sampleQuestion": "Where can I get a certificate of study?",
+    "sampleAnswer": "You can get a certificate of study at the dean's office of your faculty.",
+    "botResponses": [
+      "You can get the certificate at the dean's office from 9:00 to 17:00.",
+      "For this, you need to contact the academic department.",
+      "I can help you with this question. Do you need more information?",
+      "This document is available through the student’s personal account."
+    ],
+    "popularQuestions": [
+      "Where can I find the exam schedule?",
+      "Scholarship application",
+      "Campus locations",
+      "Debts on subjects",
+      "Class schedule"
+    ],
+    "cards": {
+      "freshmen": {
+        "title": "Help for freshmen",
+        "desc": "Where the campuses are, where to apply...",
+        "question": "Where are the university campuses located?"
+      },
+      "documents": {
+        "title": "Document processing",
+        "desc": "Certificates, applications...",
+        "question": "How to get a certificate of study?"
+      },
+      "academic": {
+        "title": "Academic questions",
+        "desc": "Debts, exams...",
+        "question": "How to find out the exam schedule?"
+      },
+      "content": {
+        "title": "Content generation",
+        "desc": "Diploma topics...",
+        "question": "Help me come up with a diploma topic"
+      }
+    }
+  },
+
+  "settings": {
+    "title": "Profile Settings",
+    "subtitle": "Manage your personal data and preferences",
+    "sections": {
+      "profile": "Profile",
+      "security": "Security",
+      "contacts": "Contacts",
+      "about": "About Me",
+      "certificates": "Certificates",
+      "courses": "Courses"
+    },
+    "avatar": {
+      "recommendations": "Photo recommendations:",
+      "square": "Use a square image (1:1)",
+      "minSize": "Minimum size: 400x400 pixels",
+      "formats": "Supported formats: JPG, PNG, GIF",
+      "maxSize": "Maximum file size: 5 MB",
+      "saving": "Saving...",
+      "save": "Save changes"
+    },
+    "password": {
+      "securityTitle": "Your account security",
+      "securityDesc": "Use a strong password of at least 8 characters with numbers and special symbols",
+      "current": "Current password",
+      "currentPlaceholder": "Enter current password",
+      "new": "New password",
+      "newPlaceholder": "Enter new password",
+      "confirm": "Confirm new password",
+      "confirmPlaceholder": "Repeat new password",
+      "change": "Change password"
+    },
+    "contacts": {
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Enter first name",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Enter last name",
+      "phone": "Phone",
+      "email": "Email",
+      "save": "Save contacts"
+    },
+    "about": {
+      "title": "Tell us about yourself",
+      "placeholder": "Describe your interests, achievements, hobbies...",
+      "maxChars": "Maximum 500 characters",
+      "save": "Save description"
+    },
+    "upload": {
+      "certificates": "certificates",
+      "courses": "course materials",
+      "uploadFiles": "Upload files",
+      "dragText": "Drag files here or click to select",
+      "choose": "Choose files",
+      "supportedFormats": "Supported formats: JPG, PNG, PDF (up to 10 MB each)",
+      "uploadedFiles": "Uploaded files",
+      "pdfFile": "PDF file",
+      "mb": "MB",
+      "save": "Save files"
+    }
+  },
+  "profile": {
+    "teacher": "teacher"
+  },
+  "menu": {
+    "news": "News",
+    "calendar": "Events",
+    "education": "Education",
+    "science": "Science",
+    "upbringing": "Upbringing",
+    "eservices": "E-services",
+    "yessenovai": "YessenovAI"
+  },
+  "portfolio": {
+    "general": "General information",
+    "publications": "Publications and research",
+    "teaching": "Teaching activities",
+    "achievements": "Achievements and awards",
+    "additional": "Additional activities",
+    "generalContent": "General information about the teacher",
+    "publicationsContent": "List of scientific publications and research work",
+    "teachingContent": "Information about teaching activities and courses",
+    "achievementsContent": "Achievements, awards, and competition results",
+    "additionalContent": "Additional professional activities and contributions"
+  },
+  "account": {
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "groups": {
+    "sections": "Sections",
+    "portfolio": "Portfolio",
+    "account": "Account"
+  },
+  "aria": {
+    "languageSelect": "Language selection"
+  },
+  "notifications": {
+    "empty": "No notifications",
+    "clearAll": "Clear all",
+    "viewMore": "View more",
+    "items": {
+      "1": "New message from Alexey",
+      "2": "Order status updated",
+      "3": "Reminder about tomorrow's meeting"
+    }
+  },
+  "appMap": {
+    "button": "App map",
+    "title": "App map",
+    "subtitle": "Quick access to all sections",
+    "searchPlaceholder": "Search sections...",
+    "nothingFound": "Nothing found",
+    "openPage": "Open map page"
+  },
+  "education": {
+    "education": "Education",
+    "education_desc": "Access to courses and assignments",
+    "platonus_desc": "System for automating the educational process",
+    "lessons_desc": "Conducting video conferences using Google Meet",
+    "sign_in": "Sign in",
+    "canvas": "Canvas",
+    "platonus": "Platonus"
+  },
+  "news": {
+    "pageTitle": "News",
+    "pageDescription": "Latest news and events of the university",
+    "viewAll": "View all news",
+    "categories": {
+      "rating": "Rating",
+      "international": "International cooperation",
+      "science": "Scientific cooperation",
+      "management": "Management",
+      "cooperation": "Cooperation",
+      "opening": "Opening",
+      "achievements": "Achievements",
+      "olympiad": "Olympiad"
+    },
+    "items": {
+      "1": {
+        "title": "QS World University Rankings 2026 Results",
+        "description": "Caspian State University of Technologies and Engineering named after Sh. Yessenov showed high results in the QS World University Rankings 2026."
+      },
+      "2": {
+        "title": "Azerbaijan and Kazakhstan: Strengthening ties in the Year of Constitution and Sovereignty",
+        "description": "The university implements joint projects to strengthen academic and cultural ties between Azerbaijan and Kazakhstan."
+      },
+      "3": {
+        "title": "Joint meeting of KINI and DKU representatives",
+        "description": "Issues of scientific cooperation between Caspian International University and University of Copenhagen Denmark were discussed."
+      },
+      "4": {
+        "title": "Anti-corruption management system",
+        "description": "A new anti-corruption management system has been implemented at the university, its effectiveness has been discussed."
+      },
+      "5": {
+        "title": "Meeting with COEST delegation",
+        "description": "Negotiations on future cooperation and joint projects took place between the university administration and the COEST delegation."
+      },
+      "6": {
+        "title": "Opening of Shynabay Akkenzheev auditorium",
+        "description": "The university solemnly opened a new auditorium named after the famous Kazakhstani scientist Shynabay Akkenzheev."
+      },
+      "7": {
+        "title": "Kazakhstani students won at the world competition!",
+        "description": "Students of Yessenov University won in an international technology competition, increasing the prestige of the university."
+      },
+      "8": {
+        "title": "XVII Republican subject olympiad",
+        "description": "In the second stage of the XVII Republican subject olympiad, held at the university, students demonstrated their knowledge."
+      }
+    },
+    "readMore": "Read more",
+    "likes": "likes",
+    "commentPlaceholder": "Write a comment...",
+    "send": "Send",
+    "exampleComment1": "Great news!",
+    "exampleComment2": "Looking forward to details!",
+    "exampleComment3": "Nice to see the university's progress."
+  },
+  "eservices": {
+    "title": "E-services",
+    "subtitle": "Online services for requests, certificates and support",
+    "bitrix24": "Bitrix24",
+    "bitrixDesc": "Internal document management",
+    "helpdeskDesc": "Technical support",
+    "serviceDesc": "Production issue resolution",
+    "tabs": { "services": "Services", "history": "History" },
+    "sections": { "certificates": "Certificates", "applications": "Applications" },
+    "certs": {
+      "studyProof": { "title": "Study certificate", "desc": "Request a certificate of current study" },
+      "transcript": { "title": "Transcript", "desc": "Order an academic transcript" }
+    },
+    "apps": {
+      "academicLeave": { "title": "Academic leave", "desc": "Apply for academic leave" },
+      "grantTransfer": { "title": "Grant transfer", "desc": "Apply to transfer from tuition to grant" },
+      "expel": { "title": "Expulsion", "desc": "Apply for expulsion" }
+    },
+    "actions": { "applyCertificate": "Submit request", "applyApplication": "Submit application","login": "Sign in" },
+    "history": { "type": "Type" },
+    "status": { "approved": "Approved", "rejected": "Rejected", "pending": "Pending" }
+  },
+  "science": {
+    "title": "Science",
+    "subtitle": "Platforms for research, publications and projects",
+    "ojsDesc": "Scientific journal management",
+    "dspaceDesc": "Electronic archive of theses and research",
+    "ysjDesc": "Publication of university works"
+  },
+  "upbringing": {
+    "title": "Upbringing",
+    "subtitle": "Dormitory applications, sections, clubs",
+    "curatorship": { "title": "Curatorship", "desc": "applying for a dormitory" },
+    "events": { "title": "Upbringing events", "desc": "Registration for sports and creative sections" }
+  },
+  "calendar": {
+    "newEvent": "New event",
+    "titlePlaceholder": "Title",
+    "blue": "Blue",
+    "green": "Green",
+    "yellow": "Yellow",
+    "cancel": "Cancel",
+    "add": "Add"
+  },
+  "common": { "loading": "Loading..." },
+  "calendarPage": {
+    "title": "Events",
+    "book": "+ Book",
+    "weekdaysShort": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "nearestTitle": "Upcoming events",
+    "noEventsToday": "No events today",
+    "headerTitle": "Events calendar",
+    "refresh": "Refresh events",
+    "eventsCount": "Events",
+    "errors": {
+      "titleRequired": "Enter event title",
+      "dateRequired": "Select a date",
+      "startTimeRequired": "Select start time",
+      "endTimeRequired": "Select end time",
+      "placeRequired": "Select a place",
+      "endAfterStart": "End time must be after start time",
+      "participantsRequired": "Add participants for an online meeting",
+      "linkRequired": "Add a link for the online meeting",
+      "slotBusy": "This time and place are already booked!"
+    },
+    "successCreated": "Event created successfully!",
+    "createError": "Error creating event",
+    "connectionError": "Connection error",
+    "form": {
+      "title": "Event title",
+      "titlePlaceholder": "Enter event title",
+      "date": "Date",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "color": "Color",
+      "colors": { "blue": "Blue", "green": "Green", "yellow": "Yellow", "red": "Red" },
+      "place": "Place",
+      "isOnline": "Online meeting",
+      "link": "Event link",
+      "linkPlaceholder": "Paste the meeting link",
+      "participants": "Participants",
+      "noParticipants": "No participants selected",
+      "noUsers": "No users yet",
+      "adding": "Adding...",
+      "add": "Add",
+      "cancel": "Cancel"
+    }
+  }
+}

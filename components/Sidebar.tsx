@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Monitor, Calendar, GraduationCap, BookOpen, Users, FileText,
-  Bot, User, Settings, LogOut, BriefcaseBusiness, Menu, X, ChevronUp, ChevronDown,
-  FileUser, Award, BookMarked, Briefcase, Trophy
+  Bot, Settings, LogOut, BriefcaseBusiness, ChevronUp, ChevronDown,
+  FileUser, BookMarked, Briefcase, Trophy
 } from 'lucide-react'
 import Image from 'next/image'
 import { useAvatar } from '@/context/AvatarContext'
@@ -13,9 +15,9 @@ import { useState } from 'react'
 import clsx from 'clsx'
 
 export default function Sidebar({ active }: { active?: string }) {
+  const { t } = useTranslation('common')
   const pathname = usePathname()
   const { avatar, userName } = useAvatar()
-  const [open, setOpen] = useState(false)
   const [portfolioOpen, setPortfolioOpen] = useState(false)
   const router = useRouter()
 
@@ -25,58 +27,36 @@ export default function Sidebar({ active }: { active?: string }) {
   }
 
   const menuItems = [
-    { icon: <Monitor size={20} />, label: 'Новости', href: '/main/news' },
-    { icon: <Calendar size={20} />, label: 'Мероприятия', href: '/main/calendar' },
-    { icon: <GraduationCap size={20} />, label: 'Образование', href: '/main/education' },
-    { icon: <BookOpen size={20} />, label: 'Наука', href: '/main/science' },
-    { icon: <Users size={20} />, label: 'Воспитание', href: '/main/upbringing' },
-    { icon: <FileText size={20} />, label: 'E‑услуги', href: '/main/E-services' },
-    { icon: <Bot size={20} />, label: 'YessenovAI', href: '/main/yessenovbot' },
-    // { icon: <User size={20} />, label: 'Администрирование', href: '/admin' },
+    { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
+    { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
+    { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
+    { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
+    { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
+    { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
+    { icon: <Bot size={20} />, label: t('menu.yessenovai'), href: '/main/yessenovbot' },
   ]
-const portfolioItems = [
-  { icon: <FileUser size={16} />, label: 'Общая информация', href: '/portfolio?tab=general' },
-  { icon: <BookMarked size={16} />, label: 'Публикации и научная деятельность', href: '/portfolio?tab=publications' },
-  { icon: <GraduationCap size={16} />, label: 'Преподавательская деятельность', href: '/portfolio?tab=teaching' },
-  { icon: <Trophy size={16} />, label: 'Достижения и награды', href: '/portfolio?tab=achievements' },
-  { icon: <Briefcase size={16} />, label: 'Дополнительная деятельность', href: '/portfolio?tab=additional' },
-]
 
+  const portfolioItems = [
+    { icon: <FileUser size={16} />, label: t('portfolio.general'), href: '/portfolio?tab=general' },
+    { icon: <BookMarked size={16} />, label: t('portfolio.publications'), href: '/portfolio?tab=publications' },
+    { icon: <GraduationCap size={16} />, label: t('portfolio.teaching'), href: '/portfolio?tab=teaching' },
+    { icon: <Trophy size={16} />, label: t('portfolio.achievements'), href: '/portfolio?tab=achievements' },
+    { icon: <Briefcase size={16} />, label: t('portfolio.additional'), href: '/portfolio?tab=additional' },
+  ]
 
   const accountItems = [
-    { icon: <Settings size={20} />, label: 'Настройки', href: '/main/site-settings' },
+    { icon: <Settings size={20} />, label: t('account.settings'), href: '/main/site-settings' },
   ]
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="md:hidden p-3">
-        <Menu size={24} />
-      </button>
-
-      <div
-        className={clsx(
-          'fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity md:hidden',
-          open ? 'opacity-100 visible' : 'opacity-0 invisible'
-        )}
-        onClick={() => setOpen(false)}
-      />
-
-      <aside
-        className={clsx(
-          'fixed z-40 top-0 left-0 h-full bg-white p-6 w-[320px] transform transition-transform duration-300 md:relative md:translate-x-0 md:block shadow-lg font-sans',
-          open ? 'translate-x-0' : '-translate-x-full'
-        )}
-      >
+      {/* Десктопный сайдбар */}
+      <aside className="hidden md:block fixed z-40 top-0 left-0 h-full bg-white p-6 w-[320px] shadow-lg font-sans">
         <div className="flex flex-col justify-between h-full">
           <div>
-            <div className="flex items-center gap-2 mb-8 justify-between">
-              <div className="flex items-center gap-2">
-                <Image src="/yessenov_blue.png" alt="Лого" width={32} height={32} />
-                <h2 className="text-xl font-semibold text-blue-700">YESSENOV ID</h2>
-              </div>
-              <button className="md:hidden" onClick={() => setOpen(false)}>
-                <X size={24} />
-              </button>
+            <div className="flex items-center gap-2 mb-8">
+              <Image src="/yessenov_blue.png" alt="Лого" width={32} height={32} />
+              <h2 className="text-xl font-semibold text-blue-700">YESSENOV ID</h2>
             </div>
 
             <div className="flex items-center mb-6">
@@ -89,7 +69,7 @@ const portfolioItems = [
               />
               <div>
                 <p className="font">{userName}</p>
-                <p className="text-sm text-gray-500">преподаватель</p>
+                <p className="text-sm text-gray-500">{t('profile.teacher')}</p>
               </div>
             </div>
 
@@ -101,9 +81,9 @@ const portfolioItems = [
           </div>
 
           <div className="text-sm space-y-2 mt-8">
-            <p className="text-gray-500">АККАУНТ</p>
+            <p className="text-gray-500">{t('groups.account').toUpperCase()}</p>
 
-            {/* Выпадающее портфолио с absolute */}
+            {/* Портфолио */}
             <div className="relative">
               <button
                 onClick={() => setPortfolioOpen(!portfolioOpen)}
@@ -116,7 +96,7 @@ const portfolioItems = [
               >
                 <div className="flex items-center gap-2">
                   <BriefcaseBusiness size={20} />
-                  <span>Портфолио</span>
+                  <span>{t('groups.portfolio')}</span>
                 </div>
                 {portfolioOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
               </button>
@@ -150,15 +130,60 @@ const portfolioItems = [
 
             <button
               onClick={handleLogout}
-              className={clsx(
-                'flex items-center gap-2 pl-3 pr-2 py-2 rounded w-full transition text-sm text-red-500 hover:bg-gray-100 font-medium'
-              )}
+              className="flex items-center gap-2 pl-3 pr-2 py-2 rounded w-full transition text-sm text-red-500 hover:bg-gray-100 font-medium"
             >
-              <LogOut size={20} /> Выйти
+              <LogOut size={20} /> {t('account.logout')}
             </button>
           </div>
         </div>
       </aside>
+
+      {/* Мобильная нижняя панель — показываем только важные пункты + "Ещё" */}
+      <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-50">
+        <div className="flex justify-around items-center h-14">
+          <Link
+            href="/main/news"
+            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/news') ? 'text-blue-600' : 'text-gray-500')}
+          >
+            <Monitor size={20} />
+            <span className="truncate">Новости</span>
+          </Link>
+
+          <Link
+            href="/main/education"
+            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/education') ? 'text-blue-600' : 'text-gray-500')}
+          >
+            <GraduationCap size={20} />
+            <span className="truncate">Образование</span>
+          </Link>
+
+          <Link
+            href="/main/science"
+            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/science') ? 'text-blue-600' : 'text-gray-500')}
+          >
+            <BookOpen size={20} />
+            <span className="truncate">Наука</span>
+          </Link>
+
+          <Link
+            href="/main/upbringing"
+            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/upbringing') ? 'text-blue-600' : 'text-gray-500')}
+          >
+            <Users size={20} />
+            <span className="truncate">Воспитание</span>
+          </Link>
+
+          <Link
+            href="/main/yessenovbot"
+            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/yessenovbot') ? 'text-blue-600' : 'text-gray-500')}
+          >
+            <Bot size={20} />
+            <span className="truncate">Yessenov AI</span>
+          </Link>
+
+
+        </div>
+      </nav>
     </>
   )
 }
@@ -185,7 +210,7 @@ function MenuItem({
       )}
     >
       {icon}
-      <span>{label}</span>
+      <span suppressHydrationWarning>{label}</span>
       {active && (
         <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-blue-600 rounded-r" />
       )}
