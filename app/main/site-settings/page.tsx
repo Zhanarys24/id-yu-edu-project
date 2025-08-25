@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import '@/i18n' 
 import { 
   Edit3, X, User, Lock, Phone, Info, Award, BookOpen,
-  Camera, Save, Upload, Mail, UserCheck, Shield, Eye, EyeOff, FileText
+  Camera, Save, Upload, Mail, UserCheck, Shield, Eye, EyeOff, FileText, Calendar
 } from 'lucide-react'
 import { useAvatar } from '@/context/AvatarContext'
 import clsx from 'clsx'
@@ -292,6 +292,17 @@ function PasswordSection() {
 
 function ContactSection() {
   const { t } = useTranslation('common')
+  const [dob, setDob] = useState<string>('')
+
+  useEffect(() => {
+    const saved = localStorage.getItem('user.birthDate')
+    if (saved) setDob(saved)
+  }, [])
+
+  const saveContacts = () => {
+    if (dob) localStorage.setItem('user.birthDate', dob)
+    // здесь можно добавить сохранение других полей при их добавлении
+  }
 
   return (
     <div className="space-y-6">
@@ -324,10 +335,23 @@ function ContactSection() {
           </label>
           <Input placeholder="example@yessenov.edu.kz" />
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Calendar size={16} className="inline mr-1" />
+            Дата рождения
+          </label>
+          <Input 
+            type="date" 
+            value={dob}
+            onChange={(e) => setDob(e.target.value)}
+          />
+          <p className="text-xs text-gray-500 mt-1">Формат: ГГГГ-ММ-ДД</p>
+        </div>
       </div>
       
       <div className="flex justify-end">
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={saveContacts}>
           <Save size={16} />
           {t('settings.contacts.save')}
         </Button>

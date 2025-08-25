@@ -1,6 +1,7 @@
 'use client';
 import Image from "next/image";
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
 
@@ -193,12 +194,21 @@ const WelcomeBlock = () => {
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation('common');
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [locale, setLocale] = useState('ru');
+  // Enhanced toast notification state
+  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(
+    null
+  );
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Инициализация языка (точно как в Header)
   useEffect(() => {
@@ -233,18 +243,18 @@ export default function LoginPage() {
 
   const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Email login');
+    router.push('/main/news');
   };
 
   const handleECPLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedFile) {
-      console.log('ECP login');
+      router.push('/main/news');
     }
   };
 
   const handleAnonymousLogin = () => {
-    console.log('Anonymous login');
+    router.push('/main/news');
   };
 
   const renderTabContent = () => {
@@ -523,6 +533,43 @@ export default function LoginPage() {
           )}
         </div>
       </div>
+
+      {/* Enhanced Toast */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-white font-semibold min-w-[300px] animate-[slideIn_0.3s_ease-out] ${
+            toast.type === 'error'
+              ? 'bg-gradient-to-r from-red-500 to-pink-600'
+              : 'bg-gradient-to-r from-green-500 to-emerald-600'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-white/20`}>
+              {toast.type === 'error' ? (
+                <span className="text-xl">⚠️</span>
+              ) : (
+                <span className="text-xl">🎉</span>
+              )}
+            </div>
+            <span>{toast.message}</span>
+            <button
+              onClick={() => setToast(null)}
+              className="ml-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+              aria-label="Close notification"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Toast animation keyframes */}
+      <style jsx global>{`
+        @keyframes slideIn {
+          from { transform: translateY(16px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

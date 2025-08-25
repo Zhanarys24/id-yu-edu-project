@@ -10,13 +10,13 @@ const UserContext = createContext<{
 }>({
   avatar: '/avatar.jpg',
   setAvatar: () => {},
-  userName: 'Альбина Тілекбай',
+  userName: 'Джони',
   setUserName: () => {},
 })
 
 export function AvatarProvider({ children }: { children: React.ReactNode }) {
   const [avatar, setAvatar] = useState('/avatar.jpg')
-  const [userName, setUserName] = useState('Альбина Тілекбай')
+  const [userName, setUserName] = useState('Джони')
 
   return (
     <UserContext.Provider value={{ avatar, setAvatar, userName, setUserName }}>

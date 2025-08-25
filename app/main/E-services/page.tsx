@@ -18,14 +18,25 @@ export default function EservicesPage() {
   }
 
   const getTypeLabel = (type: 'certificate' | 'application') => {
-    const key = `eservices.types.${type}`
-    const translated = t(key)
-    if (translated === key) {
-      return type === 'certificate'
-        ? t('eservices.sections.certificates')
-        : t('eservices.sections.applications')
+    // Мапинг переводов для разных языков
+    const typeTranslations = {
+      'certificate': {
+        'ru': 'Справка',
+        'en': 'Certificate', 
+        'kz': 'Анықтама'
+      },
+      'application': {
+        'ru': 'Заявление',
+        'en': 'Application',
+        'kz': 'Өтініш'
+      }
     }
-    return translated
+    
+    // Получаем текущий язык из i18n
+    const currentLanguage = t('eservices.title') === 'E-services' ? 'en' : 
+                           t('eservices.title') === 'E-қызметтер' ? 'kz' : 'ru'
+    
+    return typeTranslations[type]?.[currentLanguage] || type
   }
 
   const historyData: Array<{

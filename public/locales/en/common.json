@@ -244,9 +244,26 @@
     "languageSelect": "Language selection"
   },
   "notifications": {
+    "title": "Notifications",
     "empty": "No notifications",
     "clearAll": "Clear all",
     "viewMore": "View more",
+    "compact": "Compact",
+    "markAllRead": "Mark all as read",
+    "newCount": "{{count}} new",
+    "birthdayGreeting": "Happy Birthday! Yessenov University congratulates you and wishes you success! 🎉",
+    "samples": {
+      "newsHackathon": "New post: Hackathon enrollment opened",
+      "curatorMeeting": "Reminder: meeting with curator tomorrow at 10:00",
+      "eservicesStatus": "E-services: your certificate request was approved",
+      "portfolioAchievement": "Congrats! A new achievement entry was added",
+      "aiReply": "YessenovAI: your request has a new reply",
+      "calendarRoom": "Calendar: room 3.215 booked for 16:00",
+      "settingsSecurity": "Security: it is recommended to update your password",
+      "newsGrant": "News: additional master's grants announced",
+      "clubEvent": "Clubs: open IT-club meetup today at 18:00",
+      "scienceCall": "Science: call for journal submissions is open"
+    },
     "items": {
       "1": "New message from Alexey",
       "2": "Order status updated",
@@ -346,7 +363,6 @@
     },
     "actions": { "applyCertificate": "Submit request", "applyApplication": "Submit application","login": "Sign in" },
     "history": { "type": "Type" },
-    "types": { "certificate": "Certificate", "application": "Application" },
     "status": { "approved": "Approved", "rejected": "Rejected", "pending": "Pending" }
   },
   "science": {

@@ -1,9 +1,7 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { NextConfig } from "next";
 
-const config: CapacitorConfig = {
-  appId: 'com.yu.id',
-  appName: 'YU ID',
-  webDir: 'public'
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
 };
 
-export default config;
+export default nextConfig;
