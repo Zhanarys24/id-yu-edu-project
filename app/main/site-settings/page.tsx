@@ -104,8 +104,10 @@ export default function SiteSettingsPage() {
 
 function AvatarSection() {
   const { t } = useTranslation('common')
-  const { avatar, setAvatar, userName } = useAvatar()
+  const { avatar, setAvatar, userName, setUserName } = useAvatar()
   const [newAvatar, setNewAvatar] = useState<File | null>(null)
+  const [editingName, setEditingName] = useState(false)
+  const [tempName, setTempName] = useState(userName)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,6 +126,21 @@ function AvatarSection() {
     setIsLoading(false)
     setNewAvatar(null)
   }
+
+  const handleNameSave = () => {
+    setUserName(tempName)
+    setEditingName(false)
+  }
+
+  const handleNameCancel = () => {
+    setTempName(userName)
+    setEditingName(false)
+  }
+
+  // Update tempName when userName changes
+  useEffect(() => {
+    setTempName(userName)
+  }, [userName])
 
   return (
     <div className="space-y-6">
@@ -151,8 +168,50 @@ function AvatarSection() {
           </label>
         </div>
         <div className="mt-4">
-          <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
-          <p className="text-gray-600">{t('profile.teacher')}</p>
+          {editingName ? (
+            <div className="space-y-3">
+              <Input
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
+                className="text-center text-xl font-semibold"
+                placeholder="Введите имя"
+                autoFocus
+              />
+              <div className="flex gap-2 justify-center">
+                <Button 
+                  size="sm" 
+                  onClick={handleNameSave}
+                  disabled={!tempName.trim()}
+                >
+                  <Save size={14} className="mr-1" />
+                  Сохранить
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleNameCancel}
+                >
+                  <X size={14} className="mr-1" />
+                  Отмена
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <div className="flex items-center justify-center gap-2">
+                <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditingName(true)}
+                  className="p-1 h-auto"
+                >
+                  <Edit3 size={14} />
+                </Button>
+              </div>
+              <p className="text-gray-600">{t('profile.teacher')}</p>
+            </div>
+          )}
         </div>
       </div>
 
