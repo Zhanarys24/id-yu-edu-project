@@ -3,9 +3,11 @@
 import { useState, useEffect, useMemo, cloneElement } from "react"
 import Image from "next/image"
 import type { ReactNode, ReactElement } from "react"
-import { Trophy, Coins, Star, Award, ArrowRight, Zap, Target, Calendar, Users, Gift, Crown, Medal, Flame, ShoppingBag, Home, ChevronRight, Sparkles, TrendingUp, Clock } from "lucide-react"
+import { Trophy, Coins, Star, Award, ArrowRight, Zap, Target, Calendar, Users, Gift, Crown, Medal, Flame, ShoppingBag, Home, ChevronRight, Sparkles, TrendingUp, Clock, BookOpen, Gamepad2 } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { useAvatar } from '@/context/AvatarContext'
+import AchievementSystem from './components/AchievementSystem'
+import EventSystem from './components/EventSystem'
 
 // ClientOnly component to prevent hydration mismatch
 const ClientOnly = ({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) => {
@@ -778,7 +780,7 @@ export default function DashboardPage() {
   ])
 
   // Navigation
-  type Tab = 'dashboard' | 'quests' | 'shop' | 'leaders' | 'events' | 'profile'
+  type Tab = 'dashboard' | 'quests' | 'shop' | 'leaders' | 'events' | 'profile' | 'achievements'
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
 
   // Daily reward
@@ -805,7 +807,7 @@ export default function DashboardPage() {
       return newState
     })
     
-    showToast('Күнделікті сыйлық: +50 YU-coins! 🎉', 'success')
+    showToast('Ежедневный подарок: +50 YU-coins! 🎉', 'success')
     
     // Reset claim in progress after a short delay
     setTimeout(() => setClaimInProgress(false), 1000)
@@ -1116,9 +1118,10 @@ export default function DashboardPage() {
                   {[
                     { id: 'dashboard', icon: Home, label: 'Главная', badge: null },
                     { id: 'quests', icon: Target, label: 'Квесты', badge: visibleQuests.filter(q => !q.completed).length },
+                    { id: 'achievements', icon: Award, label: 'Достижения', badge: 3 },
+                    { id: 'events', icon: Calendar, label: 'События', badge: 2 },
                     { id: 'leaders', icon: Trophy, label: 'Рейтинг', badge: null },
                     { id: 'profile', icon: Users, label: 'Профиль', badge: null },
-                    { id: 'events', icon: Calendar, label: 'События', badge: 2 },
                     { id: 'shop', icon: ShoppingBag, label: 'Магазин', badge: null },
                   ].map(({ id, icon: Icon, label, badge }) => (
                     <button
@@ -1250,7 +1253,7 @@ export default function DashboardPage() {
                                   : 'bg-white text-blue-700 hover:bg-gray-100 hover:shadow-xl transform hover:scale-105'
                               }`}
                             >
-                              {claimedToday ? 'Сыйлық алынды' : '+50 YU-coins алу'}
+                              {claimedToday ? 'Подарок получен' : '+50 YU-coins алу'}
                             </button>
                             
                             <div className="text-white/80 text-sm">
@@ -1554,7 +1557,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <h2 className="text-3xl font-bold text-gray-800">Магазин наград</h2>
-                    <p className="text-gray-500">Жиналған YU-coins пайдалы сыйлықтарға алмастырыңыз</p>
+                    <p className="text-gray-500">Обменяйте собранные YU-coins на полезные подарки</p>
                   </div>
                 </div>
                 
@@ -2354,121 +2357,125 @@ export default function DashboardPage() {
                         </div>
                       </CardContent>
                     </Card>
+
+                    {/* Achievements Preview */}
+                    <Card hover={false} className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Award className="w-5 h-5 text-amber-600" />
+                          Достижения
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="text-center p-3 bg-white rounded-xl border border-amber-100">
+                            <div className="text-2xl font-bold text-green-600">5</div>
+                            <div className="text-xs text-gray-600">Получено</div>
+                          </div>
+                          <div className="text-center p-3 bg-white rounded-xl border border-amber-100">
+                            <div className="text-2xl font-bold text-blue-600">12</div>
+                            <div className="text-xs text-gray-600">В процессе</div>
+                          </div>
+                        </div>
+                        
+                        {/* Recent achievements */}
+                        <div className="space-y-2">
+                          <div className="text-xs font-semibold text-gray-600 mb-2">Недавние</div>
+                          {[
+                            { icon: '🎯', name: 'Первые шаги', rarity: 'common' },
+                            { icon: '📚', name: 'Книжный червь', rarity: 'uncommon' },
+                            { icon: '⚡', name: 'Молниеносный', rarity: 'rare' }
+                          ].map((ach, index) => (
+                            <div key={index} className="flex items-center gap-3 p-2 bg-white rounded-lg border border-amber-100">
+                              <div className="text-lg">{ach.icon}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-gray-800 truncate">{ach.name}</div>
+                                <div className={`text-xs capitalize ${
+                                  ach.rarity === 'common' ? 'text-gray-500' :
+                                  ach.rarity === 'uncommon' ? 'text-green-500' :
+                                  'text-blue-500'
+                                }`}>
+                                  {ach.rarity === 'common' ? 'Обычное' :
+                                   ach.rarity === 'uncommon' ? 'Необычное' :
+                                   'Редкое'}
+                                </div>
+                              </div>
+                              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <Star className="w-3 h-3 text-green-600" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <button 
+                          onClick={() => setActiveTab('achievements')}
+                          className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 text-white py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
+                        >
+                          Смотреть все
+                        </button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Events Preview */}
+                    <Card hover={false} className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Calendar className="w-5 h-5 text-purple-600" />
+                          Предстоящие события
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { 
+                            title: 'YU Hackathon 2024',
+                            time: 'Через 7 дней',
+                            participants: 87,
+                            category: 'competition',
+                            icon: '🏆'
+                          },
+                          { 
+                            title: 'Ярмарка карьеры',
+                            time: 'Через 3 дня',
+                            participants: 234,
+                            category: 'academic',
+                            icon: '📚'
+                          }
+                        ].map((event, index) => (
+                          <div key={index} className="p-3 bg-white rounded-xl border border-purple-100">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">{event.icon}</span>
+                                <div>
+                                  <div className="text-sm font-semibold text-gray-800">{event.title}</div>
+                                  <div className="text-xs text-gray-500">{event.time}</div>
+                                </div>
+                              </div>
+                              <div className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                                {event.participants} участников
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        <button 
+                          onClick={() => setActiveTab('events')}
+                          className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
+                        >
+                          Все события
+                        </button>
+                      </CardContent>
+                    </Card>
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === 'events' && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl">
-                    <Calendar className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-gray-800">События и активности</h2>
-                    <p className="text-gray-500">Специальные мероприятия и челленджи</p>
-                  </div>
-                </div>
+              <EventSystem userStats={state} />
+            )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Current Events */}
-                  <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-purple-600" />
-                        Текущие события
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="bg-white rounded-2xl p-4 border border-purple-100">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h4 className="font-bold text-gray-800">Неделя отличника</h4>
-                            <p className="text-sm text-gray-600">Удвоенные награды за квесты</p>
-                          </div>
-                          <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs font-semibold">
-                            Активно
-                          </span>
-                        </div>
-                        <div className="mb-3">
-                          <Progress value={65} className="h-2" />
-                          <p className="text-xs text-gray-500 mt-1">Осталось 2 дня</p>
-                        </div>
-                        <button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-200">
-                          Участвовать
-                        </button>
-                      </div>
-
-                      <div className="bg-white rounded-2xl p-4 border border-blue-100">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h4 className="font-bold text-gray-800">Марафон знаний</h4>
-                            <p className="text-sm text-gray-600">Ежедневные мини-квесты</p>
-                          </div>
-                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">
-                            Скоро
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 mb-3">Начинается через 3 дня</p>
-                        <button className="w-full bg-gray-100 text-gray-600 py-2 rounded-xl font-semibold cursor-not-allowed">
-                          Ожидание
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Achievements & Rewards */}
-                  <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Gift className="w-5 h-5 text-amber-600" />
-                        Специальные награды
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-3">
-                        {[
-                          { name: 'Эксклюзивный бейдж', desc: 'За участие в событии', cost: 'Участие', available: true },
-                          { name: 'Дополнительные XP', desc: '+500 очков опыта', cost: '1 место', available: false },
-                          { name: 'Премиум статус', desc: 'На 1 месяц', cost: 'Топ-3', available: false }
-                        ].map((reward, index) => (
-                          <div key={index} className="bg-white rounded-2xl p-4 border border-amber-100">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4 className="font-semibold text-gray-800 text-sm">{reward.name}</h4>
-                                <p className="text-xs text-gray-600">{reward.desc}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-xs font-semibold text-amber-600">{reward.cost}</p>
-                                <div className={`w-3 h-3 rounded-full mt-1 ${reward.available ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Event Calendar */}
-                <Card hover={false}>
-                  <CardHeader>
-                    <CardTitle>Календарь событий</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-12">
-                      <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <Calendar className="w-10 h-10 text-gray-400" />
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">Скоро появятся новые события!</h3>
-                      <p className="text-gray-500 max-w-md mx-auto">
-                        Следите за обновлениями, чтобы не пропустить интересные челленджи и получить эксклюзивные награды.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+            {activeTab === 'achievements' && (
+              <AchievementSystem userStats={state} />
             )}
           </div>
         </div>
