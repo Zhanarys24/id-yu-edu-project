@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Coins, ShoppingBag, Home, ChevronRight, Filter, Search, Sparkles, Gift, Star, Clock, Users, Zap, Trophy, Coffee, Shirt, Headphones, Book, Gamepad2, Heart, Shield, Flame, Award } from "lucide-react"
+import { Coins, ShoppingBag, Home, ChevronRight, Filter, Search, Sparkles, Gift, Star, Clock, Users, Zap, Trophy, Coffee, Shirt, Headphones, Book, Gamepad2, Heart, Shield, Flame, Award, Target } from "lucide-react"
 
 type ShopItem = {
   id: number
@@ -260,7 +260,7 @@ export default function ShopPage() {
           )
         })}
       </div>
-      <div className="max-w-7xl mx-auto p-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 relative z-10">
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
           <Link href="/YU-Gamification" className="inline-flex items-center gap-1 hover:text-gray-700 transition-colors">
             <Home className="w-4 h-4" /> Главная
@@ -269,10 +269,10 @@ export default function ShopPage() {
           <span className="text-gray-700 font-medium">Магазин</span>
         </div>
 
-        <div className="flex items-start gap-8">
+        <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-8">
           {/* Sidebar */}
-          <aside className="hidden lg:block w-80">
-            <div className="sticky top-6 space-y-6">
+          <aside className="w-full lg:w-80 xl:w-96 lg:flex-shrink-0">
+            <div className="lg:sticky lg:top-6 space-y-4 lg:space-y-6">
               <Card hover={false} className="bg-gradient-to-br from-white to-gray-50/50 border-gray-100 overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-200/20 to-yellow-300/20 rounded-full -mr-16 -mt-16"></div>
                 <CardContent className="p-6 relative">
@@ -391,20 +391,20 @@ export default function ShopPage() {
           </aside>
 
           {/* Main */}
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 space-y-4 lg:space-y-6">
             {/* Tabs */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
               {(['catalog','favorites','inventory'] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                  className={`px-3 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
                     activeTab === tab
                       ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                       : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                   }`}
                 >
-                  {tab === 'catalog' ? 'Каталог' : tab === 'favorites' ? `Избранные (${wishlist.size})` : `Мои покупки (${inventory.length})`}
+                  <span className="truncate">{tab === 'catalog' ? 'Каталог' : tab === 'favorites' ? `Избранные (${wishlist.size})` : `Мои покупки (${inventory.length})`}</span>
                 </button>
               ))}
             </div>
@@ -450,14 +450,14 @@ export default function ShopPage() {
 
             {/* Search and Filter */}
             <Card className="shadow-md">
-              <CardContent className="px-4 pt-0 pb-0">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 min-h-[88px]">
-                  <div className="flex-1 relative max-w-md">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col gap-3 sm:gap-4">
+                  <div className="flex-1 relative">
                     <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder="Найти товар..."
-                      className="w-full h-11 px-4 pl-11 pr-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full h-10 sm:h-11 px-3 sm:px-4 pl-9 sm:pl-11 pr-3 sm:pr-4 text-sm sm:text-base rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                     <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
                       <Search className="w-5 h-5 text-gray-400" />
@@ -586,7 +586,7 @@ export default function ShopPage() {
 
             {/* Products Grid */}
             {activeTab === 'catalog' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {filtered.map(item => {
                 const finalCost = item.discount ? Math.floor(item.cost * (100 - item.discount) / 100) : item.cost
                 const canAfford = coins >= finalCost
@@ -739,7 +739,7 @@ export default function ShopPage() {
 
             {/* Favorites View */}
             {activeTab === 'favorites' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                 {items.filter(i => wishlist.has(i.id)).map(item => {
                   const finalCost = item.discount ? Math.floor(item.cost * (100 - item.discount) / 100) : item.cost
                   const canAfford = coins >= finalCost
@@ -816,11 +816,28 @@ export default function ShopPage() {
           99% { opacity: 1; }
           100% { transform: translateY(calc(200vh + 320px)) rotate(360deg); opacity: 0; }
         }
+        
+        /* Mobile optimizations */
+        .touch-manipulation {
+          touch-action: manipulation;
+        }
+        
+        /* Improve scrolling on mobile */
+        @media (max-width: 1023px) {
+          body {
+            -webkit-overflow-scrolling: touch;
+          }
+          
+          /* Hide scrollbars on mobile for cleaner look */
+          ::-webkit-scrollbar {
+            display: none;
+          }
+        }
       `}</style>
 
       {/* Toast Notification */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-white font-semibold min-w-[350px] transform transition-all duration-300 ${
+        <div className={`fixed bottom-20 lg:bottom-6 right-3 lg:right-6 left-3 lg:left-auto z-50 px-4 lg:px-6 py-3 lg:py-4 rounded-2xl shadow-2xl text-white font-semibold lg:min-w-[350px] max-w-[calc(100vw-1.5rem)] lg:max-w-none transform transition-all duration-300 ${
           toast.type === 'error' 
             ? 'bg-gradient-to-r from-red-500 to-pink-600' 
             : 'bg-gradient-to-r from-green-500 to-emerald-600'
@@ -843,13 +860,13 @@ export default function ShopPage() {
       )}
 
       {/* Floating Action Button for Mobile Categories */}
-      <div className="fixed bottom-6 left-6 lg:hidden z-40">
+      <div className="fixed bottom-20 left-3 lg:hidden z-40">
         <div className="flex flex-col gap-2">
           {(['all','benefit','service','merch'] as const).map(cat => (
             <button
               key={cat}
               onClick={() => setCategory(cat)}
-              className={`w-12 h-12 rounded-full shadow-lg transition-all duration-200 ${
+              className={`w-12 h-12 rounded-full shadow-lg transition-all duration-200 touch-manipulation ${
                 category === cat 
                   ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white scale-110' 
                   : 'bg-white text-gray-600 hover:bg-gray-50'
@@ -868,10 +885,36 @@ export default function ShopPage() {
         </div>
       </div>
 
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 lg:hidden z-50">
+        <div className="grid grid-cols-5 gap-1 px-2 py-2">
+          {[
+            { href: '/YU-Gamification', icon: Home, label: 'Главная' },
+            { href: '/YU-Gamification?tab=quests', icon: Target, label: 'Квесты' },
+            { href: '/YU-Gamification/shop', icon: ShoppingBag, label: 'Магазин', active: true },
+            { href: '/YU-Gamification?tab=leaderboard', icon: Trophy, label: 'Рейтинг' },
+            { href: '/YU-Gamification?tab=profile', icon: Users, label: 'Профиль' }
+          ].map(({ href, icon: Icon, label, active = false }) => (
+            <a
+              key={href}
+              href={href}
+              className={`flex flex-col items-center py-2 px-1 text-xs rounded-lg transition-colors min-h-[60px] touch-manipulation ${
+                active 
+                  ? 'text-blue-600 bg-blue-50' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              <Icon className="w-5 h-5 mb-1 flex-shrink-0" />
+              <span className="truncate max-w-full leading-tight">{label}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
       {/* Back to Top Button */}
       <button 
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 z-30 lg:bottom-24"
+        className="fixed bottom-20 lg:bottom-6 right-3 lg:right-6 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 z-30"
       >
         ↑
       </button>

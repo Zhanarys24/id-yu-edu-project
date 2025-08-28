@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import { 
   Bell, X, Monitor, Calendar, GraduationCap, BookOpen, 
   Users, FileText, Settings, LogOut, BriefcaseBusiness,
-  FileUser, BookMarked, Briefcase, Trophy, Search
+  FileUser, BookMarked, Briefcase, Trophy, Search, Star
 } from 'lucide-react'
 
 type AppNotification = {
@@ -137,29 +137,38 @@ export default function Header() {
         ]
       }
 
-      // Add birthday greeting once per year
+      // Add birthday greeting from Yessenov University
       const today = new Date()
-      const key = `birthday_greeted_${today.getFullYear()}`
-      const greetedThisYear = localStorage.getItem(key) === '1'
-      const isUserBirthdayToday = false // replace with real check if user profile available
-      if ((isUserBirthdayToday || true) && !greetedThisYear) {
-        // Show a generic university birthday greeting once per year
+      const key = `birthday_greeted_${today.toDateString()}`
+      const greetedToday = localStorage.getItem(key) === '1'
+      
+      // Always show birthday greeting for testing (remove this line later)
+      const forceShowBirthday = true
+      
+      if (!greetedToday || forceShowBirthday) {
+        // Show university birthday greeting every day
         const birthday: AppNotification = {
-          id: `bday_${today.getFullYear()}`,
-          text: t('notifications.birthdayGreeting', 'С Днём рождения! Yessenov University поздравляет вас и желает успехов! 🎉'),
+          id: `bday_${today.getTime()}`,
+          text: t('notifications.birthdayGreeting', 'С Днём рождения! 🎉 Yessenov University поздравляет вас и желает успехов в учебе и достижения всех целей! Университет гордится своими студентами! 🎓✨'),
           read: false,
           category: 'birthday',
           createdAt: today.toISOString(),
         }
         loaded = [birthday, ...loaded]
         localStorage.setItem(key, '1')
+        
+        // Debug log
+        console.log('Birthday notification added:', birthday)
       }
 
       setNotifications(loaded)
-    } catch {
+      console.log('Notifications loaded:', loaded)
+      console.log('Birthday notification should be visible')
+    } catch (error) {
+      console.error('Error loading notifications:', error)
       setNotifications([])
     }
-  }, [i18n.language])
+  }, [i18n.language, t])
 
   // Persist on change
   useEffect(() => {
@@ -180,9 +189,33 @@ export default function Header() {
   }
 
   const toggleModal = () => setIsOpen(!isOpen)
-  const clearNotifications = () => setNotifications([])
+  const clearNotifications = () => {
+    setNotifications([])
+    // Clear birthday greeted flag to show birthday notification again
+    const today = new Date()
+    const key = `birthday_greeted_${today.toDateString()}`
+    localStorage.removeItem(key)
+    console.log('Cleared notifications and birthday flag')
+  }
   const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   const unreadCount = notifications.filter(n => !n.read).length
+
+  const getNotificationIcon = (category: string | undefined) => {
+    switch (category) {
+      case 'birthday':
+        return <Star className="w-4 h-4 text-pink-500" />
+      case 'news':
+        return <span className="w-2 h-2 rounded-full bg-blue-500" />
+      case 'event':
+        return <span className="w-2 h-2 rounded-full bg-green-500" />
+      case 'system':
+        return <span className="w-2 h-2 rounded-full bg-purple-500" />
+      case 'message':
+        return <span className="w-2 h-2 rounded-full bg-orange-500" />
+      default:
+        return <span className="w-2 h-2 rounded-full bg-gray-500" />
+    }
+  }
 
   const onClickNotification = (n: AppNotification) => {
     setNotifications(prev => prev.map(it => it.id === n.id ? { ...it, read: true } : it))
@@ -238,6 +271,26 @@ export default function Header() {
           </span>
         )}
       </div>
+      
+      {/* Test button for birthday notification */}
+      <button
+        onClick={() => {
+          const today = new Date()
+          const birthday: AppNotification = {
+            id: `test_bday_${Date.now()}`,
+            text: t('notifications.birthdayGreeting', 'С Днём рождения! 🎉 Yessenov University поздравляет вас и желает успехов в учебе и достижения всех целей! Университет гордится своими студентами! 🎓✨'),
+            read: false,
+            category: 'birthday',
+            createdAt: today.toISOString(),
+          }
+          setNotifications(prev => [birthday, ...prev])
+          console.log('Test birthday notification added manually')
+        }}
+        className="text-xs bg-pink-500 text-white px-2 py-1 rounded hover:bg-pink-600 transition-colors"
+        title="Добавить тестовое поздравление с днем рождения"
+      >
+        🎂 Тест
+      </button>
 
       <select
         className="text-sm border border-gray-300 rounded px-2 py-1"
@@ -295,11 +348,15 @@ export default function Header() {
                     onClick={() => onClickNotification(n)}
                     className={`w-full text-left px-4 py-3 border-b border-gray-100 flex items-start gap-3 hover:bg-gray-50 transition-colors ${
                       n.read ? 'bg-white' : 'bg-blue-50/60'
-                    }`}
+                    } ${n.category === 'birthday' ? 'bg-pink-50/60 border-l-4 border-l-pink-400' : ''}`}
                   >
-                    <span className={`mt-1 w-2 h-2 rounded-full ${n.read ? 'bg-gray-300' : 'bg-blue-500'}`} />
+                    <div className="mt-1">
+                      {getNotificationIcon(n.category)}
+                    </div>
                     <div className="flex-1">
-                      <div className={`text-sm ${n.read ? 'text-gray-700' : 'text-gray-900 font-medium'}`}>{n.text}</div>
+                      <div className={`text-sm ${n.read ? 'text-gray-700' : 'text-gray-900 font-medium'} ${n.category === 'birthday' ? 'text-pink-800' : ''}`}>
+                        {n.text}
+                      </div>
                       <div className="text-[11px] text-gray-400 mt-0.5">
                         {new Date(n.createdAt).toLocaleString()}
                       </div>
