@@ -7,11 +7,12 @@ import '@/i18n'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Monitor, Calendar, GraduationCap, BookOpen, Users, FileText,
-  Bot, Settings, LogOut, BriefcaseBusiness, ChevronUp, ChevronDown,
-  FileUser, BookMarked, Briefcase, Trophy
+  Bot, Settings, LogOut, BriefcaseBusiness, ChevronUp, ChevronDown, Coins,
+  FileUser, BookMarked, Briefcase, Trophy, Shield
 } from 'lucide-react'
 import Image from 'next/image'
 import { useAvatar } from '@/context/AvatarContext'
+import { useAuth } from '@/context/AuthContext'
 import { useState } from 'react'
 import clsx from 'clsx'
 
@@ -19,6 +20,7 @@ export default function Sidebar({ active }: { active?: string }) {
   const { t } = useTranslation('common')
   const pathname = usePathname()
   const { avatar, userName } = useAvatar()
+  const { isAdmin } = useAuth()
   const [portfolioOpen, setPortfolioOpen] = useState(false)
   const router = useRouter()
 
@@ -35,6 +37,7 @@ export default function Sidebar({ active }: { active?: string }) {
     { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
     { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
     { icon: <Bot size={20} />, label: t('menu.yessenovai'), href: '/main/yessenovbot' },
+    { icon: <Coins size={20} />, label: t('menu.YU-Gamification'), href: '/YU-Gamification' },
   ]
 
   const portfolioItems = [
@@ -78,6 +81,22 @@ export default function Sidebar({ active }: { active?: string }) {
               {menuItems.map((item) => (
                 <MenuItem key={item.label} {...item} active={pathname.startsWith(item.href)} />
               ))}
+              
+              {/* Кнопка Админ под YU-Gamification */}
+              {isAdmin() && (
+                <Link
+                  href="/admin"
+                  className={clsx(
+                    'flex items-center gap-2 pl-3 pr-2 py-2 rounded transition text-sm font-medium',
+                    pathname.startsWith('/admin')
+                      ? 'bg-red-50 text-red-600'
+                      : 'text-gray-500 hover:bg-gray-100'
+                  )}
+                >
+                  <Shield size={20} />
+                  <span>Админ панель</span>
+                </Link>
+              )}
             </nav>
           </div>
 

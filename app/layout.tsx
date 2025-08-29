@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { AvatarProvider } from "@/context/AvatarContext"
+import { AuthProvider } from '@/context/AuthContext'
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,9 +20,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru">
       <body className={`${inter.variable} antialiased font-sans`}>
-        <AvatarProvider>
-          {children}
-        </AvatarProvider>
+        <AuthProvider>
+          <AvatarProvider>
+            {children}
+          </AvatarProvider>
+        </AuthProvider>
       </body>
     </html>
   )

@@ -12,6 +12,8 @@ import {
   Camera, Save, Upload, Mail, UserCheck, Shield, Eye, EyeOff, FileText, Calendar
 } from 'lucide-react'
 import { useAvatar } from '@/context/AvatarContext'
+import { useAuth } from '@/context/AuthContext'
+import { userService } from '@/lib/services/userService'
 import clsx from 'clsx'
 
 export default function SiteSettingsPage() {
@@ -241,6 +243,7 @@ function AvatarSection() {
 
 function PasswordSection() {
   const { t } = useTranslation('common')
+  const { user } = useAuth()
   const [showPasswords, setShowPasswords] = useState({
     old: false,
     new: false,
@@ -251,12 +254,55 @@ function PasswordSection() {
     new: '',
     confirm: ''
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const togglePassword = (field: keyof typeof showPasswords) => {
     setShowPasswords(prev => ({
       ...prev,
       [field]: !prev[field]
     }))
+  }
+
+  const handlePasswordChange = async () => {
+    if (!user) {
+      setMessage({ type: 'error', text: 'Пользователь не авторизован' })
+      return
+    }
+
+    // Валидация
+    if (!passwords.old || !passwords.new || !passwords.confirm) {
+      setMessage({ type: 'error', text: 'Заполните все поля' })
+      return
+    }
+
+    if (passwords.new !== passwords.confirm) {
+      setMessage({ type: 'error', text: 'Новые пароли не совпадают' })
+      return
+    }
+
+    if (passwords.new.length < 6) {
+      setMessage({ type: 'error', text: 'Новый пароль должен содержать минимум 6 символов' })
+      return
+    }
+
+    setIsLoading(true)
+    setMessage(null)
+
+    try {
+      const success = await userService.changePasswordWithVerification(user.email, passwords.old, passwords.new)
+      
+      if (success) {
+        setMessage({ type: 'success', text: 'Пароль успешно изменен' })
+        setPasswords({ old: '', new: '', confirm: '' })
+      } else {
+        setMessage({ type: 'error', text: 'Неверный текущий пароль' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Ошибка при смене пароля' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -339,10 +385,25 @@ function PasswordSection() {
 
       </div>
 
+      {/* Сообщения об ошибках/успехе */}
+      {message && (
+        <div className={`p-3 rounded-lg ${
+          message.type === 'success' 
+            ? 'bg-green-50 border border-green-200 text-green-800' 
+            : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          {message.text}
+        </div>
+      )}
+
       <div className="flex justify-end">
-        <Button className="flex items-center gap-2">
+        <Button 
+          onClick={handlePasswordChange}
+          disabled={isLoading || !passwords.old || !passwords.new || !passwords.confirm}
+          className="flex items-center gap-2"
+        >
           <Save size={16} />
-          {t('settings.password.change')}
+          {isLoading ? 'Изменение...' : t('settings.password.change')}
         </Button>
       </div>
     </div>

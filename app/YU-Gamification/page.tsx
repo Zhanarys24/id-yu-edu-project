@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, cloneElement } from "react"
 import Image from "next/image"
 import type { ReactNode, ReactElement } from "react"
-import { Trophy, Coins, Star, Award, ArrowRight, Zap, Target, Calendar, Users, Gift, Crown, Medal, Flame, ShoppingBag, Home, ChevronRight, Sparkles, TrendingUp, Clock, BookOpen, Gamepad2 } from "lucide-react"
+import { Trophy, Coins, Star, Award, ArrowRight, Zap, Target, Monitor, Newspaper, Calendar, Users, Gift, Crown, Medal, Flame, ShoppingBag, Home, ChevronRight, Sparkles, TrendingUp, Clock, BookOpen, Gamepad2 } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { useAvatar } from '@/context/AvatarContext'
 import AchievementSystem from './components/AchievementSystem'
@@ -1121,6 +1121,7 @@ export default function DashboardPage() {
                     { id: 'achievements', icon: Award, label: 'Достижения', badge: 3 },
                     { id: 'events', icon: Calendar, label: 'События', badge: 2 },
                     { id: 'leaders', icon: Trophy, label: 'Рейтинг', badge: null },
+                    { id: 'news', icon: Newspaper, label: 'Новости', badge: null },
                     { id: 'profile', icon: Users, label: 'Профиль', badge: null },
                     { id: 'shop', icon: ShoppingBag, label: 'Магазин', badge: null },
                   ].map(({ id, icon: Icon, label, badge }) => (
@@ -1129,6 +1130,8 @@ export default function DashboardPage() {
                       onClick={() => {
                         if (id === 'shop') {
                           router.push('/YU-Gamification/shop')
+                        } else if (id === 'news') {
+                          router.push('/main/news')
                         } else {
                           setActiveTab(id as Tab)
                         }
@@ -1151,6 +1154,7 @@ export default function DashboardPage() {
                     </button>
                   ))}
                 </CardContent>
+
               </Card>
             </div>
           </aside>
@@ -2518,7 +2522,7 @@ export default function DashboardPage() {
           99% { opacity: 1; }
           100% { transform: translateY(calc(200vh + 320px)) rotate(360deg); opacity: 0; }
         }
-      `}</style>
-    </div>
-  )
-}
+              `}</style>
+      </div>
+    )
+  }

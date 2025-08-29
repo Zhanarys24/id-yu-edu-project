@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
+import { useAuth } from '@/context/AuthContext';
+import { UserRole } from '@/lib/types/auth';
 
 // Выносим анимированный фон в отдельный компонент
 const AnimatedBackground = () => {
@@ -194,6 +196,7 @@ const WelcomeBlock = () => {
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation('common');
+  const { login } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -201,6 +204,7 @@ export default function LoginPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [locale, setLocale] = useState('ru');
+  // Убираем выбор роли - теперь роль определяется автоматически
   // Enhanced toast notification state
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(
     null
@@ -241,9 +245,15 @@ export default function LoginPage() {
     }
   };
 
-  const handleEmailLogin = (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/main/news');
+    
+    try {
+      await login(email, password);
+      router.push('/main/news');
+    } catch (error: any) {
+      showToast(error.message || 'Ошибка входа', 'error');
+    }
   };
 
   const handleECPLogin = (e: React.FormEvent) => {
@@ -274,6 +284,8 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
+
 
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">
@@ -318,6 +330,22 @@ export default function LoginPage() {
             >
               {t('login.signInButton')}
             </button>
+
+            {/* Информация для входа */}
+            <div className="w-3/4 p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-semibold text-blue-800 mb-2">Демо аккаунты:</h4>
+              <div className="text-sm text-blue-700 space-y-1">
+                {/* <div><strong>Супер админ:</strong> super@admin.com / admin123</div>
+                <div><strong>Админ новостей:</strong> news@admin.com / news123</div>
+                <div><strong>Админ портфолио:</strong> portfolio@admin.com / port123</div>
+                <div><strong>Студент:</strong> student@yu.edu.kz / stud123</div>
+                <div><strong>Админ мероприятий:</strong> events@admin.com / event123</div> */}
+              </div>
+              <div className="text-xs text-blue-600 mt-3 p-2 bg-blue-100 rounded">
+                <div className="font-medium mb-1">⚠️ Временные пароли:</div>
+                <div>Все пароли кроме супер-админа являются временными и требуют смены в настройках безопасности.</div>
+              </div>
+            </div>
           </div>
         );
       
