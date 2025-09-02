@@ -65,3 +65,4 @@ export default function AdminEducationPage() {
     </div>
   );
 }
+

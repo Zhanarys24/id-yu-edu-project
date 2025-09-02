@@ -68,3 +68,4 @@ export function checkPasswordStrength(password: string): {
 
   return { score, feedback, isStrong };
 }
+

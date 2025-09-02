@@ -10,12 +10,14 @@ import { portfolioService } from '@/lib/services/portfolioService'
 import { GeneralInfo, Publication, TeachingActivity, Achievement, AdditionalActivity, PortfolioFile } from '@/lib/types/portfolio'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Edit3, Plus, Trash2, Save, X, BookOpen, Award, Briefcase, Activity, FileText, Image, File, Download } from 'lucide-react'
+import { Edit3, Plus, Trash2, Save, X, BookOpen, Award, Briefcase, Activity, FileText, Image, File, Download, FileDown } from 'lucide-react'
 import FileUpload from '@/components/FileUpload'
 import clsx from 'clsx'
+import { exportPortfolioToWord } from '@/lib/utils/wordExport'
 
 function PortfolioContent() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -42,35 +44,70 @@ function PortfolioContent() {
     router.push(`/portfolio?tab=${key}`)
   }
 
+  const handleExportPortfolio = () => {
+    if (!user) return;
+
+    // Получаем все записи портфолио пользователя
+    const userPortfolio = portfolioService.getUserPortfolio(user.id);
+    
+    // Создаем объект пользователя для экспорта
+    const userForExport = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isActive: true,
+      registeredAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      passwordHash: '',
+      isTemporaryPassword: false
+    };
+
+    // Экспортируем в Word документ
+    exportPortfolioToWord(userForExport as any, userPortfolio);
+  }
+
   return (
     <Layout active={t('groups.portfolio')}>
       <div className="space-y-6">
         {/* Навигация по портфолио */}
         <div className="flex flex-wrap gap-2 bg-white p-4 rounded-xl shadow-sm">
-          {sections.map((section) => {
-            const isActive = activeTab === section.key
-            return (
-              <button
-                key={section.key}
-                onClick={() => handleTabChange(section.key)}
-                className={clsx(
-                  'relative group px-4 py-2 text-sm font-medium transition-colors duration-300',
-                  isActive ? 'text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'
-                )}
-              >
-                {section.label}
-                {/* Анимационная линия снизу */}
-                <span
+          <div className="flex flex-wrap gap-2 flex-1">
+            {sections.map((section) => {
+              const isActive = activeTab === section.key
+              return (
+                <button
+                  key={section.key}
+                  onClick={() => handleTabChange(section.key)}
                   className={clsx(
-                    'absolute left-1/2 bottom-0 h-[2px] bg-blue-600 transition-all duration-300',
-                    isActive
-                      ? 'w-full -translate-x-1/2'
-                      : 'w-0 -translate-x-1/2 group-hover:w-full'
+                    'relative group px-4 py-2 text-sm font-medium transition-colors duration-300',
+                    isActive ? 'text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'
                   )}
-                />
-              </button>
-            )
-          })}
+                >
+                  {section.label}
+                  {/* Анимационная линия снизу */}
+                  <span
+                    className={clsx(
+                      'absolute left-1/2 bottom-0 h-[2px] bg-blue-600 transition-all duration-300',
+                      isActive
+                        ? 'w-full -translate-x-1/2'
+                        : 'w-0 -translate-x-1/2 group-hover:w-full'
+                    )}
+                  />
+                </button>
+              )
+            })}
+          </div>
+          <div className="flex items-center">
+            <Button
+              onClick={handleExportPortfolio}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <FileDown size={16} />
+              Экспорт в Word
+            </Button>
+          </div>
         </div>
 
         {/* Контент секции */}
