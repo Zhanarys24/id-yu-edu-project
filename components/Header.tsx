@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import '@/i18n'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
 import { 
   Bell, X, Monitor, Calendar, GraduationCap, BookOpen, 
   Users, FileText, Settings, LogOut, BriefcaseBusiness,
@@ -24,6 +25,7 @@ type AppNotification = {
 export default function Header() {
   const { t, i18n } = useTranslation('common')
   const router = useRouter()
+  const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false) // notifications modal
   const [isExpanded, setIsExpanded] = useState(false)
   const [notifications, setNotifications] = useState<AppNotification[]>([])
@@ -225,27 +227,40 @@ export default function Header() {
     }
   }
 
-  const menuItems = [
-    { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
-    { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
-    { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
-    { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
-    { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
-    { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
-    { label: t('menu.yessenovai'), href: '/main/yessenovbot' },
-  ]
+  const menuItems = user?.role === 'anonymous' 
+    ? [
+        { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
+        { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
+        { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
+        { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
+        { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
+        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
+      ]
+    : [
+        { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
+        { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
+        { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
+        { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
+        { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
+        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
+        { label: t('menu.yessenovai'), href: '/main/yessenovbot' },
+      ]
 
-  const portfolioItems = [
-    { icon: <FileUser size={18} />, label: t('portfolio.general'), href: '/portfolio?tab=general' },
-    { icon: <BookMarked size={18} />, label: t('portfolio.publications'), href: '/portfolio?tab=publications' },
-    { icon: <GraduationCap size={18} />, label: t('portfolio.teaching'), href: '/portfolio?tab=teaching' },
-    { icon: <Trophy size={18} />, label: t('portfolio.achievements'), href: '/portfolio?tab=achievements' },
-    { icon: <Briefcase size={18} />, label: t('portfolio.additional'), href: '/portfolio?tab=additional' },
-  ]
+  const portfolioItems = user?.role === 'anonymous' 
+    ? []
+    : [
+        { icon: <FileUser size={18} />, label: t('portfolio.general'), href: '/portfolio?tab=general' },
+        { icon: <BookMarked size={18} />, label: t('portfolio.publications'), href: '/portfolio?tab=publications' },
+        { icon: <GraduationCap size={18} />, label: t('portfolio.teaching'), href: '/portfolio?tab=teaching' },
+        { icon: <Trophy size={18} />, label: t('portfolio.achievements'), href: '/portfolio?tab=achievements' },
+        { icon: <Briefcase size={18} />, label: t('portfolio.additional'), href: '/portfolio?tab=additional' },
+      ]
 
-  const accountItems = [
-    { icon: <Settings size={20} />, label: t('account.settings'), href: '/main/site-settings' },
-  ]
+  const accountItems = user?.role === 'anonymous' 
+    ? []
+    : [
+        { icon: <Settings size={20} />, label: t('account.settings'), href: '/main/site-settings' },
+      ]
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -310,7 +325,7 @@ export default function Header() {
         className="text-sm px-3 py-1 border border-gray-200 rounded hover:bg-gray-50"
         aria-haspopup="dialog"
       >
-        {t('appMap.button')}
+        <span suppressHydrationWarning>{t('appMap.button')}</span>
       </button>
 
       {/* Notifications modal */}
@@ -401,8 +416,8 @@ export default function Header() {
               {/* Заголовок */}
               <div className="flex items-center justify-between p-4 border-b">
                 <div>
-                  <h3 className="text-lg font-medium">{t('appMap.title')}</h3>
-                  <p className="text-xs text-gray-500">{t('appMap.subtitle')}</p>
+                  <h3 className="text-lg font-medium" suppressHydrationWarning>{t('appMap.title')}</h3>
+                  <p className="text-xs text-gray-500" suppressHydrationWarning>{t('appMap.subtitle')}</p>
                 </div>
                 <button onClick={() => setIsAppMapOpen(false)} className="p-2 hover:bg-gray-100 rounded">
                   <X size={18} />
@@ -427,7 +442,7 @@ export default function Header() {
               <div className="p-4 max-h-[50vh] overflow-y-auto">
                 {/* Основные разделы */}
                 <div className="mb-4">
-                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('groups.sections')}</h4>
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2" suppressHydrationWarning>{t('groups.sections')}</h4>
                   <div className="grid grid-cols-2 gap-2">
                     {menuItems
                       .filter(i => i.label.toLowerCase().includes(query.toLowerCase()))
@@ -439,58 +454,62 @@ export default function Header() {
                           className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                           {item.icon && <span className="text-gray-600 flex-shrink-0">{item.icon}</span>}
-                          <span className="text-sm text-gray-800 font-medium truncate">{item.label}</span>
+                          <span className="text-sm text-gray-800 font-medium truncate" suppressHydrationWarning>{item.label}</span>
                         </Link>
                       ))}
                   </div>
                 </div>
 
-                {/* Портфолио */}
-                <div className="mb-4">
-                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('groups.portfolio')}</h4>
-                  <div className="space-y-1">
-                    {portfolioItems
-                      .filter(i => i.label.toLowerCase().includes(query.toLowerCase()))
-                      .map(item => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setIsAppMapOpen(false)}
-                          className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <span className="text-gray-600 flex-shrink-0">{item.icon}</span>
-                          <span className="text-sm text-gray-700">{item.label}</span>
-                        </Link>
-                      ))}
+                {/* Портфолио - только для авторизованных пользователей */}
+                {portfolioItems.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2" suppressHydrationWarning>{t('groups.portfolio')}</h4>
+                    <div className="space-y-1">
+                      {portfolioItems
+                        .filter(i => i.label.toLowerCase().includes(query.toLowerCase()))
+                        .map(item => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setIsAppMapOpen(false)}
+                            className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <span className="text-gray-600 flex-shrink-0">{item.icon}</span>
+                            <span className="text-sm text-gray-700" suppressHydrationWarning>{item.label}</span>
+                          </Link>
+                        ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Аккаунт */}
-                <div className="mb-2">
-                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('groups.account')}</h4>
-                  <div className="space-y-1">
-                    {accountItems
-                      .filter(i => i.label.toLowerCase().includes(query.toLowerCase()))
-                      .map(item => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setIsAppMapOpen(false)}
-                          className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <span className="text-gray-600 flex-shrink-0">{item.icon}</span>
-                          <span className="text-sm text-gray-700">{item.label}</span>
-                        </Link>
-                      ))}
+                {/* Аккаунт - только для авторизованных пользователей */}
+                {accountItems.length > 0 && (
+                  <div className="mb-2">
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2" suppressHydrationWarning>{t('groups.account')}</h4>
+                    <div className="space-y-1">
+                      {accountItems
+                        .filter(i => i.label.toLowerCase().includes(query.toLowerCase()))
+                        .map(item => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setIsAppMapOpen(false)}
+                            className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <span className="text-gray-600 flex-shrink-0">{item.icon}</span>
+                            <span className="text-sm text-gray-700" suppressHydrationWarning>{item.label}</span>
+                          </Link>
+                        ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Сообщение, если ничего не найдено */}
                 {menuItems.filter(i => i.label.toLowerCase().includes(query.toLowerCase())).length === 0 &&
                  portfolioItems.filter(i => i.label.toLowerCase().includes(query.toLowerCase())).length === 0 &&
                  accountItems.filter(i => i.label.toLowerCase().includes(query.toLowerCase())).length === 0 && 
                  query && (
-                  <p className="text-gray-500 text-sm text-center py-4">{t('appMap.nothingFound')}</p>
+                  <p className="text-gray-500 text-sm text-center py-4" suppressHydrationWarning>{t('appMap.nothingFound')}</p>
                 )}
               </div>
 

@@ -179,28 +179,37 @@ export default function AdminPortfolioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto p-6 lg:p-8">
         {/* Заголовок */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push('/admin')}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-            >
-              <ArrowLeft size={24} className="text-gray-600" />
-            </button>
-            <FileUser size={32} className="text-red-500" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Управление портфолио
-            </h1>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push('/admin')}
+                className="group p-3 hover:bg-white/80 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                <ArrowLeft size={20} className="text-gray-600 group-hover:text-gray-900 transition-colors" />
+              </button>
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+                  <FileUser size={28} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    Управление портфолио
+                  </h1>
+                  <p className="text-gray-600 mt-1">
+                    Просмотр и управление портфолио всех пользователей
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 onClick={() => router.push('/admin/portfolio/analytics')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-white/80 hover:bg-white border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200"
               >
                 <BarChart3 size={16} />
                 Аналитика
@@ -208,81 +217,81 @@ export default function AdminPortfolioPage() {
               <Button
                 onClick={handleExportPortfolio}
                 disabled={!selectedUserId}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FileDown size={16} />
                 Экспорт в Word
               </Button>
             </div>
           </div>
-          <p className="text-gray-600">
-            Просмотр и управление портфолио всех пользователей
-          </p>
         </div>
 
         {/* Статистика */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <FileUser size={20} className="text-blue-600" />
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-gray-900">{users.length}</div>
-                <div className="text-sm text-gray-600">Всего пользователей</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">{users.length}</div>
+                <div className="text-sm font-medium text-gray-600">Всего пользователей</div>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <FileUser size={24} className="text-white" />
               </div>
             </div>
           </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <FileText size={20} className="text-green-600" />
-              </div>
+          
+          <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-gray-900">{portfolioItems.length}</div>
-                <div className="text-sm text-gray-600">Записей у пользователя</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">{portfolioItems.length}</div>
+                <div className="text-sm font-medium text-gray-600">Записей у пользователя</div>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <FileText size={24} className="text-white" />
               </div>
             </div>
           </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <BookOpen size={20} className="text-purple-600" />
-              </div>
+          
+          <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="text-3xl font-bold text-gray-900 mb-1">
                   {portfolioItems.filter(item => item.type === 'publications').length}
                 </div>
-                <div className="text-sm text-gray-600">Публикации</div>
+                <div className="text-sm font-medium text-gray-600">Публикации</div>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <BookOpen size={24} className="text-white" />
               </div>
             </div>
           </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Award size={20} className="text-yellow-600" />
-              </div>
+          
+          <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="text-3xl font-bold text-gray-900 mb-1">
                   {portfolioItems.filter(item => item.type === 'achievements').length}
                 </div>
-                <div className="text-sm text-gray-600">Достижения</div>
+                <div className="text-sm font-medium text-gray-600">Достижения</div>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Award size={24} className="text-white" />
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Выбор пользователя */}
-        <Card className="p-6 mb-6">
-          <div className="space-y-4">
+        {/* Выбор пользователя и фильтры */}
+        <Card className="p-8 mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-800 mb-3">
                 Выберите пользователя
               </label>
               <select
                 value={selectedUserId}
                 onChange={(e) => setSelectedUserId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200"
               >
                 <option value="">Выберите пользователя для просмотра портфолио</option>
                 {users.map(user => (
@@ -294,210 +303,239 @@ export default function AdminPortfolioPage() {
             </div>
             
             {selectedUserId && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">
                     Поиск по записям
-              </label>
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </label>
+                  <div className="relative">
+                    <Search size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <Input
-                  type="text"
+                      type="text"
                       placeholder="Поиск по названию или описанию..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">
                     Тип портфолио
-              </label>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              >
-                <option value="all">Все типы</option>
-                <option value="general">Общее</option>
-                <option value="publications">Публикации</option>
-                <option value="teaching">Преподавание</option>
-                <option value="achievements">Достижения</option>
-                <option value="additional">Дополнительно</option>
-              </select>
-            </div>
-            </div>
+                  </label>
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200"
+                  >
+                    <option value="all">Все типы</option>
+                    <option value="general">Общее</option>
+                    <option value="publications">Публикации</option>
+                    <option value="teaching">Преподавание</option>
+                    <option value="achievements">Достижения</option>
+                    <option value="additional">Дополнительно</option>
+                  </select>
+                </div>
+              </div>
             )}
           </div>
         </Card>
 
         {/* Таблица портфолио */}
         {!selectedUserId ? (
-          <Card className="p-12 text-center">
-            <FileUser size={64} className="mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Выберите пользователя</h3>
-            <p className="text-gray-500">Выберите пользователя из списка выше, чтобы просмотреть его портфолио</p>
+          <Card className="p-16 text-center bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <div className="p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl">
+              <FileUser size={80} className="mx-auto mb-6 text-blue-300" />
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Выберите пользователя</h3>
+              <p className="text-gray-600 text-lg">Выберите пользователя из списка выше, чтобы просмотреть его портфолио</p>
+            </div>
           </Card>
         ) : (
-          <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Тип
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Название
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <Card className="overflow-hidden bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Тип
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Название
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Дата создания
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Файлы
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Действия
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Действия
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
                   {filteredItems.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                        <FileText size={48} className="mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium">Нет записей портфолио</p>
-                        <p className="text-sm">У выбранного пользователя пока нет записей в портфолио</p>
+                      <td colSpan={5} className="px-6 py-16 text-center">
+                        <div className="p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
+                          <FileText size={64} className="mx-auto mb-6 text-gray-300" />
+                          <p className="text-xl font-semibold text-gray-700 mb-2">Нет записей портфолио</p>
+                          <p className="text-gray-500">У выбранного пользователя пока нет записей в портфолио</p>
+                        </div>
                       </td>
                     </tr>
                   ) : (
-                    filteredItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            {getTypeIcon(item.type)}
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {getTypeLabel(item.type)}
-                      </span>
+                    filteredItems.map((item, index) => (
+                      <tr key={item.id} className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-200 group">
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg group-hover:scale-110 transition-transform duration-200">
+                              {getTypeIcon(item.type)}
+                            </div>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800">
+                              {getTypeLabel(item.type)}
+                            </span>
                           </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {item.title}
-                      </div>
-                      <div className="text-sm text-gray-500 truncate max-w-xs">
-                        {item.description}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm font-semibold text-gray-900 mb-1">
+                            {item.title}
+                          </div>
+                          <div className="text-sm text-gray-600 truncate max-w-xs">
+                            {item.description}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
                           {new Date(item.createdAt).toLocaleDateString('ru-RU')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-1">
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
                             {item.attachments && item.attachments.length > 0 ? (
                               <>
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm font-medium text-gray-700">
                                   {item.attachments.length}
-                      </span>
-                                <FileText size={16} className="text-gray-400" />
+                                </span>
+                                <FileText size={16} className="text-blue-500" />
                               </>
                             ) : (
                               <span className="text-sm text-gray-400">Нет файлов</span>
                             )}
                           </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-2">
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center gap-2">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleViewItem(item)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <Eye size={16} />
+                              className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 border-blue-200 hover:border-blue-300 transition-all duration-200"
+                            >
+                              <Eye size={16} />
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleDelete(item.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <Trash2 size={16} />
+                              className="text-red-600 hover:text-red-900 hover:bg-red-50 border-red-200 hover:border-red-300 transition-all duration-200"
+                            >
+                              <Trash2 size={16} />
                             </Button>
-                      </div>
-                    </td>
-                  </tr>
+                          </div>
+                        </td>
+                      </tr>
                     ))
                   )}
-              </tbody>
-            </table>
-          </div>
+                </tbody>
+              </table>
+            </div>
           </Card>
         )}
 
         {/* Модальное окно для просмотра деталей */}
         {showModal && selectedItem && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Детали портфолио
-                  </h2>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-300">
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+                      <FileUser size={24} className="text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                        Детали портфолио
+                      </h2>
+                      <p className="text-gray-600 mt-1">Подробная информация о записи</p>
+                    </div>
+                  </div>
                   <Button
                     variant="outline"
                     onClick={() => setShowModal(false)}
+                    className="p-3 hover:bg-gray-50 rounded-xl transition-all duration-200"
                   >
-                    <X size={16} />
+                    <X size={20} />
                   </Button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {/* Информация о пользователе */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-gray-900 mb-2">Информация о пользователе</h3>
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <Users size={20} className="text-blue-600" />
+                      Информация о пользователе
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <span className="font-medium">Имя:</span> {selectedItem.userName}
+                      <div className="bg-white/80 p-4 rounded-xl">
+                        <span className="font-semibold text-gray-700">Имя:</span>
+                        <p className="text-gray-900 font-medium mt-1">{selectedItem.userName}</p>
                       </div>
-                      <div>
-                        <span className="font-medium">Email:</span> {selectedItem.userEmail}
+                      <div className="bg-white/80 p-4 rounded-xl">
+                        <span className="font-semibold text-gray-700">Email:</span>
+                        <p className="text-gray-900 font-medium mt-1">{selectedItem.userEmail}</p>
                       </div>
-                      <div>
-                        <span className="font-medium">Роль:</span> {selectedItem.userRole}
+                      <div className="bg-white/80 p-4 rounded-xl">
+                        <span className="font-semibold text-gray-700">Роль:</span>
+                        <p className="text-gray-900 font-medium mt-1">{selectedItem.userRole}</p>
                       </div>
-                      <div>
-                        <span className="font-medium">ID:</span> {selectedItem.userId}
+                      <div className="bg-white/80 p-4 rounded-xl">
+                        <span className="font-semibold text-gray-700">ID:</span>
+                        <p className="text-gray-900 font-medium mt-1">{selectedItem.userId}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Основная информация */}
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Основная информация</h3>
+                  <div className="bg-gradient-to-br from-emerald-50 to-green-50 p-6 rounded-2xl border border-emerald-100">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <FileText size={20} className="text-emerald-600" />
+                      Основная информация
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <span className="font-medium">Тип:</span> {getTypeLabel(selectedItem.type)}
+                      <div className="bg-white/80 p-4 rounded-xl">
+                        <span className="font-semibold text-gray-700">Тип:</span>
+                        <p className="text-gray-900 font-medium mt-1">{getTypeLabel(selectedItem.type)}</p>
                       </div>
-                      <div>
-                        <span className="font-medium">Название:</span> {selectedItem.title}
+                      <div className="bg-white/80 p-4 rounded-xl">
+                        <span className="font-semibold text-gray-700">Название:</span>
+                        <p className="text-gray-900 font-medium mt-1">{selectedItem.title}</p>
                       </div>
-                      <div>
-                        <span className="font-medium">Дата создания:</span> {new Date(selectedItem.createdAt).toLocaleDateString('ru-RU')}
+                      <div className="bg-white/80 p-4 rounded-xl">
+                        <span className="font-semibold text-gray-700">Дата создания:</span>
+                        <p className="text-gray-900 font-medium mt-1">{new Date(selectedItem.createdAt).toLocaleDateString('ru-RU')}</p>
                       </div>
-                      <div>
-                        <span className="font-medium">Последнее обновление:</span> {new Date(selectedItem.updatedAt).toLocaleDateString('ru-RU')}
+                      <div className="bg-white/80 p-4 rounded-xl">
+                        <span className="font-semibold text-gray-700">Последнее обновление:</span>
+                        <p className="text-gray-900 font-medium mt-1">{new Date(selectedItem.updatedAt).toLocaleDateString('ru-RU')}</p>
                       </div>
                     </div>
                     {selectedItem.description && (
-                      <div className="mt-4">
-                        <span className="font-medium">Описание:</span>
-                        <p className="text-gray-600 mt-1">{selectedItem.description}</p>
+                      <div className="mt-6 bg-white/80 p-4 rounded-xl">
+                        <span className="font-semibold text-gray-700">Описание:</span>
+                        <p className="text-gray-900 mt-2 leading-relaxed">{selectedItem.description}</p>
                       </div>
                     )}
-        </div>
+                  </div>
 
                   {/* Детальная информация в зависимости от типа */}
                   {selectedItem.type === 'general' && selectedItem.metadata && (
@@ -522,29 +560,34 @@ export default function AdminPortfolioPage() {
 
                   {/* Файлы */}
                   {selectedItem.attachments && selectedItem.attachments.length > 0 && (
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900">Прикрепленные файлы</h3>
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                          <FileDown size={20} className="text-purple-600" />
+                          Прикрепленные файлы
+                        </h3>
                         {selectedItem.attachments.length > 1 && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleDownloadAllFiles(selectedItem.attachments!)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-purple-600 hover:text-purple-900 hover:bg-purple-50 border-purple-200 hover:border-purple-300 transition-all duration-200"
                           >
                             <Download size={16} />
                             Скачать все
                           </Button>
                         )}
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {selectedItem.attachments.map((file) => (
-                          <div key={file.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              {getFileIcon(file.type)}
+                          <div key={file.id} className="flex items-center justify-between p-4 bg-white/80 rounded-xl border border-purple-100 hover:shadow-md transition-all duration-200">
+                            <div className="flex items-center gap-4">
+                              <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
+                                {getFileIcon(file.type)}
+                              </div>
                               <div>
-                                <div className="font-medium text-gray-900">{file.name}</div>
-                                <div className="text-sm text-gray-500">
+                                <div className="font-semibold text-gray-900">{file.name}</div>
+                                <div className="text-sm text-gray-600">
                                   {getFileSizeString(file.size)} • {formatFileDate(file.uploadedAt)}
                                 </div>
                               </div>
@@ -555,7 +598,7 @@ export default function AdminPortfolioPage() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => window.open(file.url, '_blank')}
-                                  className="text-green-600 hover:text-green-900"
+                                  className="text-emerald-600 hover:text-emerald-900 hover:bg-emerald-50 border-emerald-200 hover:border-emerald-300 transition-all duration-200"
                                 >
                                   <Eye size={16} />
                                 </Button>
@@ -564,15 +607,15 @@ export default function AdminPortfolioPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleDownloadFile(file)}
-                                className="text-blue-600 hover:text-blue-900"
+                                className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 border-blue-200 hover:border-blue-300 transition-all duration-200"
                               >
                                 <Download size={16} />
                               </Button>
                             </div>
-          </div>
+                          </div>
                         ))}
-            </div>
-          </div>
+                      </div>
+                    </div>
                   )}
             </div>
           </div>

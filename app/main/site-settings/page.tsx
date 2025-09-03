@@ -106,7 +106,8 @@ export default function SiteSettingsPage() {
 
 function AvatarSection() {
   const { t } = useTranslation('common')
-  const { avatar, setAvatar, userName, setUserName } = useAvatar()
+  const { avatar, setAvatar, userName, setUserName, userPosition } = useAvatar()
+  const { user } = useAuth()
   const [newAvatar, setNewAvatar] = useState<File | null>(null)
   const [editingName, setEditingName] = useState(false)
   const [tempName, setTempName] = useState(userName)
@@ -181,7 +182,7 @@ function AvatarSection() {
               />
               <div className="flex gap-2 justify-center">
                 <Button 
-                  size="sm" 
+                  className="px-3 py-1 text-sm" 
                   onClick={handleNameSave}
                   disabled={!tempName.trim()}
                 >
@@ -189,7 +190,7 @@ function AvatarSection() {
                   Сохранить
                 </Button>
                 <Button 
-                  size="sm" 
+                  className="px-3 py-1 text-sm" 
                   variant="outline" 
                   onClick={handleNameCancel}
                 >
@@ -203,15 +204,14 @@ function AvatarSection() {
               <div className="flex items-center justify-center gap-2">
                 <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
                 <Button
-                  size="sm"
+                  className="p-1 h-auto text-sm"
                   variant="ghost"
                   onClick={() => setEditingName(true)}
-                  className="p-1 h-auto"
                 >
                   <Edit3 size={14} />
                 </Button>
               </div>
-              <p className="text-gray-600">{t('profile.teacher')}</p>
+              <p className="text-gray-600">{userPosition || user?.position || t('profile.teacher')}</p>
             </div>
           )}
         </div>

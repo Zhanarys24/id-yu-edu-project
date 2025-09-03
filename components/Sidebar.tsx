@@ -19,8 +19,8 @@ import clsx from 'clsx'
 export default function Sidebar({ active }: { active?: string }) {
   const { t } = useTranslation('common')
   const pathname = usePathname()
-  const { avatar, userName } = useAvatar()
-  const { isAdmin } = useAuth()
+  const { avatar, userName, userPosition } = useAvatar()
+  const { isAdmin, user } = useAuth()
   const [portfolioOpen, setPortfolioOpen] = useState(false)
   const router = useRouter()
 
@@ -29,16 +29,25 @@ export default function Sidebar({ active }: { active?: string }) {
     router.push('/login')
   }
 
-  const menuItems = [
-    { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
-    { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
-    { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
-    { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
-    { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
-    { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
-    { icon: <Bot size={20} />, label: t('menu.yessenovai'), href: '/main/yessenovbot' },
-    { icon: <Coins size={20} />, label: t('menu.YU-Gamification'), href: '/YU-Gamification' },
-  ]
+  const menuItems = user?.role === 'anonymous' 
+    ? [
+        { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
+        { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
+        { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
+        { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
+        { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
+        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
+      ]
+    : [
+        { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
+        { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
+        { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
+        { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
+        { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
+        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
+        { icon: <Bot size={20} />, label: t('menu.yessenovai'), href: '/main/yessenovbot' },
+        { icon: <Coins size={20} />, label: t('YU-Gamification'), href: '/YU-Gamification' },
+      ]
 
   const portfolioItems = [
     { icon: <FileUser size={16} />, label: t('portfolio.general'), href: '/portfolio?tab=general' },
@@ -48,9 +57,11 @@ export default function Sidebar({ active }: { active?: string }) {
     { icon: <Briefcase size={16} />, label: t('portfolio.additional'), href: '/portfolio?tab=additional' },
   ]
 
-  const accountItems = [
-    { icon: <Settings size={20} />, label: t('account.settings'), href: '/main/site-settings' },
-  ]
+  const accountItems = user?.role === 'anonymous' 
+    ? []
+    : [
+        { icon: <Settings size={20} />, label: t('account.settings'), href: '/main/site-settings' },
+      ]
 
   return (
     <>
@@ -73,7 +84,7 @@ export default function Sidebar({ active }: { active?: string }) {
               />
               <div>
                 <p className="font">{userName}</p>
-                <p className="text-sm text-gray-500">{t('profile.teacher')}</p>
+                <p className="text-sm text-gray-500">{userPosition || t('profile.teacher')}</p>
               </div>
             </div>
 
@@ -103,8 +114,9 @@ export default function Sidebar({ active }: { active?: string }) {
           <div className="text-sm space-y-2 mt-8">
             <p className="text-gray-500">{t('groups.account').toUpperCase()}</p>
 
-            {/* Портфолио */}
-            <div className="relative">
+            {/* Портфолио - только для авторизованных пользователей */}
+            {user?.role !== 'anonymous' && (
+              <div className="relative">
               <button
                 onClick={() => setPortfolioOpen(!portfolioOpen)}
                 className={clsx(
@@ -142,7 +154,8 @@ export default function Sidebar({ active }: { active?: string }) {
                   ))}
                 </div>
               )}
-            </div>
+              </div>
+            )}
 
             {accountItems.map((item) => (
               <MenuItem key={item.label} {...item} active={pathname.startsWith(item.href)} />

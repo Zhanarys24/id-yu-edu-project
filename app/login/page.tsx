@@ -196,7 +196,7 @@ const WelcomeBlock = () => {
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation('common');
-  const { login } = useAuth();
+  const { login, anonymousLogin } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -264,6 +264,7 @@ export default function LoginPage() {
   };
 
   const handleAnonymousLogin = () => {
+    anonymousLogin();
     router.push('/main/news');
   };
 

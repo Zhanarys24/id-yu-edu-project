@@ -90,7 +90,7 @@ class UserService {
   }
 
   // Зарегистрировать нового пользователя или обновить существующего
-  registerUser(email: string, name: string, role: UserRole = 'student'): RegisteredUser {
+  registerUser(email: string, name: string, role: UserRole = 'student', position?: string): RegisteredUser {
     const db = this.getUserDatabase();
     const existingUser = db.users.find(user => user.email.toLowerCase() === email.toLowerCase());
 
@@ -98,6 +98,9 @@ class UserService {
       // Обновляем последний вход
       existingUser.lastLogin = new Date().toISOString();
       existingUser.name = name;
+      if (position !== undefined) {
+        existingUser.position = position;
+      }
       this.saveUserDatabase(db);
       return existingUser;
     }
@@ -110,6 +113,7 @@ class UserService {
       id: db.nextId.toString(),
       email: email.toLowerCase(),
       name,
+      position,
       role,
       registeredAt: new Date().toISOString(),
       lastLogin: new Date().toISOString(),
@@ -135,6 +139,49 @@ class UserService {
     }
 
     user.role = newRole;
+    this.saveUserDatabase(db);
+    return true;
+  }
+
+  // Обновить имя пользователя (только для супер-админа)
+  updateUserName(userId: string, newName: string): boolean {
+    const db = this.getUserDatabase();
+    const user = db.users.find(u => u.id === userId);
+
+    if (!user || !newName.trim()) {
+      return false;
+    }
+
+    user.name = newName.trim();
+    this.saveUserDatabase(db);
+    return true;
+  }
+
+  // Обновить должность пользователя (только для супер-админа)
+  updateUserPosition(userId: string, newPosition: string): boolean {
+    const db = this.getUserDatabase();
+    const user = db.users.find(u => u.id === userId);
+
+    if (!user) {
+      return false;
+    }
+
+    user.position = newPosition.trim() || undefined;
+    this.saveUserDatabase(db);
+    return true;
+  }
+
+  // Обновить имя и должность пользователя одновременно (только для супер-админа)
+  updateUserInfo(userId: string, newName: string, newPosition?: string): boolean {
+    const db = this.getUserDatabase();
+    const user = db.users.find(u => u.id === userId);
+
+    if (!user || !newName.trim()) {
+      return false;
+    }
+
+    user.name = newName.trim();
+    user.position = newPosition?.trim() || undefined;
     this.saveUserDatabase(db);
     return true;
   }

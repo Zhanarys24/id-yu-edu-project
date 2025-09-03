@@ -5,6 +5,7 @@ export type RegisteredUser = {
   id: string;
   email: string;
   name: string;
+  position?: string; // Должность пользователя
   role: UserRole;
   registeredAt: string;
   lastLogin?: string;
@@ -25,7 +26,8 @@ export const INITIAL_USERS: RegisteredUser[] = [
   {
     id: '1',
     email: 'super@admin.com',
-    name: 'Супер Администратор',
+    name: 'Айдар Нурланов',
+    position: 'Директор IT-департамента',
     role: 'super_admin',
     registeredAt: '2024-01-01T00:00:00Z',
     lastLogin: new Date().toISOString(),
@@ -38,7 +40,8 @@ export const INITIAL_USERS: RegisteredUser[] = [
   {
     id: '2',
     email: 'news@admin.com',
-    name: 'Админ Новостей',
+    name: 'Асель Толеуова',
+    position: 'Менеджер по коммуникациям',
     role: 'admin_news',
     registeredAt: '2024-01-01T00:00:00Z',
     isActive: true,
@@ -49,7 +52,8 @@ export const INITIAL_USERS: RegisteredUser[] = [
   {
     id: '3',
     email: 'portfolio@admin.com',
-    name: 'Админ Портфолио',
+    name: 'Данияр Касымов',
+    position: 'Координатор академических программ',
     role: 'admin_portfolio',
     registeredAt: '2024-01-01T00:00:00Z',
     isActive: true,
@@ -60,7 +64,8 @@ export const INITIAL_USERS: RegisteredUser[] = [
   {
     id: '4',
     email: 'student@yu.edu.kz',
-    name: 'Студент Иванов',
+    name: 'Алмас Жумабеков',
+    position: 'Студент 3 курса',
     role: 'student',
     registeredAt: '2024-01-01T00:00:00Z',
     isActive: true,
@@ -71,7 +76,8 @@ export const INITIAL_USERS: RegisteredUser[] = [
   {
     id: '5',
     email: 'events@admin.com',
-    name: 'Админ Мероприятий',
+    name: 'Жанар Сейтжанова',
+    position: 'Организатор мероприятий',
     role: 'admin_events',
     registeredAt: '2024-01-01T00:00:00Z',
     isActive: true,

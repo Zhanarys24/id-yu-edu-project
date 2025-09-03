@@ -7,11 +7,13 @@ import { userService } from '@/lib/services/userService';
 type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
+  anonymousLogin: () => boolean;
   logout: () => void;
   hasRole: (role: UserRole) => boolean;
   canAccess: (section: string, action: string) => boolean;
   getUserPermissions: () => Permission[];
   isAdmin: () => boolean;
+  refreshUser: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,9 +24,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      
+      // Обновляем данные пользователя из базы данных при загрузке
+      const updatedUser = userService.findUserByEmail(parsedUser.email);
+      if (updatedUser && (updatedUser.name !== parsedUser.name || updatedUser.position !== parsedUser.position)) {
+        const rolePermissions = ROLE_PERMISSIONS?.[updatedUser.role] || [];
+        
+        const refreshedUser: User = {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          position: updatedUser.position,
+          role: updatedUser.role,
+          permissions: rolePermissions,
+          avatar: parsedUser.avatar
+        };
+
+        setUser(refreshedUser);
+        localStorage.setItem('user', JSON.stringify(refreshedUser));
+        
+        // Also update individual localStorage items for AvatarContext
+        localStorage.setItem('user.name', refreshedUser.name);
+        if (refreshedUser.position) {
+          localStorage.setItem('user.position', refreshedUser.position);
+        }
+      }
     }
   }, []);
+
+  const anonymousLogin = () => {
+    const rolePermissions = ROLE_PERMISSIONS?.['anonymous'] || [];
+    
+    const anonymousUser: User = {
+      id: 'anonymous',
+      email: 'anonymous@yu.edu.kz',
+      name: 'Аноним',
+      position: 'Гость',
+      role: 'anonymous',
+      permissions: rolePermissions,
+      avatar: '/avatar.jpg'
+    };
+
+    setUser(anonymousUser);
+    localStorage.setItem('user', JSON.stringify(anonymousUser));
+    
+    // Also update individual localStorage items for AvatarContext
+    localStorage.setItem('user.name', anonymousUser.name);
+    localStorage.setItem('user.position', anonymousUser.position);
+    
+    return true;
+  };
 
   const login = async (email: string, password: string) => {
     try {
@@ -51,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: registeredUser.id,
         email: registeredUser.email,
         name: registeredUser.name,
+        position: registeredUser.position,
         role: registeredUser.role,
         permissions: rolePermissions,
         avatar: '/avatar.jpg'
@@ -58,6 +110,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
+      
+      // Also update individual localStorage items for AvatarContext
+      localStorage.setItem('user.name', newUser.name);
+      if (newUser.position) {
+        localStorage.setItem('user.position', newUser.position);
+      }
       
       // Проверяем, нужно ли сменить пароль
       if (registeredUser.isTemporaryPassword) {
@@ -100,17 +158,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const getUserPermissions = () => user?.permissions || [];
 
   const isAdmin = () => {
-    return user && user.role !== 'student';
+    return user && user.role !== 'student' && user.role !== 'anonymous';
+  };
+
+  const refreshUser = () => {
+    if (user) {
+      // Получаем обновленные данные пользователя из базы данных
+      const updatedUser = userService.findUserByEmail(user.email);
+      if (updatedUser) {
+        const rolePermissions = ROLE_PERMISSIONS?.[updatedUser.role] || [];
+        
+        const refreshedUser: User = {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          position: updatedUser.position,
+          role: updatedUser.role,
+          permissions: rolePermissions,
+          avatar: user.avatar // Сохраняем текущий аватар
+        };
+
+        setUser(refreshedUser);
+        localStorage.setItem('user', JSON.stringify(refreshedUser));
+        
+        // Also update individual localStorage items for AvatarContext
+        localStorage.setItem('user.name', refreshedUser.name);
+        if (refreshedUser.position) {
+          localStorage.setItem('user.position', refreshedUser.position);
+        }
+      }
+    }
   };
 
   const value: AuthContextType = {
     user,
     login,
+    anonymousLogin,
     logout,
     hasRole,
     canAccess,
     getUserPermissions,
-    isAdmin
+    isAdmin,
+    refreshUser
   };
 
   return (

@@ -442,6 +442,7 @@ function ActionButton({ icon, label, subtitle, color, onClick, badge, disabled =
 
 export default function DashboardPage() {
   const { userName, avatar } = useAvatar()
+  const { user } = useAuth()
   const router = useRouter()
   
   // Toast system
@@ -749,7 +750,7 @@ export default function DashboardPage() {
 
   type Leader = { name: string; coins: number }
   const [leaderboard, setLeaderboard] = useState<Leader[]>([
-    { name: userName, coins: 50000 },
+    { name: user?.name || userName, coins: 50000 },
     { name: "Айжан Қайратқызы", coins: 18900 },
     { name: "Данияр Әлімжанов", coins: 16750 },
     { name: "Әсел Нұрғалиева", coins: 14300 },
@@ -762,16 +763,17 @@ export default function DashboardPage() {
   // Update user's earned coins in leaderboard when earnedCoins changes
   useEffect(() => {
     if (!isHydrated) return
+    const currentUserName = user?.name || userName
     setLeaderboard(prev => {
       const updated = prev.map(leader => 
-        leader.name === userName 
+        leader.name === currentUserName 
           ? { ...leader, coins: state.earnedCoins }
           : leader
       )
       // Sort by coins descending to maintain correct ranking
       return updated.sort((a, b) => b.coins - a.coins)
     })
-  }, [state.earnedCoins, userName, isHydrated])
+  }, [state.earnedCoins, userName, user?.name, isHydrated])
 
   type Activity = { id: number; type: string; title: string; reward: number; timestamp: string }
   const [activity] = useState<Activity[]>([
@@ -1032,7 +1034,8 @@ export default function DashboardPage() {
     showToast(`Сатып алынды: ${item.name} (-${item.cost} YU-coins / -${item.cost} KZT)`, 'success')
   }
 
-  const userRank = Math.max(1, leaderboard.findIndex(l => l.name === userName) + 1)
+  const currentUserName = user?.name || userName
+  const userRank = Math.max(1, leaderboard.findIndex(l => l.name === currentUserName) + 1)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 relative overflow-hidden">
@@ -1070,7 +1073,7 @@ export default function DashboardPage() {
                     <div className="relative">
                       <ClientOnly fallback={
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                        {userName.split(' ').map(n => n[0]).join('')}
+                        {currentUserName.split(' ').map(n => n[0]).join('')}
                       </div>
                       }>
                         <Image
@@ -1084,7 +1087,7 @@ export default function DashboardPage() {
                       <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
                     </div>
                     <div>
-                      <p className="font-bold text-gray-800">{userName.split(' ')[0]}</p>
+                      <p className="font-bold text-gray-800">{currentUserName.split(' ')[0]}</p>
                       <p className="text-sm text-gray-500">Студент • Уровень {state.level}</p>
                     </div>
                   </div>
@@ -1180,7 +1183,7 @@ export default function DashboardPage() {
                               <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
                                 <Crown className="w-8 h-8 text-yellow-300" />
                               </div>
-                              <h1 className="text-4xl font-bold">Привет, {userName.split(' ')[0]}!</h1>
+                              <h1 className="text-4xl font-bold">Привет, {currentUserName.split(' ')[0]}!</h1>
                             </div>
                             <p className="text-xl text-white/80">Добро пожаловать в вашу геймификационную панель</p>
                           </div>
@@ -1433,7 +1436,7 @@ export default function DashboardPage() {
                           name={leader.name}
                           coins={leader.coins}
                           isTop={index < 3}
-                          isUser={leader.name === userName}
+                          isUser={leader.name === currentUserName}
 
                         />
                       ))}
@@ -1668,7 +1671,7 @@ export default function DashboardPage() {
                         <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
                           <ClientOnly fallback={
                             <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white font-bold text-2xl shadow-xl mx-auto mb-3">
-                              {userName.split(' ').map(n => n[0]).join('')}
+                              {currentUserName.split(' ').map(n => n[0]).join('')}
                             </div>
                           }>
                             <Image
@@ -1679,7 +1682,7 @@ export default function DashboardPage() {
                               className="w-16 h-16 rounded-2xl object-cover shadow-xl mx-auto mb-3 border-2 border-white/30"
                             />
                           </ClientOnly>
-                          <div className="font-bold text-lg">{userName.split(' ')[0]}</div>
+                          <div className="font-bold text-lg">{currentUserName.split(' ')[0]}</div>
                           <div className="text-white/80 text-sm">#{userRank} место</div>
                           <div className="flex items-center justify-center gap-1 mt-2 font-bold">
                             <Image src="/YU-coin.png" alt="YU coin" width={20} height={20} className="w-5 h-5" />
@@ -1745,7 +1748,7 @@ export default function DashboardPage() {
                       {leaderboard[1] && (
                           <div className="flex flex-col items-center group">
                             <div className="relative mb-4">
-                              {leaderboard[1].name === userName ? (
+                              {leaderboard[1].name === currentUserName ? (
                                 <ClientOnly fallback={
                               <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-gray-400 to-gray-500 text-white flex items-center justify-center font-bold text-2xl shadow-xl border-4 border-white group-hover:scale-110 transition-transform duration-300">
                             2
@@ -1777,7 +1780,7 @@ export default function DashboardPage() {
                               <p className="font-bold text-gray-800 text-lg mb-1">{leaderboard[1].name}</p>
                             <div className="flex items-center justify-center gap-1 text-amber-600 font-bold">
                                 <Image src="/YU-coin.png" alt="YU coin" width={20} height={20} className="w-5 h-5" />
-                                <span>{(leaderboard[1].name === userName ? state.earnedCoins : leaderboard[1].coins).toLocaleString()}</span>
+                                <span>{(leaderboard[1].name === currentUserName ? state.earnedCoins : leaderboard[1].coins).toLocaleString()}</span>
                             </div>
                               <div className="text-xs text-gray-500 mt-1">Серебро</div>
                           </div>
@@ -1792,7 +1795,7 @@ export default function DashboardPage() {
                           <div className="flex flex-col items-center group">
                             <Crown className="w-10 h-10 text-amber-500 mb-2 animate-bounce" />
                             <div className="relative mb-4">
-                              {leaderboard[0].name === userName ? (
+                              {leaderboard[0].name === currentUserName ? (
                                 <ClientOnly fallback={
                               <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-amber-400 to-yellow-500 text-white flex items-center justify-center font-bold text-3xl shadow-2xl border-4 border-white group-hover:scale-110 transition-transform duration-300">
                             1
@@ -1819,7 +1822,7 @@ export default function DashboardPage() {
                               <div className="absolute -top-2 -right-2 w-10 h-10 bg-yellow-400 rounded-full border-3 border-white shadow-lg flex items-center justify-center">
                                 <Crown className="w-5 h-5 text-yellow-800" />
                               </div>
-                              {leaderboard[0].name === userName && (
+                              {leaderboard[0].name === currentUserName && (
                                 <div className="absolute -bottom-2 -left-2 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold">
                                   ВЫ!
                                 </div>
@@ -1829,7 +1832,7 @@ export default function DashboardPage() {
                               <p className="font-bold text-gray-800 text-xl mb-1">{leaderboard[0].name}</p>
                             <div className="flex items-center justify-center gap-1 text-amber-600 font-bold text-lg">
                                 <Image src="/YU-coin.png" alt="YU coin" width={24} height={24} className="w-6 h-6" />
-                                <span>{(leaderboard[0].name === userName ? state.earnedCoins : leaderboard[0].coins).toLocaleString()}</span>
+                                <span>{(leaderboard[0].name === currentUserName ? state.earnedCoins : leaderboard[0].coins).toLocaleString()}</span>
                             </div>
                               <div className="text-sm text-amber-600 mt-1 font-medium">👑 Чемпион</div>
                           </div>
@@ -1843,7 +1846,7 @@ export default function DashboardPage() {
                       {leaderboard[2] && (
                           <div className="flex flex-col items-center group">
                             <div className="relative mb-4">
-                              {leaderboard[2].name === userName ? (
+                              {leaderboard[2].name === currentUserName ? (
                                 <ClientOnly fallback={
                               <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-400 to-red-500 text-white flex items-center justify-center font-bold text-2xl shadow-xl border-4 border-white group-hover:scale-110 transition-transform duration-300">
                             3
@@ -1875,7 +1878,7 @@ export default function DashboardPage() {
                               <p className="font-bold text-gray-800 text-lg mb-1">{leaderboard[2].name}</p>
                             <div className="flex items-center justify-center gap-1 text-amber-600 font-bold">
                                 <Image src="/YU-coin.png" alt="YU coin" width={20} height={20} className="w-5 h-5" />
-                                <span>{(leaderboard[2].name === userName ? state.earnedCoins : leaderboard[2].coins).toLocaleString()}</span>
+                                <span>{(leaderboard[2].name === currentUserName ? state.earnedCoins : leaderboard[2].coins).toLocaleString()}</span>
                             </div>
                               <div className="text-xs text-gray-500 mt-1">Бронза</div>
                           </div>
@@ -1905,7 +1908,7 @@ export default function DashboardPage() {
                   <CardContent className="p-0">
                     <div className="space-y-0">
                       {leaderboard.map((leader, index) => {
-                        const isUser = leader.name === userName
+                        const isUser = leader.name === currentUserName
                         const isTop3 = index < 3
                         return (
                           <div
@@ -1993,10 +1996,10 @@ export default function DashboardPage() {
                               <div className="text-right">
                                 <div className="flex items-center gap-2 font-bold text-xl text-amber-600">
                                   <Image src="/YU-coin.png" alt="YU coin" width={24} height={24} className="w-6 h-6" />
-                                  <span>{(leader.name === userName ? state.earnedCoins : leader.coins).toLocaleString()}</span>
+                                  <span>{(leader.name === currentUserName ? state.earnedCoins : leader.coins).toLocaleString()}</span>
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  {index === 0 ? 'Лидер' : `+${((leader.name === userName ? state.earnedCoins : leader.coins) - (leaderboard[index + 1]?.name === userName ? state.earnedCoins : leaderboard[index + 1]?.coins || 0)).toLocaleString()} от следующего`}
+                                  {index === 0 ? 'Лидер' : `+${((leader.name === currentUserName ? state.earnedCoins : leader.coins) - (leaderboard[index + 1]?.name === currentUserName ? state.earnedCoins : leaderboard[index + 1]?.coins || 0)).toLocaleString()} от следующего`}
                                 </div>
                               </div>
                               
@@ -2079,7 +2082,7 @@ export default function DashboardPage() {
                         <div className="relative inline-block">
                             <ClientOnly fallback={
                               <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-white/20 to-white/10 flex items-center justify-center text-white font-bold text-4xl shadow-2xl border-4 border-white/20">
-                            {userName.split(' ').map(n => n[0]).join('')}
+                            {currentUserName.split(' ').map(n => n[0]).join('')}
                           </div>
                             }>
                               <Image
@@ -2102,7 +2105,7 @@ export default function DashboardPage() {
                         {/* Profile Info */}
                         <div className="flex-1 space-y-6">
                         <div>
-                            <h1 className="text-4xl font-bold mb-2">{userName}</h1>
+                            <h1 className="text-4xl font-bold mb-2">{currentUserName}</h1>
                             <div className="flex flex-wrap items-center gap-4 text-white/80">
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>

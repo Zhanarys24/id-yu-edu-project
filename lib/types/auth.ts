@@ -7,7 +7,8 @@ export type UserRole =
   | 'admin_yessenovai' 
   | 'admin_gamification' 
   | 'admin_portfolio' 
-  | 'super_admin';
+  | 'super_admin'
+  | 'anonymous';
 
 export type Permission = {
   section: string;
@@ -18,6 +19,7 @@ export type User = {
   id: string;
   email: string;
   name: string;
+  position?: string; // Должность пользователя
   role: UserRole;
   permissions: Permission[];
   avatar?: string;
@@ -79,6 +81,15 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     { section: 'portfolio', actions: ['read', 'write', 'delete', 'manage'] },
     { section: 'site_settings', actions: ['read', 'write', 'delete', 'manage'] },
     { section: 'general', actions: ['read', 'write', 'delete', 'manage'] }
+  ],
+  anonymous: [
+    { section: 'news', actions: ['read'] },
+    { section: 'events', actions: ['read'] },
+    { section: 'calendar', actions: ['read'] },
+    { section: 'education', actions: ['read'] },
+    { section: 'science', actions: ['read'] },
+    { section: 'upbringing', actions: ['read'] },
+    { section: 'eservices', actions: ['read'] }
   ]
 };
 

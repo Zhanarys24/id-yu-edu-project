@@ -9,16 +9,18 @@ import { RegisteredUser } from '@/lib/types/user';
 import { UserRole } from '@/lib/types/auth';
 
 export default function AdminUsersPage() {
-  const { user, canAccess } = useAuth();
+  const { user, canAccess, refreshUser } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<RegisteredUser[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [editingUser, setEditingUser] = useState<RegisteredUser | null>(null);
+  const [editingUserInfo, setEditingUserInfo] = useState<RegisteredUser | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
+  const [newUserPosition, setNewUserPosition] = useState('');
   const [newUserRole, setNewUserRole] = useState<UserRole>('student');
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [generatingPassword, setGeneratingPassword] = useState<string | null>(null);
@@ -62,14 +64,14 @@ export default function AdminUsersPage() {
   const getRoleLabel = (role: UserRole) => {
     switch (role) {
       case 'student': return 'Студент';
-      case 'admin_news': return 'Админ новостей';
-      case 'admin_events': return 'Админ мероприятий';
-      case 'admin_education': return 'Админ образования';
-      case 'admin_eservices': return 'Админ Е-услуг';
-      case 'admin_yessenovai': return 'Админ YessenovAI';
-      case 'admin_gamification': return 'Админ YU-Gamification';
-      case 'admin_portfolio': return 'Админ портфолио';
-      case 'super_admin': return 'Супер администратор';
+      case 'admin_news': return 'Новости';
+      case 'admin_events': return 'Мероприятия';
+      case 'admin_education': return 'Образование';
+      case 'admin_eservices': return 'Е-услуги';
+      case 'admin_yessenovai': return 'YessenovAI';
+      case 'admin_gamification': return 'Геймификация';
+      case 'admin_portfolio': return 'Портфолио';
+      case 'super_admin': return 'Супер-админ';
       default: return role;
     }
   };
@@ -115,12 +117,28 @@ export default function AdminUsersPage() {
       return;
     }
 
-    userService.registerUser(newUserEmail, newUserName, newUserRole);
+    userService.registerUser(newUserEmail, newUserName, newUserRole, newUserPosition);
     loadUsers();
     setShowAddModal(false);
     setNewUserEmail('');
     setNewUserName('');
+    setNewUserPosition('');
     setNewUserRole('student');
+  };
+
+  const handleEditUserInfo = (userId: string, newName: string, newPosition: string) => {
+    if (userService.updateUserInfo(userId, newName, newPosition)) {
+      loadUsers();
+      setEditingUserInfo(null);
+      
+      // Если редактируем текущего пользователя, обновляем его данные в контексте
+      if (user && user.id === userId) {
+        refreshUser();
+        alert('Ваши данные обновлены! Изменения отразятся на всех страницах сайта.');
+      } else {
+        alert('Данные пользователя успешно обновлены!');
+      }
+    }
   };
 
   const togglePasswordVisibility = (userId: string) => {
@@ -218,14 +236,14 @@ export default function AdminUsersPage() {
               >
                 <option value="all">Все роли</option>
                 <option value="student">Студент</option>
-                <option value="admin_news">Админ новостей</option>
-                <option value="admin_events">Админ мероприятий</option>
-                <option value="admin_education">Админ образования</option>
-                <option value="admin_eservices">Админ Е-услуг</option>
-                <option value="admin_yessenovai">Админ YessenovAI</option>
-                <option value="admin_gamification">Админ YU-Gamification</option>
-                <option value="admin_portfolio">Админ портфолио</option>
-                <option value="super_admin">Супер администратор</option>
+                <option value="admin_news">Новости</option>
+                <option value="admin_events">Мероприятия</option>
+                <option value="admin_education">Образование</option>
+                <option value="admin_eservices">Е-услуги</option>
+                <option value="admin_yessenovai">YessenovAI</option>
+                <option value="admin_gamification">Геймификация</option>
+                <option value="admin_portfolio">Портфолио</option>
+                <option value="super_admin">Супер-админ</option>
               </select>
             </div>
             
@@ -248,42 +266,58 @@ export default function AdminUsersPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Действия
               </label>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-              >
-                <Plus size={16} />
-                Добавить пользователя
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus size={16} />
+                  Добавить пользователя
+                </button>
+                <button
+                  onClick={() => {
+                    loadUsers();
+                    refreshUser();
+                    alert('Данные обновлены!');
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <RefreshCw size={16} />
+                  Обновить данные
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Таблица пользователей */}
         <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100" style={{ scrollbarWidth: 'thin' }}>
+            <table className="w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
                     Пользователь
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                    Должность
+                  </th>
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                     Роль
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Дата регистрации
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    Регистрация
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                     Последний вход
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                     Статус
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                     Пароль
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                     Действия
                   </th>
                 </tr>
@@ -291,54 +325,86 @@ export default function AdminUsersPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {user.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {user.email}
-                      </div>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      {editingUserInfo?.id === user.id ? (
+                        <div className="space-y-1">
+                          <input
+                            type="text"
+                            defaultValue={user.name}
+                            id={`name-${user.id}`}
+                            className="text-xs px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 w-full"
+                            placeholder="Имя"
+                          />
+                          <div className="text-xs text-gray-500 truncate">
+                            {user.email}
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="text-xs font-medium text-gray-900 truncate">
+                            {user.name}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {user.email}
+                          </div>
+                        </div>
+                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-2 py-3 whitespace-nowrap">
+                      {editingUserInfo?.id === user.id ? (
+                        <input
+                          type="text"
+                          defaultValue={user.position || ''}
+                          id={`position-${user.id}`}
+                          className="text-xs px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 w-full"
+                          placeholder="Должность"
+                        />
+                      ) : (
+                        <div className="text-xs text-gray-600 truncate" title={user.position || 'Не указана'}>
+                          {user.position || 'Не указана'}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-2 py-3 whitespace-nowrap">
                       {editingUser?.id === user.id ? (
                         <select
                           value={user.role}
                           onChange={(e) => handleRoleChange(user.id, e.target.value as UserRole)}
-                          className="text-xs px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                          className="text-xs px-1 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="student">Студент</option>
-                          <option value="admin_news">Админ новостей</option>
-                          <option value="admin_events">Админ мероприятий</option>
-                          <option value="admin_education">Админ образования</option>
-                          <option value="admin_eservices">Админ Е-услуг</option>
-                          <option value="admin_yessenovai">Админ YessenovAI</option>
-                          <option value="admin_gamification">Админ YU-Gamification</option>
-                          <option value="admin_portfolio">Админ портфолио</option>
-                          <option value="super_admin">Супер администратор</option>
+                          <option value="admin_news">Новости</option>
+                          <option value="admin_events">Мероприятия</option>
+                          <option value="admin_education">Образование</option>
+                          <option value="admin_eservices">Е-услуги</option>
+                          <option value="admin_yessenovai">YessenovAI</option>
+                          <option value="admin_gamification">Геймификация</option>
+                          <option value="admin_portfolio">Портфолио</option>
+                          <option value="super_admin">Супер-админ</option>
                         </select>
                       ) : (
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
                           {getRoleLabel(user.role)}
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-2 py-3 whitespace-nowrap text-xs text-gray-500">
                       {new Date(user.registeredAt).toLocaleDateString('ru-RU')}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-2 py-3 whitespace-nowrap text-xs text-gray-500">
                       {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('ru-RU') : 'Никогда'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    <td className="px-2 py-3 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
                         user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
                         {user.isActive ? 'Активен' : 'Заблокирован'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
+                    <td className="px-2 py-3 whitespace-nowrap">
+                      <div className="flex items-center gap-1">
                         <div className="flex items-center gap-1">
-                          <code className={`text-xs px-2 py-1 rounded ${
+                          <code className={`text-xs px-1 py-0.5 rounded ${
                             user.isTemporaryPassword ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
                           }`}>
                             {showPasswords[user.id] 
@@ -351,47 +417,79 @@ export default function AdminUsersPage() {
                             className="text-gray-400 hover:text-gray-600"
                             title={showPasswords[user.id] ? 'Скрыть пароль' : 'Показать пароль'}
                           >
-                            {showPasswords[user.id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                            {showPasswords[user.id] ? <EyeOff size={12} /> : <Eye size={12} />}
                           </button>
                         </div>
                         {user.isTemporaryPassword && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Временный
+                          <span className="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Врем.
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-2">
+                    <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center gap-1">
+                        {editingUserInfo?.id === user.id ? (
+                          <>
+                            <button 
+                              className="text-green-600 hover:text-green-900 p-1"
+                              onClick={() => {
+                                const nameInput = document.getElementById(`name-${user.id}`) as HTMLInputElement;
+                                const positionInput = document.getElementById(`position-${user.id}`) as HTMLInputElement;
+                                if (nameInput && positionInput) {
+                                  handleEditUserInfo(user.id, nameInput.value, positionInput.value);
+                                }
+                              }}
+                              title="Сохранить изменения"
+                            >
+                              <CheckCircle size={14} />
+                            </button>
+                            <button 
+                              className="text-gray-600 hover:text-gray-900 p-1"
+                              onClick={() => setEditingUserInfo(null)}
+                              title="Отменить редактирование"
+                            >
+                              <XCircle size={14} />
+                            </button>
+                          </>
+                        ) : (
+                          <button 
+                            className="text-blue-600 hover:text-blue-900 p-1"
+                            onClick={() => setEditingUserInfo(editingUserInfo?.id === user.id ? null : user)}
+                            title="Изменить имя и должность"
+                          >
+                            <Edit size={14} />
+                          </button>
+                        )}
                         <button 
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-purple-600 hover:text-purple-900 p-1"
                           onClick={() => setEditingUser(editingUser?.id === user.id ? null : user)}
                           title="Изменить роль"
                         >
-                          <Edit size={16} />
+                          <Shield size={14} />
                         </button>
                         <button 
-                          className="text-purple-600 hover:text-purple-900"
+                          className="text-orange-600 hover:text-orange-900 p-1"
                           onClick={() => handleGenerateNewPassword(user.id)}
                           disabled={generatingPassword === user.id}
                           title="Сгенерировать новый временный пароль"
                         >
-                          {generatingPassword === user.id ? <RefreshCw size={16} className="animate-spin" /> : <Key size={16} />}
+                          {generatingPassword === user.id ? <RefreshCw size={14} className="animate-spin" /> : <Key size={14} />}
                         </button>
                         <button 
-                          className={user.isActive ? "text-red-600 hover:text-red-900" : "text-green-600 hover:text-green-900"}
+                          className={`p-1 ${user.isActive ? "text-red-600 hover:text-red-900" : "text-green-600 hover:text-green-900"}`}
                           onClick={() => handleToggleStatus(user.id)}
                           title={user.isActive ? "Заблокировать" : "Активировать"}
                         >
-                          {user.isActive ? <XCircle size={16} /> : <CheckCircle size={16} />}
+                          {user.isActive ? <XCircle size={14} /> : <CheckCircle size={14} />}
                         </button>
                         {user.role !== 'super_admin' && (
                           <button 
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-600 hover:text-red-900 p-1"
                             onClick={() => handleDeleteUser(user.id)}
                             title="Удалить"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                           </button>
                         )}
                       </div>
@@ -440,6 +538,19 @@ export default function AdminUsersPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Должность
+                  </label>
+                  <input
+                    type="text"
+                    value={newUserPosition}
+                    onChange={(e) => setNewUserPosition(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Должность пользователя"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Роль
                   </label>
                   <select
@@ -448,14 +559,14 @@ export default function AdminUsersPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="student">Студент</option>
-                    <option value="admin_news">Админ новостей</option>
-                    <option value="admin_events">Админ мероприятий</option>
-                    <option value="admin_education">Админ образования</option>
-                    <option value="admin_eservices">Админ Е-услуг</option>
-                    <option value="admin_yessenovai">Админ YessenovAI</option>
-                    <option value="admin_gamification">Админ YU-Gamification</option>
-                    <option value="admin_portfolio">Админ портфолио</option>
-                    <option value="super_admin">Супер администратор</option>
+                    <option value="admin_news">Новости</option>
+                    <option value="admin_events">Мероприятия</option>
+                    <option value="admin_education">Образование</option>
+                    <option value="admin_eservices">Е-услуги</option>
+                    <option value="admin_yessenovai">YessenovAI</option>
+                    <option value="admin_gamification">Геймификация</option>
+                    <option value="admin_portfolio">Портфолио</option>
+                    <option value="super_admin">Супер-админ</option>
                   </select>
                 </div>
               </div>

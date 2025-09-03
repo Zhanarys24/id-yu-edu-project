@@ -158,17 +158,33 @@ function GeneralSection() {
       if (info) {
         setGeneralInfo(info)
         setFormData({
-          fullName: info.fullName || '',
-          position: info.position || '',
+          fullName: info.fullName || user.name || '',
+          position: info.position || user.position || '',
           department: info.department || '',
           education: info.education || '',
           experience: info.experience || '',
           skills: info.skills.length > 0 ? info.skills : [''],
           languages: info.languages.length > 0 ? info.languages : [''],
           contactInfo: {
-            email: info.contactInfo.email || '',
+            email: info.contactInfo.email || user.email || '',
             phone: info.contactInfo.phone || '',
             address: info.contactInfo.address || ''
+          }
+        })
+      } else {
+        // Если нет сохраненной информации, используем данные пользователя
+        setFormData({
+          fullName: user.name || '',
+          position: user.position || '',
+          department: '',
+          education: '',
+          experience: '',
+          skills: [''],
+          languages: [''],
+          contactInfo: {
+            email: user.email || '',
+            phone: '',
+            address: ''
           }
         })
       }

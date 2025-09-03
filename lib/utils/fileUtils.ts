@@ -101,3 +101,4 @@ export const validateFileType = (file: File, allowedTypes: string[]): boolean =>
     return fileExtension === cleanType;
   });
 };
+

@@ -4,8 +4,34 @@ import { ChevronRight } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useAuth } from '@/context/AuthContext'
+import { educationService } from '@/lib/services/educationService'
+import { useEffect, useState } from 'react'
+import { EducationCard } from '@/lib/types/education'
 
 export default function SciencePage() {
+  const { user } = useAuth()
+  const [cards, setCards] = useState<EducationCard[]>([])
+
+  useEffect(() => {
+    loadCards()
+  }, [])
+
+  const loadCards = () => {
+    try {
+      const scienceCards = educationService.getCardsByCategory('science')
+      setCards(scienceCards.filter(card => card.isActive).sort((a, b) => a.order - b.order))
+    } catch (error) {
+      console.error('Ошибка загрузки карточек:', error)
+    }
+  }
+
+  const handleCardClick = (card: EducationCard) => {
+    if (user) {
+      educationService.trackClick(card.id, user.id, user.email, user.name)
+    }
+  }
+
   return (
     <Layout active="Наука">
       <h1 className="text-[22px] font-semibold text-gray-800 mb-3">Наука</h1>
@@ -13,27 +39,17 @@ export default function SciencePage() {
 
       {/* Адаптивная сетка */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
-        <EduCard
-          image="/OJS.png"
-          overlayImage="/OJS-logo.png"
-          title="OJS"
-          description="Управление научными журналами"
-          href="https://pkp.sfu.ca/ojs/"
-        />
-        <EduCard
-          image="/Dspace.png"
-          overlayImage="/Dspace-logo.png"
-          title="Dspace"
-          description="Электронный архив диссертаций и исследований"
-          href="https://dspace.ly"
-        />
-        <EduCard
-          image="/YSJ.png"
-          overlayImage="/YSJ-logo.png"
-          title="YSJ"
-          description="Публикация университетских работ"
-          href="/ysj"
-        />
+        {cards.map((card) => (
+          <EduCard
+            key={card.id}
+            image={card.image}
+            title={card.title}
+            description={card.description}
+            href={card.href}
+            ctaLabel={card.ctaLabel}
+            onClick={() => handleCardClick(card)}
+          />
+        ))}
       </div>
     </Layout>
   )
@@ -41,34 +57,31 @@ export default function SciencePage() {
 
 function EduCard({
   image,
-  overlayImage,
   title,
   description,
   href,
+  ctaLabel,
+  onClick
 }: {
   image: string
-  overlayImage?: string
   title: string
   description: string
   href: string
+  ctaLabel: string
+  onClick: () => void
 }) {
   return (
     <div
       className="
         bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52
         w-full max-w-full sm:max-w-[300px] lg:max-w-[420px] xl:max-w-[340px]
-        overflow-hidden transition-transform
+        overflow-hidden transition-transform hover:shadow-md
       "
     >
       <div className="flex-1">
         <div className="flex items-center gap-4 mb-3">
           <div className="relative w-17 h-17">
             <Image src={image} alt={title} fill className="object-contain" />
-            {overlayImage && (
-              <div className="absolute inset-0 flex items-center justify-center z-10">
-                <Image src={overlayImage} alt="Overlay" width={55} height={55} />
-              </div>
-            )}
           </div>
           <p className="font-semibold text-[17px]">{title}</p>
         </div>
@@ -82,9 +95,10 @@ function EduCard({
             href={href}
             target={href.startsWith('http') ? '_blank' : undefined}
             rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+            onClick={onClick}
             className="text-sm text-blue-600 font-medium hover:underline whitespace-nowrap inline-flex items-center gap-1"
           >
-            Войти <ChevronRight size={16} />
+            {ctaLabel} <ChevronRight size={16} />
           </Link>
         </div>
       </div>

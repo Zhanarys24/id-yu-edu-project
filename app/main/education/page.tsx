@@ -5,10 +5,35 @@ import Layout from '@/components/Layout'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/context/AuthContext'
+import { educationService } from '@/lib/services/educationService'
+import { useEffect, useState } from 'react'
+import { EducationCard } from '@/lib/types/education'
 import '@/i18n'
 
 export default function EducationPage() {
   const { t } = useTranslation('common')
+  const { user } = useAuth()
+  const [cards, setCards] = useState<EducationCard[]>([])
+
+  useEffect(() => {
+    loadCards()
+  }, [])
+
+  const loadCards = () => {
+    try {
+      const educationCards = educationService.getCardsByCategory('education')
+      setCards(educationCards.filter(card => card.isActive).sort((a, b) => a.order - b.order))
+    } catch (error) {
+      console.error('Ошибка загрузки карточек:', error)
+    }
+  }
+
+  const handleCardClick = (card: EducationCard) => {
+    if (user) {
+      educationService.trackClick(card.id, user.id, user.email, user.name)
+    }
+  }
 
   return (
     <Layout active={'education'}>
@@ -17,27 +42,17 @@ export default function EducationPage() {
 
       {/* Адаптивная сетка */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
-        <EduCard
-          image="/canvas.png"
-          title={t('education.canvas')}
-          description={t('education.education_desc')}
-          href="https://canvas.instructure.com"
-          ctaLabel={t('education.sign_in')}
-        />
-        <EduCard
-          image="/platonus.png"
-          title={t('education.platonus')}
-          description={t('education.platonus_desc')}
-          href="https://platonus.kz"
-          ctaLabel={t('education.sign_in')}
-        />
-        <EduCard
-          image="/lessons.png"
-          title="lessons"
-          description={t('education.lessons_desc')}
-          href="https://meet.google.com"
-          ctaLabel={t('education.sign_in')}
-        />
+        {cards.map((card) => (
+          <EduCard
+            key={card.id}
+            image={card.image}
+            title={card.title}
+            description={card.description}
+            href={card.href}
+            ctaLabel={card.ctaLabel}
+            onClick={() => handleCardClick(card)}
+          />
+        ))}
       </div>
     </Layout>
   )
@@ -49,19 +64,21 @@ function EduCard({
   description,
   href,
   ctaLabel,
+  onClick
 }: {
   image: string
   title: string
   description: string
   href: string
   ctaLabel: string
+  onClick: () => void
 }) {
   return (
     <div
       className="
         bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52
         w-full max-w-full sm:max-w-[300px] lg:max-w-[420px] xl:max-w-[350px]
-        overflow-hidden transition-transform
+        overflow-hidden transition-transform hover:shadow-md
       "
     >
       <div className="flex items-center gap-4 mb-2">
@@ -84,6 +101,7 @@ function EduCard({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={onClick}
           className="text-sm text-blue-600 font-medium hover:underline whitespace-nowrap inline-flex items-center gap-1"
         >
           {ctaLabel} <ChevronRight size={16} />
