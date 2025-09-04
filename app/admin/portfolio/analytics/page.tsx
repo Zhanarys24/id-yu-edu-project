@@ -3,13 +3,14 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, BarChart3, Users, FileText, TrendingUp, Calendar, Award, BookOpen, Briefcase, Activity } from 'lucide-react';
+import { ArrowLeft, BarChart3, Users, FileText, TrendingUp, Calendar, Award, BookOpen, Briefcase, Activity, Download } from 'lucide-react';
 import { portfolioService } from '@/lib/services/portfolioService';
 import { userService } from '@/lib/services/userService';
 import { PortfolioItem } from '@/lib/types/portfolio';
 import { RegisteredUser } from '@/lib/types/user';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { exportPortfolioAnalyticsToExcel } from '@/lib/utils/excelExport';
 
 type PortfolioItemWithUser = PortfolioItem & {
   userName: string;
@@ -96,6 +97,37 @@ export default function PortfolioAnalyticsPage() {
 
     loadAnalytics();
   }, []);
+
+  const handleExportToExcel = () => {
+    try {
+      if (!analyticsData) return;
+      
+      // Подготавливаем данные для экспорта
+      const usersData = analyticsData.topUsers.map(({ user, itemCount }) => {
+        const userPortfolio = portfolioService.getUserPortfolio(user.id);
+        const itemsByType = userPortfolio.reduce((acc, item) => {
+          acc[item.type] = (acc[item.type] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        
+        const lastActivity = userPortfolio.length > 0 
+          ? userPortfolio.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0].createdAt
+          : undefined;
+
+        return {
+          user,
+          itemCount,
+          itemsByType,
+          lastActivity
+        };
+      });
+
+      exportPortfolioAnalyticsToExcel(usersData);
+    } catch (error) {
+      console.error('Ошибка экспорта в Excel:', error);
+      alert('Ошибка при экспорте данных');
+    }
+  };
 
   if (!canAccess('portfolio', 'manage')) {
     return (
@@ -256,24 +288,24 @@ export default function PortfolioAnalyticsPage() {
             </div>
           </Card>
 
-          {/* Топ пользователей */}
+          {/* Экспорт данных */}
           <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Топ пользователей</h3>
-            <div className="space-y-3">
-              {analyticsData.topUsers.slice(0, 5).map(({ user, itemCount }, index) => (
-                <div key={user.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                      <div className="text-xs text-gray-500">{user.email}</div>
-                    </div>
-                  </div>
-                  <span className="text-sm font-medium text-gray-900">{itemCount}</span>
-                </div>
-              ))}
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Экспорт данных</h3>
+            <div className="space-y-4">
+              <div className="text-sm text-gray-600 mb-4">
+                Экспортируйте данные о пользователях и их портфолио в Excel файл. 
+                В файле будет указано имя пользователя, email, роль и количество записей по каждому типу портфолио.
+              </div>
+              <Button
+                onClick={handleExportToExcel}
+                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Download size={16} />
+                Экспорт в Excel
+              </Button>
+              <div className="text-xs text-gray-500 text-center">
+                Будет экспортировано {analyticsData.topUsers.length} пользователей
+              </div>
             </div>
           </Card>
         </div>

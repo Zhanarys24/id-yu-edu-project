@@ -42,3 +42,14 @@ export interface CardAnalytics {
 }
 
 export type EducationCategory = 'education' | 'science' | 'upbringing';
+
+export interface UserClickData {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  category: EducationCategory;
+  cardId: string;
+  cardTitle: string;
+  clickedAt: string; // Last click time for this user-card interaction
+  clickCount: number; // Total clicks for this user-card interaction
+}

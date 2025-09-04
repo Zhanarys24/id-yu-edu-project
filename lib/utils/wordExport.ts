@@ -1,5 +1,6 @@
 import { PortfolioItem, PortfolioFile } from '@/lib/types/portfolio';
 import { RegisteredUser } from '@/lib/types/user';
+import { UserClickData, EducationCategory } from '@/lib/types/education';
 
 /**
  * Утилиты для экспорта портфолио в Word документ
@@ -650,6 +651,304 @@ const generateWordHTML = (user: RegisteredUser, portfolioItems: PortfolioItem[])
         <div class="footer-date">Документ сформирован ${currentDate}</div>
         <div style="margin-top: 8pt; font-size: 9pt;">
           Система управления портфолио
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+/**
+ * Экспорт данных о переходах по карточкам образования в Word документ
+ */
+export const exportEducationClicksToWord = (
+  clicksData: UserClickData[],
+  category?: EducationCategory
+): void => {
+  try {
+    // Создаем HTML контент для Word документа
+    const htmlContent = generateEducationClicksHTML(clicksData, category);
+    
+    // Создаем Blob с HTML контентом
+    const blob = new Blob([htmlContent], { 
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+    });
+    
+    // Создаем ссылку для скачивания
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const categoryName = category ? getCategoryName(category) : 'Все категории';
+    link.download = `Education_Clicks_${categoryName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.doc`;
+    
+    // Добавляем ссылку в DOM, кликаем и удаляем
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Освобождаем память
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Ошибка при экспорте в Word:', error);
+    alert('Произошла ошибка при экспорте документа');
+  }
+};
+
+const getCategoryName = (category: EducationCategory): string => {
+  switch (category) {
+    case 'education': return 'Образование';
+    case 'science': return 'Наука';
+    case 'upbringing': return 'Воспитание';
+    default: return category;
+  }
+};
+
+const generateEducationClicksHTML = (
+  clicksData: UserClickData[],
+  category?: EducationCategory
+): string => {
+  const currentDate = new Date().toLocaleDateString('ru-RU', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  // Группируем данные по категориям для статистики
+  const statsByCategory = clicksData.reduce((acc, click) => {
+    if (!acc[click.category]) {
+      acc[click.category] = {
+        totalClicks: 0,
+        uniqueUsers: new Set(),
+        cards: new Set()
+      };
+    }
+    acc[click.category].totalClicks += click.clickCount;
+    acc[click.category].uniqueUsers.add(click.userId);
+    acc[click.category].cards.add(click.cardId);
+    return acc;
+  }, {} as Record<EducationCategory, { totalClicks: number; uniqueUsers: Set<string>; cards: Set<string> }>);
+
+  // Создаем строки данных
+  const rows = clicksData.map((clickData, index) => {
+    const clickDate = new Date(clickData.clickedAt);
+    const formattedDate = clickDate.toLocaleDateString('ru-RU');
+    const formattedTime = clickDate.toLocaleTimeString('ru-RU', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+    
+    return `
+      <tr>
+        <td style="text-align: center; font-weight: bold;">${index + 1}</td>
+        <td style="font-weight: bold; color: #2c5aa0;">${clickData.userName}</td>
+        <td>${clickData.userEmail}</td>
+        <td style="font-weight: bold; color: #1a1a1a;">${getCategoryName(clickData.category)}</td>
+        <td style="font-weight: bold; color: #1a1a1a;">${clickData.cardTitle}</td>
+        <td style="text-align: center; font-weight: bold; background-color: #e8f4fd;">${clickData.clickCount}</td>
+        <td style="text-align: center;">${formattedDate}</td>
+        <td style="text-align: center;">${formattedTime}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Создаем итоговую строку
+  const totalClicks = clicksData.reduce((sum, click) => sum + click.clickCount, 0);
+  const totalUsers = new Set(clicksData.map(click => click.userId)).size;
+  const totalCards = new Set(clicksData.map(click => click.cardId)).size;
+
+  const totalRow = `
+    <tr style="background-color: #f8f9fa; font-weight: bold;">
+      <td style="text-align: center;">ИТОГО</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td style="text-align: center; background-color: #e8f4fd;">${totalClicks}</td>
+      <td></td>
+      <td></td>
+    </tr>
+  `;
+
+  return `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:w="urn:schemas-microsoft-com:office:word"
+          xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <title>Отчет по переходам по карточкам образования</title>
+      <!--[if gte mso 9]>
+      <xml>
+        <w:WordDocument>
+          <w:View>Print</w:View>
+          <w:Zoom>90</w:Zoom>
+          <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+      </xml>
+      <![endif]-->
+      <style>
+        body {
+          font-family: 'Times New Roman', serif;
+          font-size: 12pt;
+          line-height: 1.15;
+          color: #000;
+          margin: 0;
+          padding: 20pt;
+          background: white;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 30pt;
+          border-bottom: 2pt solid #2c5aa0;
+          padding-bottom: 15pt;
+        }
+        .title {
+          font-size: 18pt;
+          font-weight: bold;
+          color: #2c5aa0;
+          margin-bottom: 8pt;
+        }
+        .subtitle {
+          font-size: 14pt;
+          color: #666;
+          margin-bottom: 5pt;
+        }
+        .date {
+          font-size: 11pt;
+          color: #888;
+        }
+        .stats {
+          margin: 20pt 0;
+          padding: 15pt;
+          background-color: #f8f9fa;
+          border-left: 4pt solid #2c5aa0;
+        }
+        .stats-title {
+          font-size: 14pt;
+          font-weight: bold;
+          color: #2c5aa0;
+          margin-bottom: 10pt;
+        }
+        .stats-grid {
+          display: table;
+          width: 100%;
+          border-collapse: collapse;
+        }
+        .stats-row {
+          display: table-row;
+        }
+        .stats-cell {
+          display: table-cell;
+          padding: 5pt 10pt;
+          border: 1pt solid #ddd;
+          background-color: white;
+        }
+        .stats-label {
+          font-weight: bold;
+          background-color: #e8f4fd;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 20pt 0;
+          font-size: 11pt;
+        }
+        th {
+          background-color: #2c5aa0;
+          color: white;
+          font-weight: bold;
+          text-align: center;
+          padding: 8pt;
+          border: 1pt solid #1e3a5f;
+        }
+        td {
+          padding: 6pt;
+          border: 1pt solid #ddd;
+          vertical-align: top;
+        }
+        tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+        .footer {
+          margin-top: 30pt;
+          text-align: center;
+          font-size: 10pt;
+          color: #666;
+          border-top: 1pt solid #ddd;
+          padding-top: 10pt;
+        }
+        .footer-university {
+          font-weight: bold;
+          color: #2c5aa0;
+        }
+        .footer-date {
+          margin-top: 5pt;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="title">ОТЧЕТ ПО ПЕРЕХОДАМ ПО КАРТОЧКАМ ОБРАЗОВАНИЯ</div>
+        <div class="subtitle">Университет имени Есенова (YU)</div>
+        <div class="subtitle">${category ? `Категория: ${getCategoryName(category)}` : 'Все категории'}</div>
+        <div class="date">Дата формирования: ${currentDate}</div>
+      </div>
+
+      <div class="stats">
+        <div class="stats-title">Общая статистика</div>
+        <div class="stats-grid">
+          <div class="stats-row">
+            <div class="stats-cell stats-label">Всего переходов:</div>
+            <div class="stats-cell">${totalClicks}</div>
+            <div class="stats-cell stats-label">Уникальных пользователей:</div>
+            <div class="stats-cell">${totalUsers}</div>
+          </div>
+          <div class="stats-row">
+            <div class="stats-cell stats-label">Карточек задействовано:</div>
+            <div class="stats-cell">${totalCards}</div>
+            <div class="stats-cell stats-label">Период:</div>
+            <div class="stats-cell">${currentDate}</div>
+          </div>
+        </div>
+      </div>
+
+      ${Object.keys(statsByCategory).length > 1 ? `
+        <div class="stats">
+          <div class="stats-title">Статистика по категориям</div>
+          <div class="stats-grid">
+            ${Object.entries(statsByCategory).map(([cat, stats]) => `
+              <div class="stats-row">
+                <div class="stats-cell stats-label">${getCategoryName(cat as EducationCategory)}:</div>
+                <div class="stats-cell">${stats.totalClicks} переходов, ${stats.uniqueUsers.size} пользователей, ${stats.cards.size} карточек</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+      
+      <table>
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Имя пользователя</th>
+            <th>Email</th>
+            <th>Категория</th>
+            <th>Название карточки</th>
+            <th>Количество переходов</th>
+            <th>Дата перехода</th>
+            <th>Время перехода</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+          ${totalRow}
+        </tbody>
+      </table>
+
+      <div class="footer">
+        <div class="footer-university">Университет имени Есенова (YU)</div>
+        <div class="footer-date">Документ сформирован ${currentDate}</div>
+        <div style="margin-top: 8pt; font-size: 9pt;">
+          Система управления образованием
         </div>
       </div>
     </body>

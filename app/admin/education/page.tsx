@@ -9,24 +9,22 @@ import {
   Plus, 
   Edit, 
   Trash2, 
-  Eye, 
   BarChart3,
-  Users,
   MousePointer,
-  Calendar,
-  Filter,
   Search,
   Save,
   X,
   BookOpen,
   Atom,
-  Heart
+  Heart,
+  Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { educationService } from '@/lib/services/educationService';
 import { EducationCard, CardAnalytics, EducationCategory } from '@/lib/types/education';
+import { exportEducationClicksToWord } from '@/lib/utils/wordExport';
 
 export default function AdminEducationPage() {
   const { user, canAccess } = useAuth();
@@ -121,6 +119,20 @@ export default function AdminEducationPage() {
     }
   };
 
+  const handleExportToWord = () => {
+    try {
+      const clicksData = educationService.getUserClicksData(selectedCategory);
+      if (clicksData.length === 0) {
+        alert('Нет данных о переходах для экспорта');
+        return;
+      }
+      exportEducationClicksToWord(clicksData, selectedCategory);
+    } catch (error) {
+      console.error('Ошибка экспорта в Word:', error);
+      alert('Ошибка при экспорте данных');
+    }
+  };
+
   const getCategoryInfo = (category: EducationCategory) => {
     switch (category) {
       case 'education':
@@ -211,6 +223,14 @@ export default function AdminEducationPage() {
               >
                 <BarChart3 size={16} />
                 {showAnalytics ? 'Скрыть аналитику' : 'Показать аналитику'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleExportToWord}
+                className="flex items-center gap-2 bg-white/80 hover:bg-white border-green-200 hover:border-green-300 text-green-700 hover:text-green-900 shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                <Download size={16} />
+                Экспорт в Word
               </Button>
               <Button
                 onClick={handleCreateCard}

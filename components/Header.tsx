@@ -287,7 +287,7 @@ export default function Header() {
         )}
       </div>
       
-      {/* Test button for birthday notification */}
+      {/* Test button for birthday notification
       <button
         onClick={() => {
           const today = new Date()
@@ -305,7 +305,7 @@ export default function Header() {
         title="Добавить тестовое поздравление с днем рождения"
       >
         🎂 Тест
-      </button>
+      </button> */}
 
       <select
         className="text-sm border border-gray-300 rounded px-2 py-1"

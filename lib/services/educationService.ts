@@ -1,4 +1,4 @@
-import { EducationCard, CardClick, CardAnalytics, EducationCategory } from '@/lib/types/education';
+import { EducationCard, CardClick, CardAnalytics, EducationCategory, UserClickData } from '@/lib/types/education';
 
 class EducationService {
   private readonly CARDS_KEY = 'education_cards';
@@ -160,6 +160,52 @@ class EducationService {
   getAnalyticsByCategory(category: EducationCategory): CardAnalytics[] {
     const cards = this.getCardsByCategory(category);
     return cards.map(card => this.getCardAnalytics(card.id)).filter(Boolean) as CardAnalytics[];
+  }
+
+  // Получение данных о переходах для экспорта
+  getUserClicksData(category?: EducationCategory): UserClickData[] {
+    const allClicks = this.getAllClicks();
+    const cards = this.getAllCards();
+    
+    // Фильтруем клики по категории, если указана
+    const filteredClicks = category 
+      ? allClicks.filter(click => {
+          const card = cards.find(c => c.id === click.cardId);
+          return card && card.category === category;
+        })
+      : allClicks;
+
+    // Группируем клики по пользователю и карточке для подсчета количества переходов
+    const groupedClicks = filteredClicks.reduce((acc, click) => {
+      const key = `${click.userId}-${click.cardId}`;
+      if (!acc[key]) {
+        const card = cards.find(c => c.id === click.cardId);
+        if (card) {
+          acc[key] = {
+            userId: click.userId,
+            userName: click.userName,
+            userEmail: click.userEmail,
+            cardId: click.cardId,
+            cardTitle: card.title,
+            category: card.category,
+            clickedAt: click.clickedAt,
+            clickCount: 1
+          };
+        }
+      } else {
+        acc[key].clickCount++;
+        // Обновляем дату на самую последнюю
+        if (new Date(click.clickedAt) > new Date(acc[key].clickedAt)) {
+          acc[key].clickedAt = click.clickedAt;
+        }
+      }
+      return acc;
+    }, {} as Record<string, UserClickData>);
+
+    // Преобразуем в массив и сортируем по дате (сначала новые)
+    return Object.values(groupedClicks).sort((a, b) => 
+      new Date(b.clickedAt).getTime() - new Date(a.clickedAt).getTime()
+    );
   }
 
   // Приватные методы
