@@ -1,5 +1,5 @@
 import { RegisteredUser } from '@/lib/types/user';
-import { UserNewsClickData, NewsCategory } from '@/lib/types/news';
+import { NewsClickData, NewsCategory } from '@/lib/types/news';
 
 /**
  * Экспорт данных портфолио пользователей в Excel файл
@@ -205,7 +205,7 @@ const generatePortfolioAnalyticsHTML = (
  * Экспорт данных о переходах по новостям в Excel файл
  */
 export const exportNewsClicksToExcel = (
-  clicksData: UserNewsClickData[],
+  clicksData: NewsClickData[],
   category?: NewsCategory
 ): void => {
   try {
@@ -237,21 +237,11 @@ export const exportNewsClicksToExcel = (
 };
 
 const getCategoryName = (category: NewsCategory): string => {
-  const categoryNames: Record<NewsCategory, string> = {
-    rating: 'Рейтинги',
-    international: 'Международное сотрудничество',
-    science: 'Наука',
-    management: 'Управление',
-    cooperation: 'Сотрудничество',
-    opening: 'Открытие',
-    achievements: 'Достижения',
-    olympiad: 'Олимпиада'
-  };
-  return categoryNames[category] || category;
+  return category.name;
 };
 
 const generateNewsClicksHTML = (
-  clicksData: UserNewsClickData[],
+  clicksData: NewsClickData[],
   category?: NewsCategory
 ): string => {
   const currentDate = new Date().toLocaleDateString('ru-RU');
@@ -263,9 +253,9 @@ const generateNewsClicksHTML = (
         <td style="text-align: center; font-weight: bold;">${index + 1}</td>
         <td style="font-weight: bold; color: #2c5aa0;">${clickData.userName}</td>
         <td>${clickData.userEmail}</td>
-        <td style="font-weight: bold; color: #1a1a1a;">${clickData.newsTitle}</td>
-        <td style="text-align: center; background-color: #e8f4fd;">${getCategoryName(clickData.category)}</td>
-        <td style="text-align: center; font-weight: bold; background-color: #e8f4fd;">${clickData.clickCount}</td>
+        <td style="font-weight: bold; color: #1a1a1a;">Новость ID: ${clickData.newsId}</td>
+        <td style="text-align: center; background-color: #e8f4fd;">${category ? getCategoryName(category) : 'Все категории'}</td>
+        <td style="text-align: center; font-weight: bold; background-color: #e8f4fd;">1</td>
         <td style="text-align: center;">${new Date(clickData.clickedAt).toLocaleDateString('ru-RU')}</td>
         <td style="text-align: center;">${new Date(clickData.clickedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</td>
       </tr>
@@ -280,7 +270,7 @@ const generateNewsClicksHTML = (
       <td></td>
       <td></td>
       <td></td>
-      <td style="text-align: center; background-color: #e8f4fd;">${clicksData.reduce((sum, click) => sum + click.clickCount, 0)}</td>
+      <td style="text-align: center; background-color: #e8f4fd;">${clicksData.length}</td>
       <td></td>
       <td></td>
     </tr>

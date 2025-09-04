@@ -31,36 +31,36 @@ export default function Sidebar({ active }: { active?: string }) {
 
   const menuItems = user?.role === 'anonymous' 
     ? [
-        { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
-        { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
-        { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
-        { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
-        { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
-        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
+        { icon: <Monitor size={20} />, label: 'Новости', href: '/main/news' },
+        { icon: <Calendar size={20} />, label: 'Календарь', href: '/main/calendar' },
+        { icon: <GraduationCap size={20} />, label: 'Образование', href: '/main/education' },
+        { icon: <BookOpen size={20} />, label: 'Наука', href: '/main/science' },
+        { icon: <Users size={20} />, label: 'Воспитание', href: '/main/upbringing' },
+        { icon: <FileText size={20} />, label: 'Электронные услуги', href: '/main/E-services' },
       ]
     : [
-        { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
-        { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
-        { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
-        { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
-        { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
-        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
-        { icon: <Bot size={20} />, label: t('menu.yessenovai'), href: '/main/yessenovbot' },
-        { icon: <Coins size={20} />, label: t('YU-Gamification'), href: '/YU-Gamification' },
+        { icon: <Monitor size={20} />, label: 'Новости', href: '/main/news' },
+        { icon: <Calendar size={20} />, label: 'Календарь', href: '/main/calendar' },
+        { icon: <GraduationCap size={20} />, label: 'Образование', href: '/main/education' },
+        { icon: <BookOpen size={20} />, label: 'Наука', href: '/main/science' },
+        { icon: <Users size={20} />, label: 'Воспитание', href: '/main/upbringing' },
+        { icon: <FileText size={20} />, label: 'Электронные услуги', href: '/main/E-services' },
+        { icon: <Bot size={20} />, label: 'YessenovAI', href: '/main/yessenovbot' },
+        { icon: <Coins size={20} />, label: 'YU-Геймификация', href: '/YU-Gamification' },
       ]
 
   const portfolioItems = [
-    { icon: <FileUser size={16} />, label: t('portfolio.general'), href: '/portfolio?tab=general' },
-    { icon: <BookMarked size={16} />, label: t('portfolio.publications'), href: '/portfolio?tab=publications' },
-    { icon: <GraduationCap size={16} />, label: t('portfolio.teaching'), href: '/portfolio?tab=teaching' },
-    { icon: <Trophy size={16} />, label: t('portfolio.achievements'), href: '/portfolio?tab=achievements' },
-    { icon: <Briefcase size={16} />, label: t('portfolio.additional'), href: '/portfolio?tab=additional' },
+    { icon: <FileUser size={16} />, label: 'Общие данные', href: '/portfolio?tab=general' },
+    { icon: <BookMarked size={16} />, label: 'Публикации', href: '/portfolio?tab=publications' },
+    { icon: <GraduationCap size={16} />, label: 'Преподавательская деятельность', href: '/portfolio?tab=teaching' },
+    { icon: <Trophy size={16} />, label: 'Достижения', href: '/portfolio?tab=achievements' },
+    { icon: <Briefcase size={16} />, label: 'Дополнительно', href: '/portfolio?tab=additional' },
   ]
 
   const accountItems = user?.role === 'anonymous' 
     ? []
     : [
-        { icon: <Settings size={20} />, label: t('account.settings'), href: '/main/site-settings' },
+        { icon: <Settings size={20} />, label: 'Настройки', href: '/main/site-settings' },
       ]
 
   return (
@@ -84,7 +84,7 @@ export default function Sidebar({ active }: { active?: string }) {
               />
               <div>
                 <p className="font">{userName}</p>
-                <p className="text-sm text-gray-500">{userPosition || t('profile.teacher')}</p>
+                <p className="text-sm text-gray-500">{userPosition || 'Преподаватель'}</p>
               </div>
             </div>
 
@@ -112,7 +112,7 @@ export default function Sidebar({ active }: { active?: string }) {
           </div>
 
           <div className="text-sm space-y-2 mt-8">
-            <p className="text-gray-500">{t('groups.account').toUpperCase()}</p>
+            <p className="text-gray-500">АККАУНТ</p>
 
             {/* Портфолио - только для авторизованных пользователей */}
             {user?.role !== 'anonymous' && (
@@ -128,7 +128,7 @@ export default function Sidebar({ active }: { active?: string }) {
               >
                 <div className="flex items-center gap-2">
                   <BriefcaseBusiness size={20} />
-                  <span>{t('groups.portfolio')}</span>
+                  <span>Портфолио</span>
                 </div>
                 {portfolioOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
               </button>
@@ -165,7 +165,7 @@ export default function Sidebar({ active }: { active?: string }) {
               onClick={handleLogout}
               className="flex items-center gap-2 pl-3 pr-2 py-2 rounded w-full transition text-sm text-red-500 hover:bg-gray-100 font-medium"
             >
-              <LogOut size={20} /> {t('account.logout')}
+              <LogOut size={20} /> Выйти
             </button>
           </div>
         </div>

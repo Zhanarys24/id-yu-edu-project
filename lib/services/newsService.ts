@@ -1,354 +1,462 @@
-import { NewsItem, NewsClick, NewsAnalytics, UserNewsClickData, NewsCategory, NEWS_CATEGORIES } from '@/lib/types/news';
+import { 
+  NewsItem, 
+  NewsCategory, 
+  NewsTag, 
+  NewsClickData, 
+  NewsAnalytics, 
+  NewsDatabase, 
+  NewsStatus,
+  INITIAL_NEWS_CATEGORIES,
+  INITIAL_NEWS_TAGS
+} from '@/lib/types/news';
+import { RegisteredUser } from '@/lib/types/user';
+import { createExampleNews } from './exampleNewsData';
 
 class NewsService {
-  private readonly NEWS_KEY = 'news_items';
-  private readonly CLICKS_KEY = 'news_clicks';
+  private readonly STORAGE_KEY = 'news_database';
 
-  // Управление новостями
-  getAllNews(): NewsItem[] {
-    try {
-      const news = localStorage.getItem(this.NEWS_KEY);
-      return news ? JSON.parse(news) : this.getInitialNews();
-    } catch (error) {
-      console.error('Ошибка загрузки новостей:', error);
-      return this.getInitialNews();
+  private getDatabase(): NewsDatabase {
+    if (typeof window === 'undefined') {
+      return {
+        news: [],
+        categories: INITIAL_NEWS_CATEGORIES,
+        tags: INITIAL_NEWS_TAGS,
+        clicks: [],
+        nextNewsId: 1,
+        nextCategoryId: INITIAL_NEWS_CATEGORIES.length + 1,
+        nextTagId: INITIAL_NEWS_TAGS.length + 1,
+        nextClickId: 1
+      };
     }
+
+    const stored = localStorage.getItem(this.STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        return {
+          ...parsed,
+          categories: parsed.categories || INITIAL_NEWS_CATEGORIES,
+          tags: parsed.tags || INITIAL_NEWS_TAGS,
+          nextCategoryId: parsed.nextCategoryId || INITIAL_NEWS_CATEGORIES.length + 1,
+          nextTagId: parsed.nextTagId || INITIAL_NEWS_TAGS.length + 1,
+        };
+      } catch (error) {
+        console.error('Error parsing news database:', error);
+      }
+    }
+
+    // Если база данных пустая, создаем примеры новостей
+    const exampleNews = createExampleNews();
+    
+    return {
+      news: exampleNews,
+      categories: INITIAL_NEWS_CATEGORIES,
+      tags: INITIAL_NEWS_TAGS,
+      clicks: [],
+      nextNewsId: exampleNews.length + 1,
+      nextCategoryId: INITIAL_NEWS_CATEGORIES.length + 1,
+      nextTagId: INITIAL_NEWS_TAGS.length + 1,
+      nextClickId: 1
+    };
   }
 
-  getNewsByCategory(category: NewsCategory): NewsItem[] {
-    return this.getAllNews().filter(news => news.category === category);
+  private saveDatabase(database: NewsDatabase): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(database));
+  }
+
+  // News CRUD operations
+  getAllNews(): NewsItem[] {
+    const database = this.getDatabase();
+    return database.news.map(news => ({
+      ...news,
+      category: database.categories.find(cat => cat.id === news.categoryId),
+      tagObjects: database.tags.filter(tag => news.tags.includes(tag.id))
+    }));
   }
 
   getNewsById(id: string): NewsItem | null {
-    const news = this.getAllNews();
-    return news.find(item => item.id === id) || null;
-  }
+    const database = this.getDatabase();
+    const news = database.news.find(n => n.id === id);
+    if (!news) return null;
 
-  getActiveNews(): NewsItem[] {
-    return this.getAllNews().filter(news => news.isActive).sort((a, b) => a.order - b.order);
-  }
-
-  createNews(news: Omit<NewsItem, 'id' | 'createdAt' | 'updatedAt'>): NewsItem {
-    const allNews = this.getAllNews();
-    const newNews: NewsItem = {
+    return {
       ...news,
-      id: this.generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      category: database.categories.find(cat => cat.id === news.categoryId),
+      tagObjects: database.tags.filter(tag => news.tags.includes(tag.id))
     };
-    
-    allNews.push(newNews);
-    this.saveNews(allNews);
-    return newNews;
   }
 
-  updateNews(id: string, updates: Partial<Omit<NewsItem, 'id' | 'createdAt'>>): boolean {
-    const allNews = this.getAllNews();
-    const index = allNews.findIndex(news => news.id === id);
+  getPublishedNews(): NewsItem[] {
+    return this.getAllNews().filter(news => news.status === 'published');
+  }
+
+  getNewsByStatus(status: NewsStatus): NewsItem[] {
+    return this.getAllNews().filter(news => news.status === status);
+  }
+
+  getNewsByCategory(categoryId: string): NewsItem[] {
+    return this.getAllNews().filter(news => news.categoryId === categoryId);
+  }
+
+  getNewsByTag(tagId: string): NewsItem[] {
+    return this.getAllNews().filter(news => news.tags.includes(tagId));
+  }
+
+  getFeaturedNews(): NewsItem[] {
+    return this.getPublishedNews().filter(news => news.isFeatured);
+  }
+
+  getBreakingNews(): NewsItem[] {
+    return this.getPublishedNews().filter(news => news.isBreaking);
+  }
+
+  createNews(newsData: Omit<NewsItem, 'id' | 'createdAt' | 'updatedAt' | 'viewCount'>): NewsItem {
+    const database = this.getDatabase();
+    const now = new Date().toISOString();
     
-    if (index === -1) return false;
+    const newNews: NewsItem = {
+      ...newsData,
+      id: database.nextNewsId.toString(),
+      viewCount: 0,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    database.news.push(newNews);
+    database.nextNewsId++;
+    this.saveDatabase(database);
+
+    return this.getNewsById(newNews.id)!;
+  }
+
+  updateNews(id: string, updates: Partial<Omit<NewsItem, 'id' | 'createdAt' | 'viewCount'>>): NewsItem | null {
+    const database = this.getDatabase();
+    const newsIndex = database.news.findIndex(n => n.id === id);
     
-    allNews[index] = {
-      ...allNews[index],
+    if (newsIndex === -1) return null;
+
+    database.news[newsIndex] = {
+      ...database.news[newsIndex],
       ...updates,
       updatedAt: new Date().toISOString()
     };
-    
-    this.saveNews(allNews);
-    return true;
+
+    this.saveDatabase(database);
+    return this.getNewsById(id);
   }
 
   deleteNews(id: string): boolean {
-    const allNews = this.getAllNews();
-    const filteredNews = allNews.filter(news => news.id !== id);
+    const database = this.getDatabase();
+    const newsIndex = database.news.findIndex(n => n.id === id);
     
-    if (filteredNews.length === allNews.length) return false;
-    
-    this.saveNews(filteredNews);
-    // Также удаляем все клики по этой новости
-    this.deleteClicksByNewsId(id);
+    if (newsIndex === -1) return false;
+
+    database.news.splice(newsIndex, 1);
+    this.saveDatabase(database);
     return true;
   }
 
-  // Отслеживание кликов
-  trackClick(newsId: string, userId: string, userEmail: string, userName: string): void {
-    const clicks = this.getAllClicks();
-    const newClick: NewsClick = {
-      id: this.generateId(),
-      newsId,
-      userId,
-      userEmail,
-      userName,
-      clickedAt: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      ipAddress: 'unknown' // В реальном приложении получали бы с сервера
-    };
-    
-    clicks.push(newClick);
-    this.saveClicks(clicks);
+  publishNews(id: string): NewsItem | null {
+    return this.updateNews(id, {
+      status: 'published',
+      publishedAt: new Date().toISOString()
+    });
   }
 
-  getAllClicks(): NewsClick[] {
-    try {
-      const clicks = localStorage.getItem(this.CLICKS_KEY);
-      return clicks ? JSON.parse(clicks) : [];
-    } catch (error) {
-      console.error('Ошибка загрузки кликов:', error);
-      return [];
+  archiveNews(id: string): NewsItem | null {
+    return this.updateNews(id, {
+      status: 'archived',
+      archivedAt: new Date().toISOString()
+    });
+  }
+
+  incrementViewCount(id: string): void {
+    const database = this.getDatabase();
+    const news = database.news.find(n => n.id === id);
+    if (news) {
+      news.viewCount++;
+      this.saveDatabase(database);
     }
   }
 
-  getClicksByNewsId(newsId: string): NewsClick[] {
+  // Categories CRUD operations
+  getAllCategories(): NewsCategory[] {
+    const database = this.getDatabase();
+    return database.categories;
+  }
+
+  getCategoryById(id: string): NewsCategory | null {
+    const database = this.getDatabase();
+    return database.categories.find(cat => cat.id === id) || null;
+  }
+
+  createCategory(categoryData: Omit<NewsCategory, 'id' | 'createdAt' | 'updatedAt'>): NewsCategory {
+    const database = this.getDatabase();
+    const now = new Date().toISOString();
+    
+    const newCategory: NewsCategory = {
+      ...categoryData,
+      id: database.nextCategoryId.toString(),
+      createdAt: now,
+      updatedAt: now
+    };
+
+    database.categories.push(newCategory);
+    database.nextCategoryId++;
+    this.saveDatabase(database);
+
+    return newCategory;
+  }
+
+  updateCategory(id: string, updates: Partial<Omit<NewsCategory, 'id' | 'createdAt'>>): NewsCategory | null {
+    const database = this.getDatabase();
+    const categoryIndex = database.categories.findIndex(cat => cat.id === id);
+    
+    if (categoryIndex === -1) return null;
+
+    database.categories[categoryIndex] = {
+      ...database.categories[categoryIndex],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+
+    this.saveDatabase(database);
+    return database.categories[categoryIndex];
+  }
+
+  deleteCategory(id: string): boolean {
+    const database = this.getDatabase();
+    const categoryIndex = database.categories.findIndex(cat => cat.id === id);
+    
+    if (categoryIndex === -1) return false;
+
+    // Check if any news uses this category
+    const newsUsingCategory = database.news.some(news => news.categoryId === id);
+    if (newsUsingCategory) {
+      throw new Error('Cannot delete category that is being used by news items');
+    }
+
+    database.categories.splice(categoryIndex, 1);
+    this.saveDatabase(database);
+    return true;
+  }
+
+  // Tags CRUD operations
+  getAllTags(): NewsTag[] {
+    const database = this.getDatabase();
+    return database.tags;
+  }
+
+  getTagById(id: string): NewsTag | null {
+    const database = this.getDatabase();
+    return database.tags.find(tag => tag.id === id) || null;
+  }
+
+  createTag(tagData: Omit<NewsTag, 'id' | 'createdAt' | 'updatedAt'>): NewsTag {
+    const database = this.getDatabase();
+    const now = new Date().toISOString();
+    
+    const newTag: NewsTag = {
+      ...tagData,
+      id: database.nextTagId.toString(),
+      createdAt: now,
+      updatedAt: now
+    };
+
+    database.tags.push(newTag);
+    database.nextTagId++;
+    this.saveDatabase(database);
+
+    return newTag;
+  }
+
+  updateTag(id: string, updates: Partial<Omit<NewsTag, 'id' | 'createdAt'>>): NewsTag | null {
+    const database = this.getDatabase();
+    const tagIndex = database.tags.findIndex(tag => tag.id === id);
+    
+    if (tagIndex === -1) return null;
+
+    database.tags[tagIndex] = {
+      ...database.tags[tagIndex],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+
+    this.saveDatabase(database);
+    return database.tags[tagIndex];
+  }
+
+  deleteTag(id: string): boolean {
+    const database = this.getDatabase();
+    const tagIndex = database.tags.findIndex(tag => tag.id === id);
+    
+    if (tagIndex === -1) return false;
+
+    // Remove tag from all news items
+    database.news.forEach(news => {
+      news.tags = news.tags.filter(tagId => tagId !== id);
+    });
+
+    database.tags.splice(tagIndex, 1);
+    this.saveDatabase(database);
+    return true;
+  }
+
+  // Click tracking
+  trackNewsClick(newsId: string, user: RegisteredUser, userAgent?: string, ipAddress?: string): void {
+    const database = this.getDatabase();
+    const now = new Date().toISOString();
+    
+    const clickData: NewsClickData = {
+      id: database.nextClickId.toString(),
+      newsId,
+      userId: user.id,
+      userName: user.name,
+      userEmail: user.email,
+      clickedAt: now,
+      userAgent,
+      ipAddress
+    };
+
+    database.clicks.push(clickData);
+    database.nextClickId++;
+    this.saveDatabase(database);
+
+    // Increment view count
+    this.incrementViewCount(newsId);
+  }
+
+  getAllClicks(): NewsClickData[] {
+    const database = this.getDatabase();
+    return database.clicks;
+  }
+
+  getClicksByNewsId(newsId: string): NewsClickData[] {
     return this.getAllClicks().filter(click => click.newsId === newsId);
   }
 
-  getClicksByUserId(userId: string): NewsClick[] {
+  getClicksByUserId(userId: string): NewsClickData[] {
     return this.getAllClicks().filter(click => click.userId === userId);
   }
 
-  // Аналитика
-  getNewsAnalytics(newsId: string): NewsAnalytics | null {
-    const news = this.getNewsById(newsId);
-    if (!news) return null;
+  // Analytics
+  getAnalytics(): NewsAnalytics {
+    const database = this.getDatabase();
+    const allNews = this.getAllNews();
+    const allClicks = this.getAllClicks();
 
-    const clicks = this.getClicksByNewsId(newsId);
-    const uniqueUsers = new Set(clicks.map(click => click.userId)).size;
-    
-    // Группировка кликов по пользователям
-    const clicksByUser = clicks.reduce((acc, click) => {
-      const existing = acc.find(item => item.userId === click.userId);
-      if (existing) {
-        existing.clickCount++;
-        if (new Date(click.clickedAt) > new Date(existing.lastClick)) {
-          existing.lastClick = click.clickedAt;
-        }
-      } else {
-        acc.push({
-          userId: click.userId,
-          userName: click.userName,
-          userEmail: click.userEmail,
-          clickCount: 1,
-          lastClick: click.clickedAt
-        });
-      }
-      return acc;
-    }, [] as NewsAnalytics['clicksByUser']);
+    const publishedNews = allNews.filter(news => news.status === 'published');
+    const scheduledNews = allNews.filter(news => news.status === 'scheduled');
+    const archivedNews = allNews.filter(news => news.status === 'archived');
 
-    // Группировка кликов по датам
-    const clicksByDate = clicks.reduce((acc, click) => {
-      const date = click.clickedAt.split('T')[0];
-      const existing = acc.find(item => item.date === date);
-      if (existing) {
-        existing.clicks++;
-      } else {
-        acc.push({ date, clicks: 1 });
-      }
-      return acc;
-    }, [] as NewsAnalytics['clicksByDate']);
+    const totalViews = allNews.reduce((sum, news) => sum + news.viewCount, 0);
+    const totalClicks = allClicks.length;
+    const uniqueReaders = new Set(allClicks.map(click => click.userId)).size;
+
+    // Top news by views and clicks
+    const topNews = publishedNews
+      .map(news => ({
+        news,
+        viewCount: news.viewCount,
+        clickCount: allClicks.filter(click => click.newsId === news.id).length
+      }))
+      .sort((a, b) => (b.viewCount + b.clickCount) - (a.viewCount + a.clickCount))
+      .slice(0, 10);
+
+    // Top categories
+    const topCategories = database.categories.map(category => {
+      const categoryNews = allNews.filter(news => news.categoryId === category.id);
+      const newsCount = categoryNews.length;
+      const viewCount = categoryNews.reduce((sum, news) => sum + news.viewCount, 0);
+      
+      return { category, newsCount, viewCount };
+    }).sort((a, b) => b.newsCount - a.newsCount);
+
+    // Top tags
+    const topTags = database.tags.map(tag => {
+      const newsCount = allNews.filter(news => news.tags.includes(tag.id)).length;
+      return { tag, newsCount };
+    }).filter(item => item.newsCount > 0)
+      .sort((a, b) => b.newsCount - a.newsCount);
+
+    // Recent clicks
+    const recentClicks = allClicks
+      .sort((a, b) => new Date(b.clickedAt).getTime() - new Date(a.clickedAt).getTime())
+      .slice(0, 20);
+
+    // Views by date (last 30 days)
+    const viewsByDate: Array<{ date: string; views: number; clicks: number }> = [];
+    const today = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const dayClicks = allClicks.filter(click => 
+        click.clickedAt.startsWith(dateStr)
+      );
+      
+      const dayViews = allNews.reduce((sum, news) => {
+        // This is a simplified calculation - in real app you'd track daily views
+        return sum + Math.floor(news.viewCount / 30);
+      }, 0);
+
+      viewsByDate.push({
+        date: dateStr,
+        views: dayViews,
+        clicks: dayClicks.length
+      });
+    }
 
     return {
-      newsId,
-      newsTitle: news.title,
-      totalClicks: clicks.length,
-      uniqueUsers,
-      clicksByUser: clicksByUser.sort((a, b) => b.clickCount - a.clickCount),
-      clicksByDate: clicksByDate.sort((a, b) => a.date.localeCompare(b.date))
+      totalNews: allNews.length,
+      publishedNews: publishedNews.length,
+      scheduledNews: scheduledNews.length,
+      archivedNews: archivedNews.length,
+      totalViews,
+      totalClicks,
+      uniqueReaders,
+      topNews,
+      topCategories,
+      topTags,
+      recentClicks,
+      viewsByDate
     };
   }
 
-  getAllAnalytics(): NewsAnalytics[] {
-    const news = this.getAllNews();
-    return news.map(news => this.getNewsAnalytics(news.id)).filter(Boolean) as NewsAnalytics[];
-  }
-
-  getAnalyticsByCategory(category: NewsCategory): NewsAnalytics[] {
-    const news = this.getNewsByCategory(category);
-    return news.map(news => this.getNewsAnalytics(news.id)).filter(Boolean) as NewsAnalytics[];
-  }
-
-  // Получение данных о переходах для экспорта
-  getUserClicksData(category?: NewsCategory): UserNewsClickData[] {
-    const allClicks = this.getAllClicks();
-    const news = this.getAllNews();
+  // Search functionality
+  searchNews(query: string): NewsItem[] {
+    const allNews = this.getAllNews();
+    const lowercaseQuery = query.toLowerCase();
     
-    // Фильтруем клики по категории, если указана
-    const filteredClicks = category 
-      ? allClicks.filter(click => {
-          const newsItem = news.find(n => n.id === click.newsId);
-          return newsItem && newsItem.category === category;
-        })
-      : allClicks;
-
-    // Группируем клики по пользователю и новости для подсчета количества переходов
-    const groupedClicks = filteredClicks.reduce((acc, click) => {
-      const key = `${click.userId}-${click.newsId}`;
-      if (!acc[key]) {
-        const newsItem = news.find(n => n.id === click.newsId);
-        if (newsItem) {
-          acc[key] = {
-            userId: click.userId,
-            userName: click.userName,
-            userEmail: click.userEmail,
-            newsId: click.newsId,
-            newsTitle: newsItem.title,
-            category: newsItem.category,
-            clickedAt: click.clickedAt,
-            clickCount: 1
-          };
-        }
-      } else {
-        acc[key].clickCount++;
-        // Обновляем дату на самую последнюю
-        if (new Date(click.clickedAt) > new Date(acc[key].clickedAt)) {
-          acc[key].clickedAt = click.clickedAt;
-        }
-      }
-      return acc;
-    }, {} as Record<string, UserNewsClickData>);
-
-    // Преобразуем в массив и сортируем по дате (сначала новые)
-    return Object.values(groupedClicks).sort((a, b) => 
-      new Date(b.clickedAt).getTime() - new Date(a.clickedAt).getTime()
+    return allNews.filter(news => 
+      news.title.toLowerCase().includes(lowercaseQuery) ||
+      news.description.toLowerCase().includes(lowercaseQuery) ||
+      news.content.toLowerCase().includes(lowercaseQuery) ||
+      news.excerpt.toLowerCase().includes(lowercaseQuery)
     );
   }
 
-  // Приватные методы
-  private saveNews(news: NewsItem[]): void {
-    localStorage.setItem(this.NEWS_KEY, JSON.stringify(news));
+  // Utility methods
+  getNewsCountByStatus(): Record<NewsStatus, number> {
+    const allNews = this.getAllNews();
+    return {
+      draft: allNews.filter(n => n.status === 'draft').length,
+      published: allNews.filter(n => n.status === 'published').length,
+      archived: allNews.filter(n => n.status === 'archived').length,
+      scheduled: allNews.filter(n => n.status === 'scheduled').length
+    };
   }
 
-  private saveClicks(clicks: NewsClick[]): void {
-    localStorage.setItem(this.CLICKS_KEY, JSON.stringify(clicks));
-  }
-
-  private deleteClicksByNewsId(newsId: string): void {
-    const clicks = this.getAllClicks();
-    const filteredClicks = clicks.filter(click => click.newsId !== newsId);
-    this.saveClicks(filteredClicks);
-  }
-
-  private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  }
-
-  private getInitialNews(): NewsItem[] {
-    const initialNews: NewsItem[] = [
-      {
-        id: '1',
-        title: 'QS World University Rankings 2026 нәтижелері',
-        description: 'Университет имени Есенова вошел в рейтинг QS World University Rankings 2026',
-        date: '01.07.2025',
-        category: 'rating',
-        categoryKey: 'rating',
-        image: '/qs.jpeg',
-        link: 'https://yu.edu.kz/qs-world-university-rankings-2026-n%d3%99tizheleri/',
-        isActive: true,
-        order: 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        title: 'КІНІ және ДКУ әкілдерінің бірлескен отырысы',
-        description: 'Совместное заседание представителей КИНИ и ДКУ',
-        date: '01.07.2025',
-        category: 'international',
-        categoryKey: 'international',
-        image: '/Az.jpeg',
-        link: 'https://yu.edu.kz/kini-zh%d3%99ne-dku-%d3%a9kilderinin-birlesken-otyrysy-2/',
-        isActive: true,
-        order: 2,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '3',
-        title: 'КІНІ және ДКУ әкілдерінің бірлескен отырысы',
-        description: 'Совместное заседание представителей КИНИ и ДКУ',
-        date: '01.07.2025',
-        category: 'science',
-        categoryKey: 'science',
-        image: '/kini.jpeg',
-        link: 'https://yu.edu.kz/kini-zh%d3%99ne-dku-%d3%a9kilderinin-birlesken-otyrysy/',
-        isActive: true,
-        order: 3,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '4',
-        title: 'Сыбайлас жемқорлыққа қарсы менеджмент жүйесі',
-        description: 'Система управления против коррупции',
-        date: '01.07.2025',
-        category: 'management',
-        categoryKey: 'management',
-        image: '/korup.jpeg',
-        link: 'https://yu.edu.kz/sybajlas-zhemqorlyqqa-qarsy-menedzhment-zh%d2%afjesi/',
-        isActive: true,
-        order: 4,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '5',
-        title: 'COEST делегациясымен кездесу',
-        description: 'Встреча с делегацией COEST',
-        date: '30.06.2025',
-        category: 'cooperation',
-        categoryKey: 'cooperation',
-        image: '/coest.jpeg',
-        link: 'https://yu.edu.kz/coest-delegacziyasymen-kezdesu/',
-        isActive: true,
-        order: 5,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '6',
-        title: 'Шынабай Ақкенжеевтің атындағы аудиторияның ашылуы',
-        description: 'Открытие аудитории имени Шынабая Ақкенжеева',
-        date: '24.06.2025',
-        category: 'opening',
-        categoryKey: 'opening',
-        image: '/Aqkenjeev.jpeg',
-        link: 'https://yu.edu.kz/shynabaj-aqkenzheevtin-atynda%d2%93y-auditoriyanyn-ashyluy-2/',
-        isActive: true,
-        order: 6,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '7',
-        title: 'Қазақстандық студенттер жаһандық байқауда жеңіске жетті',
-        description: 'Казахстанские студенты добились успеха на международном конкурсе',
-        date: '03.06.2025',
-        category: 'achievements',
-        categoryKey: 'achievements',
-        image: '/students_inter.jpg',
-        link: 'https://yu.edu.kz/qazaqstandyq-studentter-zha%d2%bbandyq-bajqauda-zheniske-zhetti/',
-        isActive: true,
-        order: 7,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '8',
-        title: 'XVII Республикалық пәндік олимпиадасы II кезеңі өтті',
-        description: 'Прошел II этап XVII Республиканской предметной олимпиады',
-        date: '19.11.2025',
-        category: 'olympiad',
-        categoryKey: 'olympiad',
-        image: '/olimpiada.jpg',
-        link: 'https://yu.edu.kz/ru/xvii-respublikalyq-p%D3%99ndik-olimpiadasy-ii-kezeni-%D3%A9tedi/',
-        isActive: true,
-        order: 8,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
+  getNewsCountByCategory(): Array<{ category: NewsCategory; count: number }> {
+    const database = this.getDatabase();
+    const allNews = this.getAllNews();
     
-    this.saveNews(initialNews);
-    return initialNews;
+    return database.categories.map(category => ({
+      category,
+      count: allNews.filter(news => news.categoryId === category.id).length
+    }));
   }
 }
 

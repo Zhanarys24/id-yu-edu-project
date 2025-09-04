@@ -22,6 +22,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    // Проверяем, что мы на клиенте
+    if (typeof window === 'undefined') return;
+    
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
@@ -55,6 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const anonymousLogin = () => {
+    // Проверяем, что мы на клиенте
+    if (typeof window === 'undefined') return false;
+    
     const rolePermissions = ROLE_PERMISSIONS?.['anonymous'] || [];
     
     const anonymousUser: User = {
@@ -78,6 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
+    // Проверяем, что мы на клиенте
+    if (typeof window === 'undefined') return;
+    
     try {
       // Проверяем пароль
       const registeredUser = userService.verifyUserPassword(email, password);
@@ -142,6 +151,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    // Проверяем, что мы на клиенте
+    if (typeof window === 'undefined') return;
+    
     setUser(null);
     localStorage.removeItem('user');
   };
@@ -162,6 +174,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const refreshUser = () => {
+    // Проверяем, что мы на клиенте
+    if (typeof window === 'undefined') return;
+    
     if (user) {
       // Получаем обновленные данные пользователя из базы данных
       const updatedUser = userService.findUserByEmail(user.email);
