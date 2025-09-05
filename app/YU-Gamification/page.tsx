@@ -5,7 +5,10 @@ import Image from "next/image"
 import type { ReactNode, ReactElement } from "react"
 import { Trophy, Coins, Star, Award, ArrowRight, Zap, Target, Monitor, Newspaper, Calendar, Users, Gift, Crown, Medal, Flame, ShoppingBag, Home, ChevronRight, Sparkles, TrendingUp, Clock, BookOpen, Gamepad2 } from "lucide-react"
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 import { useAvatar } from '@/context/AvatarContext'
+import { useAuth } from '@/context/AuthContext'
 import AchievementSystem from './components/AchievementSystem'
 import EventSystem from './components/EventSystem'
 

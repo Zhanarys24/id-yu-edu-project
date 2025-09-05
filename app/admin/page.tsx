@@ -2,15 +2,19 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
 import { 
   Monitor, FileText, Calendar, GraduationCap, BookOpen, 
-  Users, Settings, Bot, Trophy, FileUser, Shield
+  Users, Settings, Bot, Trophy, FileUser, Shield, Globe
 } from 'lucide-react';
 
 export default function AdminPage() {
   const { user, canAccess, isAdmin } = useAuth();
+  const { t, i18n } = useTranslation('common');
   const router = useRouter();
+  const [locale, setLocale] = useState('ru');
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -18,12 +22,36 @@ export default function AdminPage() {
     }
   }, [user, isAdmin, router]);
 
+  // Инициализация языка
+  useEffect(() => {
+    const savedLocale = localStorage.getItem('locale');
+    const initial = savedLocale || i18n.language || 'ru';
+    setLocale(initial);
+    if (i18n.language !== initial) {
+      i18n.changeLanguage(initial);
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = initial;
+    }
+  }, [i18n]);
+
+  // Функция смены языка
+  const changeLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLocale = e.target.value;
+    setLocale(selectedLocale);
+    localStorage.setItem('locale', selectedLocale);
+    i18n.changeLanguage(selectedLocale);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = selectedLocale;
+    }
+  };
+
   if (!isAdmin()) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Доступ запрещен</h2>
-          <p className="text-gray-600">У вас нет прав для просмотра этой страницы</p>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">{t('admin.accessDenied')}</h2>
+          <p className="text-gray-600">{t('admin.noAccess')}</p>
         </div>
       </div>
     );
@@ -113,23 +141,42 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto">
         {/* Заголовок */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Админ панель
-          </h1>
-          <p className="text-gray-600">
-            Добро пожаловать, {user?.name}! Выберите раздел для управления.
-          </p>
-          <div className="mt-2 flex items-center gap-2">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {t('admin.title')}
+              </h1>
+              <p className="text-gray-600">
+                {t('admin.welcome')}, {user?.name}! {t('admin.selectSection')}
+              </p>
+            </div>
+            
+            {/* Селектор языка */}
+            <div className="flex items-center gap-2">
+              <Globe size={16} className="text-gray-500" />
+              <select
+                value={locale}
+                onChange={changeLanguage}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="ru">🇷🇺 Русский</option>
+                <option value="en">🇺🇸 English</option>
+                <option value="kz">🇰🇿 Қазақша</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
             <Shield size={16} className="text-blue-500" />
             <span className="text-sm text-blue-600 font-medium">
-              Роль: {user?.role === 'super_admin' ? 'Супер администратор' : 
-                     user?.role === 'admin_news' ? 'Админ новостей' :
-                     user?.role === 'admin_events' ? 'Админ мероприятий' :
-                     user?.role === 'admin_education' ? 'Админ образования' :
-                     user?.role === 'admin_eservices' ? 'Админ Е-услуг' :
-                     user?.role === 'admin_yessenovai' ? 'Админ YessenovAI' :
-                     user?.role === 'admin_gamification' ? 'Админ YU-Gamification' :
-                     user?.role === 'admin_portfolio' ? 'Админ портфолио' : 'Студент'}
+              {t('admin.role')}: {user?.role === 'super_admin' ? t('admin.superAdmin') : 
+                     user?.role === 'admin_news' ? t('admin.adminNews') :
+                     user?.role === 'admin_events' ? t('admin.adminEvents') :
+                     user?.role === 'admin_education' ? t('admin.adminEducation') :
+                     user?.role === 'admin_eservices' ? t('admin.adminEservices') :
+                     user?.role === 'admin_yessenovai' ? t('admin.adminYessenovai') :
+                     user?.role === 'admin_gamification' ? t('admin.adminGamification') :
+                     user?.role === 'admin_portfolio' ? t('admin.adminPortfolio') : t('admin.student')}
             </span>
           </div>
         </div>

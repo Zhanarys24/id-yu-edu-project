@@ -33,3 +33,4 @@ export const formatTime = (dateString: string, locale: string = 'ru-RU'): string
     minute: '2-digit' 
   });
 };
+

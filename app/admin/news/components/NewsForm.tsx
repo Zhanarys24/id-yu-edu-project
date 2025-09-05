@@ -30,6 +30,7 @@ export default function NewsForm({ news, onClose, onSave }: NewsFormProps) {
     excerptKz: '',
     image: '',
     imageAlt: '',
+    link: '',
     categoryId: '',
     tags: [] as string[],
     status: 'draft' as NewsStatus,
@@ -64,6 +65,7 @@ export default function NewsForm({ news, onClose, onSave }: NewsFormProps) {
         excerptKz: news.excerptKz,
         image: news.image,
         imageAlt: news.imageAlt || '',
+        link: news.link || '',
         categoryId: news.categoryId,
         tags: news.tags,
         status: news.status,
@@ -251,6 +253,23 @@ export default function NewsForm({ news, onClose, onSave }: NewsFormProps) {
               />
             </div>
 
+            {/* Link */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Link className="w-4 h-4 inline mr-1" />
+                Ссылка (необязательно)
+              </label>
+              <Input
+                value={formData.link}
+                onChange={(e) => handleInputChange('link', e.target.value)}
+                placeholder="https://example.com"
+                type="url"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Если указана ссылка, кнопка "Читать дальше" будет вести на эту ссылку
+              </p>
+            </div>
+
             {/* Category and Tags */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -407,3 +426,4 @@ export default function NewsForm({ news, onClose, onSave }: NewsFormProps) {
     </div>
   )
 }
+

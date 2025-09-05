@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Save, Calendar, Tag, Image } from 'lucide-react'
+import { X, Save, Calendar, Tag, Image, Link } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { newsService } from '@/lib/services/newsService'
@@ -22,6 +22,7 @@ export default function SimpleNewsForm({ news, onClose, onSave }: SimpleNewsForm
     descriptionEn: '',
     descriptionKz: '',
     image: '',
+    link: '',
     categoryId: '',
     status: 'published' as NewsStatus,
     publishedAt: '',
@@ -43,6 +44,7 @@ export default function SimpleNewsForm({ news, onClose, onSave }: SimpleNewsForm
         descriptionEn: news.descriptionEn,
         descriptionKz: news.descriptionKz,
         image: news.image,
+        link: news.link || '',
         categoryId: news.categoryId,
         status: news.status,
         publishedAt: news.publishedAt || '',
@@ -192,6 +194,23 @@ export default function SimpleNewsForm({ news, onClose, onSave }: SimpleNewsForm
                 placeholder="URL изображения"
                 required
               />
+            </div>
+
+            {/* Link */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Link className="w-4 h-4 inline mr-1" />
+                Ссылка (необязательно)
+              </label>
+              <Input
+                value={formData.link}
+                onChange={(e) => handleInputChange('link', e.target.value)}
+                placeholder="https://example.com"
+                type="url"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Если указана ссылка, кнопка "Читать дальше" будет вести на эту ссылку
+              </p>
             </div>
 
             {/* Date and Status */}

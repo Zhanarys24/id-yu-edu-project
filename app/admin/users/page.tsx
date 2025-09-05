@@ -3,13 +3,16 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Users, ArrowLeft, Edit, Trash2, Plus, Shield, CheckCircle, XCircle, Key, Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
+import { Users, ArrowLeft, Edit, Trash2, Plus, Shield, CheckCircle, XCircle, Key, Eye, EyeOff, RefreshCw, Globe } from 'lucide-react';
 import { userService } from '@/lib/services/userService';
 import { RegisteredUser } from '@/lib/types/user';
 import { UserRole } from '@/lib/types/auth';
 
 export default function AdminUsersPage() {
   const { user, canAccess, refreshUser } = useAuth();
+  const { t, i18n } = useTranslation('common');
   const router = useRouter();
   const [users, setUsers] = useState<RegisteredUser[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,12 +27,37 @@ export default function AdminUsersPage() {
   const [newUserRole, setNewUserRole] = useState<UserRole>('student');
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [generatingPassword, setGeneratingPassword] = useState<string | null>(null);
+  const [locale, setLocale] = useState('ru');
 
   useEffect(() => {
     if (!canAccess('site_settings', 'manage')) {
       router.push('/admin');
     }
   }, [user, canAccess, router]);
+
+  // Инициализация языка
+  useEffect(() => {
+    const savedLocale = localStorage.getItem('locale');
+    const initial = savedLocale || i18n.language || 'ru';
+    setLocale(initial);
+    if (i18n.language !== initial) {
+      i18n.changeLanguage(initial);
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = initial;
+    }
+  }, [i18n]);
+
+  // Функция смены языка
+  const changeLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLocale = e.target.value;
+    setLocale(selectedLocale);
+    localStorage.setItem('locale', selectedLocale);
+    i18n.changeLanguage(selectedLocale);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = selectedLocale;
+    }
+  };
 
   useEffect(() => {
     loadUsers();
@@ -172,20 +200,36 @@ export default function AdminUsersPage() {
       <div className="max-w-7xl mx-auto">
         {/* Заголовок */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <button
-              onClick={() => router.push('/admin')}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-            >
-              <ArrowLeft size={24} className="text-gray-600" />
-            </button>
-            <Users size={32} className="text-gray-700" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Управление пользователями
-            </h1>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.push('/admin')}
+                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                <ArrowLeft size={24} className="text-gray-600" />
+              </button>
+              <Users size={32} className="text-gray-700" />
+              <h1 className="text-3xl font-bold text-gray-900">
+                {t('admin.users.title')}
+              </h1>
+            </div>
+            
+            {/* Селектор языка */}
+            <div className="flex items-center gap-2">
+              <Globe size={16} className="text-gray-500" />
+              <select
+                value={locale}
+                onChange={changeLanguage}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="ru">🇷🇺 Русский</option>
+                <option value="en">🇺🇸 English</option>
+                <option value="kz">🇰🇿 Қазақша</option>
+              </select>
+            </div>
           </div>
           <p className="text-gray-600">
-            Управление ролями и правами всех пользователей системы
+            {t('admin.users.description')}
           </p>
         </div>
 
@@ -197,11 +241,11 @@ export default function AdminUsersPage() {
           </div>
           <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
             <div className="text-2xl font-bold text-green-600">{stats.active}</div>
-            <div className="text-sm text-gray-600">Активных</div>
+            <div className="text-sm text-gray-600">{t('admin.users.active')}</div>
           </div>
           <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
             <div className="text-2xl font-bold text-red-600">{stats.inactive}</div>
-            <div className="text-sm text-gray-600">Заблокированных</div>
+            <div className="text-sm text-gray-600">{t('admin.users.inactive')}</div>
           </div>
           <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
             <div className="text-2xl font-bold text-orange-600">{stats.temporaryPasswords}</div>
@@ -214,11 +258,11 @@ export default function AdminUsersPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Поиск
+                {t('admin.users.search')}
               </label>
               <input
                 type="text"
-                placeholder="Поиск по имени или email..."
+                placeholder={t('admin.users.search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
@@ -227,38 +271,38 @@ export default function AdminUsersPage() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Роль
+                {t('admin.users.role')}
               </label>
               <select
                 value={filterRole}
                 onChange={(e) => setFilterRole(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
               >
-                <option value="all">Все роли</option>
-                <option value="student">Студент</option>
-                <option value="admin_news">Новости</option>
-                <option value="admin_events">Мероприятия</option>
-                <option value="admin_education">Образование</option>
-                <option value="admin_eservices">Е-услуги</option>
-                <option value="admin_yessenovai">YessenovAI</option>
-                <option value="admin_gamification">Геймификация</option>
-                <option value="admin_portfolio">Портфолио</option>
-                <option value="super_admin">Супер-админ</option>
+                <option value="all">{t('admin.users.allRoles')}</option>
+                <option value="student">{t('admin.student')}</option>
+                <option value="admin_news">{t('admin.adminNews')}</option>
+                <option value="admin_events">{t('admin.adminEvents')}</option>
+                <option value="admin_education">{t('admin.adminEducation')}</option>
+                <option value="admin_eservices">{t('admin.adminEservices')}</option>
+                <option value="admin_yessenovai">{t('admin.adminYessenovai')}</option>
+                <option value="admin_gamification">{t('admin.adminGamification')}</option>
+                <option value="admin_portfolio">{t('admin.adminPortfolio')}</option>
+                <option value="super_admin">{t('admin.superAdmin')}</option>
               </select>
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Статус
+                {t('admin.users.status')}
               </label>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
               >
-                <option value="all">Все статусы</option>
-                <option value="active">Активные</option>
-                <option value="inactive">Заблокированные</option>
+                <option value="all">{t('admin.users.allStatuses')}</option>
+                <option value="active">{t('admin.users.active')}</option>
+                <option value="inactive">{t('admin.users.inactive')}</option>
               </select>
             </div>
 
@@ -272,7 +316,7 @@ export default function AdminUsersPage() {
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   <Plus size={16} />
-                  Добавить пользователя
+                  {t('admin.users.addUser')}
                 </button>
                 <button
                   onClick={() => {

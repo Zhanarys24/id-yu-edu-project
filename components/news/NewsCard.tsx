@@ -14,7 +14,7 @@ interface NewsItem {
   date: string
   category: string
   image: string
-  link: string
+  link?: string
 }
 
 interface NewsCardProps {
@@ -94,16 +94,25 @@ export default function NewsCard({ news }: NewsCardProps) {
         </p>
         
         <div className="mt-3 pt-2 border-t border-gray-100">
-          <a 
-            href={news.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleClick}
-            className="inline-flex items-center gap-1.5 text-blue-600 text-xs font-medium hover:text-blue-700 transition-colors"
-          >
-            <span>{t('news.readMore')}</span>
-            <ExternalLink size={12} />
-          </a>
+          {news.link ? (
+            <a 
+              href={news.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleClick}
+              className="inline-flex items-center gap-1.5 text-blue-600 text-xs font-medium hover:text-blue-700 transition-colors"
+            >
+              <span>{t('news.readMore')}</span>
+              <ExternalLink size={12} />
+            </a>
+          ) : (
+            <button
+              onClick={handleClick}
+              className="inline-flex items-center gap-1.5 text-blue-600 text-xs font-medium hover:text-blue-700 transition-colors"
+            >
+              <span>{t('news.readMore')}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

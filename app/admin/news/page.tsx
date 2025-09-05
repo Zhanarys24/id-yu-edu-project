@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 import { useAuth } from '@/context/AuthContext'
 import { 
   Plus, 
@@ -24,7 +26,8 @@ import {
   CheckCircle,
   AlertCircle,
   ArrowLeft,
-  FileText
+  FileText,
+  Globe
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,7 +40,9 @@ import SimpleNewsForm from './components/SimpleNewsForm'
 
 export default function AdminNewsPage() {
   const { user, logout } = useAuth()
+  const { t, i18n } = useTranslation('common')
   const router = useRouter()
+  const [locale, setLocale] = useState('ru')
   
   // Check permissions
   if (!user || (user.role !== 'admin_news' && user.role !== 'super_admin')) {
@@ -56,6 +61,30 @@ export default function AdminNewsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null)
   const [activeTab, setActiveTab] = useState<'all' | 'archived'>('all')
+
+  // Инициализация языка
+  useEffect(() => {
+    const savedLocale = localStorage.getItem('locale')
+    const initial = savedLocale || i18n.language || 'ru'
+    setLocale(initial)
+    if (i18n.language !== initial) {
+      i18n.changeLanguage(initial)
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = initial
+    }
+  }, [i18n])
+
+  // Функция смены языка
+  const changeLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLocale = e.target.value
+    setLocale(selectedLocale)
+    localStorage.setItem('locale', selectedLocale)
+    i18n.changeLanguage(selectedLocale)
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = selectedLocale
+    }
+  }
 
   // Load data
   useEffect(() => {
@@ -167,11 +196,11 @@ export default function AdminNewsPage() {
   const getStatusText = (status: NewsStatus) => {
     switch (status) {
       case 'published':
-        return 'Опубликовано'
+        return t('admin.news.published')
       case 'archived':
-        return 'Архив'
+        return t('admin.news.archived')
       case 'scheduled':
-        return 'Запланировано'
+        return t('admin.news.scheduled')
       default:
         return 'Неизвестно'
     }
@@ -220,22 +249,36 @@ export default function AdminNewsPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              Управление новостями
+              {t('admin.news.title')}
             </h1>
                   <p className="text-gray-600 mt-2 text-lg">
-                    Создание, редактирование и управление новостями
+                    {t('admin.news.description')}
                   </p>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {/* Селектор языка */}
+              <div className="flex items-center gap-2">
+                <Globe size={16} className="text-gray-500" />
+                <select
+                  value={locale}
+                  onChange={changeLanguage}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white/80"
+                >
+                  <option value="ru">🇷🇺 Русский</option>
+                  <option value="en">🇺🇸 English</option>
+                  <option value="kz">🇰🇿 Қазақша</option>
+                </select>
+              </div>
+              
               <Button
                 variant="outline"
                 onClick={() => setShowAnalytics(!showAnalytics)}
                 className="flex items-center gap-2 bg-white/80 hover:bg-white border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200"
               >
                 <BarChart3 size={16} />
-                {showAnalytics ? 'Скрыть аналитику' : 'Показать аналитику'}
+                {showAnalytics ? t('admin.news.analytics') : t('admin.news.analytics')}
               </Button>
               <Button
                 variant="outline"
@@ -243,14 +286,14 @@ export default function AdminNewsPage() {
                 className="flex items-center gap-2 bg-white/80 hover:bg-white border-green-200 hover:border-green-300 text-green-700 hover:text-green-900 shadow-sm hover:shadow-md transition-all duration-200"
               >
                 <Download size={16} />
-                Экспорт в Excel
+                {t('admin.news.export')}
               </Button>
               <Button
                 onClick={() => setShowCreateForm(true)}
                 className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <Plus size={16} />
-                Добавить новость
+                {t('admin.news.addNews')}
               </Button>
             </div>
           </div>
@@ -267,7 +310,7 @@ export default function AdminNewsPage() {
                   <BarChart3 className="w-6 h-6 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Всего новостей</p>
+                  <p className="text-sm font-medium text-gray-600">{t('admin.news.analytics.totalNews')}</p>
                   <p className="text-2xl font-bold text-gray-900">{analytics.totalNews}</p>
                 </div>
               </div>
@@ -279,7 +322,7 @@ export default function AdminNewsPage() {
                   <CheckCircle className="w-6 h-6 text-green-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Опубликовано</p>
+                  <p className="text-sm font-medium text-gray-600">{t('admin.news.analytics.published')}</p>
                   <p className="text-2xl font-bold text-gray-900">{analytics.publishedNews}</p>
                 </div>
               </div>
@@ -291,7 +334,7 @@ export default function AdminNewsPage() {
                   <Clock className="w-6 h-6 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Запланировано</p>
+                  <p className="text-sm font-medium text-gray-600">{t('admin.news.analytics.scheduled')}</p>
                   <p className="text-2xl font-bold text-gray-900">{analytics.scheduledNews || 0}</p>
                 </div>
               </div>
@@ -303,7 +346,7 @@ export default function AdminNewsPage() {
                   <Archive className="w-6 h-6 text-gray-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">В архиве</p>
+                  <p className="text-sm font-medium text-gray-600">{t('admin.news.analytics.archived')}</p>
                   <p className="text-2xl font-bold text-gray-900">{analytics.archivedNews}</p>
                 </div>
               </div>
@@ -321,7 +364,7 @@ export default function AdminNewsPage() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            Все новости
+            {t('news.pageTitle')}
           </button>
           <button
             onClick={() => setActiveTab('archived')}
@@ -331,7 +374,7 @@ export default function AdminNewsPage() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            Архив
+            {t('admin.news.archived')}
           </button>
         </div>
 
@@ -339,11 +382,11 @@ export default function AdminNewsPage() {
         <Card className="p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Поиск</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.news.search')}</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Поиск по заголовку или описанию..."
+                  placeholder={t('admin.news.search')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -352,14 +395,14 @@ export default function AdminNewsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Категория</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.news.category')}</label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">Все категории</option>
-                <option value="no-category">Без категории</option>
+                <option value="all">{t('admin.news.allCategories')}</option>
+                <option value="no-category">{t('admin.news.noCategory')}</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -369,16 +412,16 @@ export default function AdminNewsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Статус</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.news.status')}</label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value as NewsStatus | 'all')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">Все статусы</option>
-                <option value="published">Опубликовано</option>
-                <option value="archived">Архив</option>
-                <option value="scheduled">Запланировано</option>
+                <option value="all">{t('admin.news.allStatuses')}</option>
+                <option value="published">{t('admin.news.published')}</option>
+                <option value="archived">{t('admin.news.archived')}</option>
+                <option value="scheduled">{t('admin.news.scheduled')}</option>
               </select>
             </div>
           </div>
@@ -390,8 +433,8 @@ export default function AdminNewsPage() {
             <Card className="p-8 text-center">
               <div className="text-gray-500">
                 <BarChart3 className="w-12 h-12 mx-auto mb-4" />
-                <p className="text-lg font-medium">Новости не найдены</p>
-                <p className="text-sm">Попробуйте изменить фильтры или добавить новую новость</p>
+                <p className="text-lg font-medium">{t('admin.news.noNews')}</p>
+                <p className="text-sm">{t('admin.news.noNewsDescription')}</p>
               </div>
             </Card>
           ) : (
@@ -406,12 +449,12 @@ export default function AdminNewsPage() {
                       </span>
                       {item.isFeatured && (
                         <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
-                          Рекомендуемое
+                          {t('news.featured')}
                         </span>
                       )}
                       {item.isBreaking && (
                         <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                          Срочное
+                          {t('news.breaking')}
                         </span>
                       )}
                     </div>
@@ -426,9 +469,15 @@ export default function AdminNewsPage() {
                           <span>{item.category.name}</span>
                         </div>
                       )}
+                      {item.link && (
+                        <div className="flex items-center gap-1">
+                          <FileText className="w-4 h-4" />
+                          <span className="text-blue-600">{t('admin.news.hasLink')}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-1">
                         <Eye className="w-4 h-4" />
-                        <span>{item.viewCount} просмотров</span>
+                        <span>{item.viewCount} {t('admin.news.views')}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
@@ -442,6 +491,7 @@ export default function AdminNewsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setEditingNews(item)}
+                      title={t('admin.news.edit')}
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -453,6 +503,7 @@ export default function AdminNewsPage() {
                         size="sm"
                         onClick={() => handleArchive(item.id)}
                         className="text-gray-600 hover:text-gray-700"
+                        title={t('admin.news.archive')}
                       >
                         <Archive className="w-4 h-4" />
                       </Button>
@@ -463,6 +514,7 @@ export default function AdminNewsPage() {
                       size="sm"
                       onClick={() => handleDelete(item.id)}
                       className="text-red-600 hover:text-red-700"
+                      title={t('admin.news.delete')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

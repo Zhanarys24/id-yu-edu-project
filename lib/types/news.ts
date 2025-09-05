@@ -37,6 +37,7 @@ export type NewsItem = {
   excerptKz: string;
   image: string;
   imageAlt?: string;
+  link?: string;
   categoryId: string;
   category?: NewsCategory;
   tags: string[];

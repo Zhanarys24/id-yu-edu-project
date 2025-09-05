@@ -20,6 +20,7 @@ export const createExampleNews = (): NewsItem[] => {
       excerptKz: 'YU QS World University Rankings 2025 бойынша әлемдегі ең үздік 500 университетінің қатарына кіру арқылы тарихи нәтижеге қол жеткізді.',
       image: '/qs.jpeg',
       imageAlt: 'QS World University Rankings 2025 - YU в топ-500',
+      link: 'https://www.topuniversities.com/university-rankings/world-university-rankings/2025',
       categoryId: '1', // Рейтинги
       tags: ['1', '3'], // Важное, Образование
       status: 'published',
@@ -52,6 +53,7 @@ export const createExampleNews = (): NewsItem[] => {
       excerptKz: 'Жасанды интеллект саласындағы жаңа зерттеу жаңа мүмкіндіктер ашады.',
       image: '/kini.jpeg',
       imageAlt: 'Исследование в области ИИ',
+      link: 'https://arxiv.org/abs/2401.00001',
       categoryId: '', // Без категории
       tags: ['4'], // Исследования
       status: 'published',

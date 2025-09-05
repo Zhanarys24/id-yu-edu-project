@@ -4,12 +4,15 @@ import { ChevronRight } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
+import '@/i18n'
 import { useAuth } from '@/context/AuthContext'
 import { educationService } from '@/lib/services/educationService'
 import { useEffect, useState } from 'react'
 import { EducationCard } from '@/lib/types/education'
 
 export default function SciencePage() {
+  const { t } = useTranslation('common')
   const { user } = useAuth()
   const [cards, setCards] = useState<EducationCard[]>([])
 

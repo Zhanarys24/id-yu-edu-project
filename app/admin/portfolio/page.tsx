@@ -3,7 +3,9 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { FileUser, Search, Edit, Trash2, Eye, ArrowLeft, CheckCircle, XCircle, Download, FileText, Image, File, Users, Filter, Calendar, Award, BookOpen, Briefcase, Activity, X, FileDown, BarChart3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
+import { FileUser, Search, Edit, Trash2, Eye, ArrowLeft, CheckCircle, XCircle, Download, FileText, Image, File, Users, Filter, Calendar, Award, BookOpen, Briefcase, Activity, X, FileDown, BarChart3, Globe } from 'lucide-react';
 import { portfolioService } from '@/lib/services/portfolioService';
 import { userService } from '@/lib/services/userService';
 import { PortfolioItem, GeneralInfo, Publication, TeachingActivity, Achievement, AdditionalActivity, PortfolioFile } from '@/lib/types/portfolio';
@@ -22,6 +24,7 @@ type PortfolioItemWithUser = PortfolioItem & {
 
 export default function AdminPortfolioPage() {
   const { user, canAccess } = useAuth();
+  const { t, i18n } = useTranslation('common');
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
@@ -31,12 +34,37 @@ export default function AdminPortfolioPage() {
   const [selectedItem, setSelectedItem] = useState<PortfolioItemWithUser | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [locale, setLocale] = useState('ru');
 
   useEffect(() => {
     if (!canAccess('portfolio', 'manage')) {
       router.push('/admin');
     }
   }, [user, canAccess, router]);
+
+  // Инициализация языка
+  useEffect(() => {
+    const savedLocale = localStorage.getItem('locale');
+    const initial = savedLocale || i18n.language || 'ru';
+    setLocale(initial);
+    if (i18n.language !== initial) {
+      i18n.changeLanguage(initial);
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = initial;
+    }
+  }, [i18n]);
+
+  // Функция смены языка
+  const changeLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLocale = e.target.value;
+    setLocale(selectedLocale);
+    localStorage.setItem('locale', selectedLocale);
+    i18n.changeLanguage(selectedLocale);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = selectedLocale;
+    }
+  };
 
   // Загружаем пользователей
   useEffect(() => {
@@ -197,22 +225,36 @@ export default function AdminPortfolioPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                    Управление портфолио
+                    {t('admin.portfolio.title')}
                   </h1>
                   <p className="text-gray-600 mt-1">
-                    Просмотр и управление портфолио всех пользователей
+                    {t('admin.portfolio.description')}
                   </p>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {/* Селектор языка */}
+              <div className="flex items-center gap-2">
+                <Globe size={16} className="text-gray-500" />
+                <select
+                  value={locale}
+                  onChange={changeLanguage}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white/80"
+                >
+                  <option value="ru">🇷🇺 Русский</option>
+                  <option value="en">🇺🇸 English</option>
+                  <option value="kz">🇰🇿 Қазақша</option>
+                </select>
+              </div>
+              
               <Button
                 variant="outline"
                 onClick={() => router.push('/admin/portfolio/analytics')}
                 className="flex items-center gap-2 bg-white/80 hover:bg-white border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200"
               >
                 <BarChart3 size={16} />
-                Аналитика
+                {t('admin.portfolio.analytics')}
               </Button>
               <Button
                 onClick={handleExportPortfolio}
@@ -220,7 +262,7 @@ export default function AdminPortfolioPage() {
                 className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FileDown size={16} />
-                Экспорт в Word
+                {t('admin.portfolio.export')}
               </Button>
             </div>
           </div>
