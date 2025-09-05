@@ -209,7 +209,7 @@ export default function SimpleNewsForm({ news, onClose, onSave }: SimpleNewsForm
                 type="url"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Если указана ссылка, кнопка "Читать дальше" будет вести на эту ссылку
+                Если указана ссылка, кнопка &quot;Читать дальше&quot; будет вести на эту ссылку
               </p>
             </div>
 

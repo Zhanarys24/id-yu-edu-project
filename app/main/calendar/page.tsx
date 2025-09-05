@@ -335,7 +335,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
   const cells = Array.from({ length: totalCells }, (_, i) => {
     const dayNum = i - startDay + 1
     let date = new Date(miniCalendarDate.getFullYear(), miniCalendarDate.getMonth(), dayNum)
-    let inMonth = dayNum >= 1 && dayNum <= daysInMonth
+    const inMonth = dayNum >= 1 && dayNum <= daysInMonth
     
     if (!inMonth) {
       if (dayNum < 1) {

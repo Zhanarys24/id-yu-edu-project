@@ -8,20 +8,14 @@ import { useAuth } from '@/context/AuthContext'
 import { 
   Plus, 
   Search, 
-  Filter, 
   Edit, 
   Trash2, 
   Eye, 
-  EyeOff, 
   Archive, 
   Calendar,
   BarChart3,
-  Tag,
   FolderOpen,
   Download,
-  Settings,
-  Users,
-  TrendingUp,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -33,23 +27,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { newsService } from '@/lib/services/newsService'
-import { NewsItem, NewsCategory, NewsTag, NewsStatus, NewsAnalytics } from '@/lib/types/news'
+import { NewsItem, NewsCategory, NewsStatus, NewsAnalytics } from '@/lib/types/news'
 import { exportNewsClicksToExcel } from '@/lib/utils/excelExport'
 import { formatDate } from '@/lib/utils/dateUtils'
 import SimpleNewsForm from './components/SimpleNewsForm'
 
 export default function AdminNewsPage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const { t, i18n } = useTranslation('common')
   const router = useRouter()
   const [locale, setLocale] = useState('ru')
-  
-  // Check permissions
-  if (!user || (user.role !== 'admin_news' && user.role !== 'super_admin')) {
-    router.push('/login')
-    return null
-  }
-
   const [news, setNews] = useState<NewsItem[]>([])
   const [categories, setCategories] = useState<NewsCategory[]>([])
   const [analytics, setAnalytics] = useState<NewsAnalytics | null>(null)
@@ -61,6 +48,12 @@ export default function AdminNewsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null)
   const [activeTab, setActiveTab] = useState<'all' | 'archived'>('all')
+  
+  // Check permissions
+  if (!user || (user.role !== 'admin_news' && user.role !== 'super_admin')) {
+    router.push('/login')
+    return null
+  }
 
   // Инициализация языка
   useEffect(() => {
@@ -133,15 +126,6 @@ export default function AdminNewsPage() {
   const filteredNews = getFilteredNews()
 
   // News actions
-  const handlePublish = (id: string) => {
-    try {
-      newsService.publishNews(id)
-      loadData()
-    } catch (error) {
-      console.error('Error publishing news:', error)
-      alert('Ошибка при публикации новости')
-    }
-  }
 
   const handleArchive = (id: string) => {
     try {

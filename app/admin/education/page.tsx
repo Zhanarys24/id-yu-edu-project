@@ -322,7 +322,7 @@ export default function AdminEducationPage() {
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <label className="block text-sm font-semibold text-gray-800 mb-2">
-                {t('admin.education.search')} "{categoryInfo.title}"
+                {t('admin.education.search')} &quot;{categoryInfo.title}&quot;
               </label>
               <div className="relative">
                 <Search size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
