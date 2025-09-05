@@ -58,7 +58,7 @@ export default function SimpleNewsForm({ news, onClose, onSave }: SimpleNewsForm
     setCategories(categoriesData)
   }
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | boolean | string[]) => {
     // Автоматически исправляем путь к изображению, если он не начинается с /
     if (field === 'image' && value && !value.startsWith('/') && !value.startsWith('http')) {
       value = `/${value}`

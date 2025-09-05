@@ -177,7 +177,7 @@ function QuestCard(props: QuestCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
           <div className={`p-3 rounded-xl bg-gradient-to-br ${config.gradient} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-            {cloneElement(icon as unknown as ReactElement<any>, { className: 'w-6 h-6' } as any)}
+            {cloneElement(icon as ReactElement<{ className?: string }>, { className: 'w-6 h-6' })}
           </div>
           <div className="flex-1 min-w-0">
             <CardTitle className="text-lg mb-2 group-hover:text-blue-600 transition-colors">
@@ -291,7 +291,7 @@ function StatCard({ title, value, subtitle, icon, gradient, trend = 'neutral' }:
             <p className="text-gray-500 text-xs">{subtitle}</p>
           </div>
           <div className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} shadow-lg transform transition-transform duration-300 ${isHovered ? 'scale-110 rotate-3' : ''}`}>
-            {cloneElement(icon as unknown as ReactElement<any>, { className: 'w-7 h-7 text-white' } as any)}
+            {cloneElement(icon as ReactElement<{ className?: string }>, { className: 'w-7 h-7 text-white' })}
           </div>
         </div>
       </CardContent>
@@ -375,7 +375,7 @@ function Achievement({ icon, title, description, earned, rarity = 'common' }: Ac
     }`}>
       <div className="flex flex-col items-center text-center space-y-3">
         <div className={`p-2 rounded-xl ${earned ? '' : 'grayscale'} transition-all duration-300`}>
-          {cloneElement(icon as unknown as ReactElement<any>, { className: 'w-8 h-8' } as any)}
+          {cloneElement(icon as ReactElement<{ className?: string }>, { className: 'w-8 h-8' })}
         </div>
         <div>
           <p className={`font-semibold text-sm mb-1 ${earned ? 'text-gray-800' : 'text-gray-500'}`}>
@@ -431,7 +431,7 @@ function ActionButton({ icon, label, subtitle, color, onClick, badge, disabled =
       
       <div className="flex items-center gap-4">
         <div className={`p-3 rounded-2xl bg-gradient-to-br ${color} text-white shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}> 
-          {cloneElement(icon as unknown as ReactElement<any>, { className: 'w-6 h-6' } as any)}
+          {cloneElement(icon as ReactElement<{ className?: string }>, { className: 'w-6 h-6' })}
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-bold text-gray-800 text-lg mb-1">{label}</div>
@@ -536,7 +536,7 @@ export default function DashboardPage() {
     const savedDaily = localStorage.getItem(`dailyQuests_${today}`)
     
     if (savedDaily) {
-      return JSON.parse(savedDaily).map((q: any) => ({
+      return JSON.parse(savedDaily).map((q: unknown) => ({
         ...q,
         icon: <Target className="w-6 h-6" /> // Восстанавливаем иконку при загрузке
       }))
@@ -1052,9 +1052,8 @@ export default function DashboardPage() {
               left: c.left,
               width: `${c.size}px`,
               height: `${c.size}px`,
-              animationDelay: c.delay as any,
-              // @ts-ignore custom property for duration
-              "--dur": c.duration as any
+              animationDelay: c.delay,
+              "--dur": c.duration
             }}
           >
             <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">

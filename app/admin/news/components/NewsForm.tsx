@@ -86,7 +86,7 @@ export default function NewsForm({ news, onClose, onSave }: NewsFormProps) {
     setAllTags(tagsData)
   }
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | boolean | string[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

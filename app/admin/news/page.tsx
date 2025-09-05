@@ -49,12 +49,6 @@ export default function AdminNewsPage() {
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null)
   const [activeTab, setActiveTab] = useState<'all' | 'archived'>('all')
   
-  // Check permissions
-  if (!user || (user.role !== 'admin_news' && user.role !== 'super_admin')) {
-    router.push('/login')
-    return null
-  }
-
   // Инициализация языка
   useEffect(() => {
     const savedLocale = localStorage.getItem('locale')
@@ -67,22 +61,6 @@ export default function AdminNewsPage() {
       document.documentElement.lang = initial
     }
   }, [i18n])
-
-  // Функция смены языка
-  const changeLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedLocale = e.target.value
-    setLocale(selectedLocale)
-    localStorage.setItem('locale', selectedLocale)
-    i18n.changeLanguage(selectedLocale)
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = selectedLocale
-    }
-  }
-
-  // Load data
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const loadData = () => {
     try {
@@ -99,6 +77,29 @@ export default function AdminNewsPage() {
       setLoading(false)
     }
   }
+
+  // Load data
+  useEffect(() => {
+    loadData()
+  }, [])
+  
+  // Check permissions AFTER all hooks
+  if (!user || (user.role !== 'admin_news' && user.role !== 'super_admin')) {
+    router.push('/login')
+    return null
+  }
+
+  // Функция смены языка
+  const changeLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLocale = e.target.value
+    setLocale(selectedLocale)
+    localStorage.setItem('locale', selectedLocale)
+    i18n.changeLanguage(selectedLocale)
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = selectedLocale
+    }
+  }
+
 
   // Filter news based on active tab
   const getFilteredNews = () => {

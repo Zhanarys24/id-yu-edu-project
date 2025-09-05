@@ -1,4 +1,4 @@
-import { PortfolioItem, PortfolioFile } from '@/lib/types/portfolio';
+import { PortfolioItem, PortfolioFile, GeneralInfo, Publication, TeachingActivity, Achievement, AdditionalActivity } from '@/lib/types/portfolio';
 import { RegisteredUser } from '@/lib/types/user';
 import { UserClickData, EducationCategory } from '@/lib/types/education';
 
@@ -153,7 +153,7 @@ const generateWordHTML = (user: RegisteredUser, portfolioItems: PortfolioItem[])
     // Детальное отображение в зависимости от типа
     switch (item.type) {
       case 'general':
-        const generalItem = item as any; // Приводим к типу GeneralInfo
+        const generalItem = item as GeneralInfo; // Приводим к типу GeneralInfo
         detailedContent = `
           <div class="item-description">
             <h4>👤 Полное имя:</h4>
@@ -198,7 +198,7 @@ const generateWordHTML = (user: RegisteredUser, portfolioItems: PortfolioItem[])
         break;
 
       case 'publications':
-        const pubItem = item as any; // Приводим к типу Publication
+        const pubItem = item as Publication; // Приводим к типу Publication
         detailedContent = `
           <div class="item-description">
             <h4>📚 Название публикации:</h4>
@@ -234,7 +234,7 @@ const generateWordHTML = (user: RegisteredUser, portfolioItems: PortfolioItem[])
         break;
 
       case 'teaching':
-        const teachingItem = item as any; // Приводим к типу TeachingActivity
+        const teachingItem = item as TeachingActivity; // Приводим к типу TeachingActivity
         detailedContent = `
           <div class="item-description">
             <h4>📚 Название курса:</h4>
@@ -262,7 +262,7 @@ const generateWordHTML = (user: RegisteredUser, portfolioItems: PortfolioItem[])
         break;
 
       case 'achievements':
-        const achievementItem = item as any; // Приводим к типу Achievement
+        const achievementItem = item as Achievement; // Приводим к типу Achievement
         const categoryLabels = {
           'certificate': 'Сертификат',
           'diploma': 'Диплом',
@@ -297,7 +297,7 @@ const generateWordHTML = (user: RegisteredUser, portfolioItems: PortfolioItem[])
         break;
 
       case 'additional':
-        const additionalItem = item as any; // Приводим к типу AdditionalActivity
+        const additionalItem = item as AdditionalActivity; // Приводим к типу AdditionalActivity
         detailedContent = `
           <div class="item-description">
             <h4>📋 Название деятельности:</h4>

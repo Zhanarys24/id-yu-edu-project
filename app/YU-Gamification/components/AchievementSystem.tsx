@@ -42,25 +42,46 @@ export interface Achievement {
 }
 
 // Card components
-const Card = ({ children, className = "", hover = true, ...rest }: any) => (
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode
+  className?: string
+  hover?: boolean
+}
+
+const Card = ({ children, className = "", hover = true, ...rest }: CardProps) => (
   <div {...rest} className={`rounded-2xl border border-gray-100 bg-white shadow-sm ${hover ? 'hover:shadow-xl hover:scale-[1.02]' : ''} transition-all duration-300 ${className}`}>
     {children}
   </div>
 )
 
-const CardHeader = ({ children, className = "" }: any) => (
+interface CardHeaderProps {
+  children: React.ReactNode
+  className?: string
+}
+
+const CardHeader = ({ children, className = "" }: CardHeaderProps) => (
   <div className={`p-6 pb-4 ${className}`}>
     {children}
   </div>
 )
 
-const CardTitle = ({ children, className = "" }: any) => (
+interface CardTitleProps {
+  children: React.ReactNode
+  className?: string
+}
+
+const CardTitle = ({ children, className = "" }: CardTitleProps) => (
   <h3 className={`text-xl font-bold text-gray-800 ${className}`}>
     {children}
   </h3>
 )
 
-const CardContent = ({ children, className = "" }: any) => (
+interface CardContentProps {
+  children: React.ReactNode
+  className?: string
+}
+
+const CardContent = ({ children, className = "" }: CardContentProps) => (
   <div className={`p-6 pt-0 ${className}`}>
     {children}
   </div>
@@ -341,7 +362,14 @@ const AchievementModal = ({
 }
 
 // Main achievements component
-export default function AchievementSystem({ userStats }: { userStats: any }) {
+interface UserStats {
+  level: number
+  xp: number
+  achievements: Achievement[]
+  [key: string]: unknown
+}
+
+export default function AchievementSystem({ userStats }: { userStats: UserStats }) {
   const [selectedCategory, setSelectedCategory] = useState<AchievementCategory | 'all'>('all')
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null)
   const [filter, setFilter] = useState<'all' | 'unlocked' | 'completed' | 'locked'>('all')

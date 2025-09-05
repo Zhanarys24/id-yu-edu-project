@@ -45,25 +45,46 @@ export interface GameEvent {
 }
 
 // Card components (reusing from AchievementSystem)
-const Card = ({ children, className = "", hover = true, ...rest }: any) => (
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode
+  className?: string
+  hover?: boolean
+}
+
+const Card = ({ children, className = "", hover = true, ...rest }: CardProps) => (
   <div {...rest} className={`rounded-2xl border border-gray-100 bg-white shadow-sm ${hover ? 'hover:shadow-xl hover:scale-[1.02]' : ''} transition-all duration-300 ${className}`}>
     {children}
   </div>
 )
 
-const CardHeader = ({ children, className = "" }: any) => (
+interface CardHeaderProps {
+  children: React.ReactNode
+  className?: string
+}
+
+const CardHeader = ({ children, className = "" }: CardHeaderProps) => (
   <div className={`p-6 pb-4 ${className}`}>
     {children}
   </div>
 )
 
-const CardTitle = ({ children, className = "" }: any) => (
+interface CardTitleProps {
+  children: React.ReactNode
+  className?: string
+}
+
+const CardTitle = ({ children, className = "" }: CardTitleProps) => (
   <h3 className={`text-xl font-bold text-gray-800 ${className}`}>
     {children}
   </h3>
 )
 
-const CardContent = ({ children, className = "" }: any) => (
+interface CardContentProps {
+  children: React.ReactNode
+  className?: string
+}
+
+const CardContent = ({ children, className = "" }: CardContentProps) => (
   <div className={`p-6 pt-0 ${className}`}>
     {children}
   </div>
@@ -636,7 +657,14 @@ const MiniCalendar = ({
 }
 
 // Main events component
-export default function EventSystem({ userStats }: { userStats: any }) {
+interface UserStats {
+  level: number
+  xp: number
+  events: Event[]
+  [key: string]: unknown
+}
+
+export default function EventSystem({ userStats }: { userStats: UserStats }) {
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | 'all'>('all')
   const [selectedEvent, setSelectedEvent] = useState<GameEvent | null>(null)
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'my_events'>('upcoming')

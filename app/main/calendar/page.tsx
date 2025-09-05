@@ -104,18 +104,20 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
         const [eventsData, usersData] = await Promise.all([eRes.json(), uRes.json()])
         
         // Валидация и очистка данных событий
-        const validEvents = (eventsData || []).filter((event: any) => {
+        const validEvents = (eventsData || []).filter((event: unknown) => {
+          const e = event as { start?: string; end?: string; title?: string }
           return event && 
-                 typeof event.start === 'string' && 
-                 event.start.length > 0 &&
-                 typeof event.end === 'string' && 
-                 event.end.length > 0 &&
-                 event.title
+                 typeof e.start === 'string' && 
+                 e.start.length > 0 &&
+                 typeof e.end === 'string' && 
+                 e.end.length > 0 &&
+                 e.title
         })
         
         // Валидация данных пользователей
-        const validUsers = (usersData || []).filter((user: any) => {
-          return user && user.id && user.name && user.email
+        const validUsers = (usersData || []).filter((user: unknown) => {
+          const u = user as { id?: string; name?: string; email?: string }
+          return user && u.id && u.name && u.email
         })
         
         setEvents(validEvents)
@@ -201,13 +203,14 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
       const res = await fetch(`${API_BASE}/events`)
       if (res.ok) {
         const eventsData = await res.json()
-        const validEvents = (eventsData || []).filter((event: any) => {
+        const validEvents = (eventsData || []).filter((event: unknown) => {
+          const e = event as { start?: string; end?: string; title?: string }
           return event && 
-                 typeof event.start === 'string' && 
-                 event.start.length > 0 &&
-                 typeof event.end === 'string' && 
-                 event.end.length > 0 &&
-                 event.title
+                 typeof e.start === 'string' && 
+                 e.start.length > 0 &&
+                 typeof e.end === 'string' && 
+                 e.end.length > 0 &&
+                 e.title
         })
         setEvents(validEvents)
         console.log('События обновлены:', validEvents)

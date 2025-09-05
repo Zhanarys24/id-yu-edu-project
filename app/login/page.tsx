@@ -251,8 +251,8 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push('/main/news');
-    } catch (error: any) {
-      showToast(error.message || 'Ошибка входа', 'error');
+    } catch (error: unknown) {
+      showToast((error as Error).message || 'Ошибка входа', 'error');
     }
   };
 

@@ -164,7 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return false;
     if (user.role === 'super_admin') return true;
     const permission = user.permissions.find(p => p.section === section);
-    return permission ? permission.actions.includes(action as any) : false;
+    return permission ? permission.actions.includes(action as string) : false;
   };
 
   const getUserPermissions = () => user?.permissions || [];

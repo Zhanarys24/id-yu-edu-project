@@ -6,7 +6,7 @@ export interface PortfolioItem {
   description?: string;
   date?: string;
   attachments?: PortfolioFile[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }

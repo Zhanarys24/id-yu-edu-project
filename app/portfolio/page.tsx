@@ -64,7 +64,7 @@ function PortfolioContent() {
     };
 
     // Экспортируем в Word документ
-    exportPortfolioToWord(userForExport as any, userPortfolio);
+    exportPortfolioToWord(userForExport, userPortfolio);
   }
 
   return (

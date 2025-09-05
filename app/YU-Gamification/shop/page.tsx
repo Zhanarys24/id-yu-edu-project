@@ -20,32 +20,59 @@ type ShopItem = {
   purchases?: number
 }
 
-const Card = ({ children, className = "", hover = true, ...rest }: any) => (
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode
+  className?: string
+  hover?: boolean
+}
+
+const Card = ({ children, className = "", hover = true, ...rest }: CardProps) => (
   <div {...rest} className={`rounded-2xl border border-gray-100 bg-white shadow-sm ${hover ? 'hover:shadow-xl hover:scale-[1.02]' : ''} transition-all duration-300 ${className}`}>
     {children}
   </div>
 )
 
-const CardHeader = ({ children, className = "" }: any) => (
+interface CardHeaderProps {
+  children: React.ReactNode
+  className?: string
+}
+
+const CardHeader = ({ children, className = "" }: CardHeaderProps) => (
   <div className={`p-6 pb-4 ${className}`}>
     {children}
   </div>
 )
 
-const CardTitle = ({ children, className = "" }: any) => (
+interface CardTitleProps {
+  children: React.ReactNode
+  className?: string
+}
+
+const CardTitle = ({ children, className = "" }: CardTitleProps) => (
   <h3 className={`text-xl font-bold text-gray-800 ${className}`}>
     {children}
   </h3>
 )
 
-const CardContent = ({ children, className = "" }: any) => (
+interface CardContentProps {
+  children: React.ReactNode
+  className?: string
+}
+
+const CardContent = ({ children, className = "" }: CardContentProps) => (
   <div className={`p-6 pt-0 ${className}`}>
     {children}
   </div>
 )
 
 type BadgeVariant = 'default' | 'popular' | 'discount' | 'limited'
-const Badge = (props: { children: any; variant?: BadgeVariant; className?: string }) => {
+interface BadgeProps {
+  children: React.ReactNode
+  variant?: BadgeVariant
+  className?: string
+}
+
+const Badge = (props: BadgeProps) => {
   const { children, variant = 'default', className = "" } = props
   const variants: Record<BadgeVariant, string> = {
     default: 'bg-gray-100 text-gray-800',
@@ -251,7 +278,13 @@ export default function ShopPage() {
             <div
               key={`shop-coin-${i}`}
               className="absolute -top-24 rounded-full bg-white/60 backdrop-blur-sm shadow-md animate-[coin-fall_var(--dur)_linear_infinite]"
-              style={{ left, width: `${size}px`, height: `${size}px`, animationDelay: delay as any, "--dur": duration as any } as any}
+              style={{ 
+                left, 
+                width: `${size}px`, 
+                height: `${size}px`, 
+                animationDelay: delay, 
+                "--dur": duration 
+              } as React.CSSProperties & { "--dur": string }}
             >
               <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
                 <Image src="/YU-coin.png" alt="YU coin" width={size} height={size} className="object-contain" />
@@ -290,7 +323,7 @@ export default function ShopPage() {
                       { key: 'benefit', label: 'Преимущества', count: categoryStats.benefit, icon: Trophy, color: 'from-blue-500 to-cyan-500' },
                       { key: 'service', label: 'Сервисы', count: categoryStats.service, icon: Zap, color: 'from-green-500 to-emerald-500' },
                       { key: 'merch', label: 'Мерч', count: categoryStats.merch, icon: Shirt, color: 'from-purple-500 to-pink-500' },
-                    ].map(({ key, label, count, icon: Icon, color }: any) => (
+                    ].map(({ key, label, count, icon: Icon, color }: { key: string; label: string; count: number; icon: React.ComponentType<{ className?: string }>; color: string }) => (
                       <button
                         key={key}
                         onClick={() => setCategory(key)}
@@ -470,7 +503,7 @@ export default function ShopPage() {
                       <span className="text-sm text-gray-600">Сортировка:</span>
                       <select 
                         value={sortBy} 
-                        onChange={(e) => setSortBy(e.target.value as any)}
+                        onChange={(e) => setSortBy(e.target.value as 'popular' | 'price' | 'newest' | 'rating')}
                         className="h-11 px-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       >
                         <option value="popular">По популярности</option>
