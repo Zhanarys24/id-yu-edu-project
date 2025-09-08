@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 import '@/i18n' 
 import { 
-  Edit3, X, User, Lock, Phone, Info, Award, BookOpen,
-  Camera, Save, Upload, Mail, UserCheck, Shield, Eye, EyeOff, FileText, Calendar
+  Edit3, X, User, Lock, Phone, Info,
+  Camera, Save, Mail, UserCheck, Shield, Eye, EyeOff, Calendar
 } from 'lucide-react'
 import { useAvatar } from '@/context/AvatarContext'
 import { useAuth } from '@/context/AuthContext'
@@ -25,8 +25,7 @@ export default function SiteSettingsPage() {
     { id: 'Смена пароля', icon: <Lock size={18} />, label: t('settings.sections.security') },
     { id: 'Контакты', icon: <Phone size={18} />, label: t('settings.sections.contacts') },
     { id: 'Обо мне', icon: <Info size={18} />, label: t('settings.sections.about') },
-    { id: 'Сертификаты', icon: <Award size={18} />, label: t('settings.sections.certificates') },
-    { id: 'Курсы', icon: <BookOpen size={18} />, label: t('settings.sections.courses') },
+    { id: 'Резервная почта', icon: <Mail size={18} />, label: t('settings.sections.reserveEmail') },
   ]
 
   const activeData = sections.find(s => s.id === activeSection)
@@ -91,8 +90,7 @@ export default function SiteSettingsPage() {
                 {activeSection === 'Смена пароля' && <PasswordSection />}
                 {activeSection === 'Контакты' && <ContactSection />}
                 {activeSection === 'Обо мне' && <AboutSection />}
-                {activeSection === 'Сертификаты' && <UploadSection type="certificates" />}
-                {activeSection === 'Курсы' && <UploadSection type="courses" />}
+                {activeSection === 'Резервная почта' && <ReserveEmailSection />}
               </div>
             </div>
           </div>
@@ -109,8 +107,6 @@ function AvatarSection() {
   const { avatar, setAvatar, userName, setUserName, userPosition } = useAvatar()
   const { user } = useAuth()
   const [newAvatar, setNewAvatar] = useState<File | null>(null)
-  const [editingName, setEditingName] = useState(false)
-  const [tempName, setTempName] = useState(userName)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,20 +126,7 @@ function AvatarSection() {
     setNewAvatar(null)
   }
 
-  const handleNameSave = () => {
-    setUserName(tempName)
-    setEditingName(false)
-  }
-
-  const handleNameCancel = () => {
-    setTempName(userName)
-    setEditingName(false)
-  }
-
-  // Update tempName when userName changes
-  useEffect(() => {
-    setTempName(userName)
-  }, [userName])
+  // Name editing is disabled by requirements; only avatar can be changed
 
   return (
     <div className="space-y-6">
@@ -171,49 +154,12 @@ function AvatarSection() {
           </label>
         </div>
         <div className="mt-4">
-          {editingName ? (
-            <div className="space-y-3">
-              <Input
-                value={tempName}
-                onChange={(e) => setTempName(e.target.value)}
-                className="text-center text-xl font-semibold"
-                placeholder="Введите имя"
-                autoFocus
-              />
-              <div className="flex gap-2 justify-center">
-                <Button 
-                  className="px-3 py-1 text-sm" 
-                  onClick={handleNameSave}
-                  disabled={!tempName.trim()}
-                >
-                  <Save size={14} className="mr-1" />
-                  Сохранить
-                </Button>
-                <Button 
-                  className="px-3 py-1 text-sm" 
-                  variant="outline" 
-                  onClick={handleNameCancel}
-                >
-                  <X size={14} className="mr-1" />
-                  Отмена
-                </Button>
-              </div>
+          <div className="space-y-1">
+            <div className="flex items-center justify-center gap-2">
+              <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
             </div>
-          ) : (
-            <div className="space-y-1">
-              <div className="flex items-center justify-center gap-2">
-                <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
-                <Button
-                  className="p-1 h-auto text-sm"
-                  variant="ghost"
-                  onClick={() => setEditingName(true)}
-                >
-                  <Edit3 size={14} />
-                </Button>
-              </div>
-              <p className="text-gray-600">{userPosition || user?.position || t('profile.teacher')}</p>
-            </div>
-          )}
+            <p className="text-gray-600">{userPosition || user?.position || t('profile.teacher')}</p>
+          </div>
         </div>
       </div>
 
@@ -290,13 +236,32 @@ function PasswordSection() {
     setMessage(null)
 
     try {
-      const success = await userService.changePasswordWithVerification(user.email, passwords.old, passwords.new)
-      
-      if (success) {
+      const resp = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_password: passwords.old, new_password: passwords.new })
+      })
+      const contentType = resp.headers.get('content-type') || ''
+      const data = contentType.includes('application/json') ? await resp.json() : null
+      if (!resp.ok) {
+        const compileErrors = () => {
+          if (!data) return ''
+          const fields = ['detail','message','current_password','old_password','password','new_password','new_password1','new_password2','non_field_errors','errors']
+          const parts: string[] = []
+          for (const f of fields) {
+            const v = (data as any)[f]
+            if (!v) continue
+            if (Array.isArray(v)) parts.push(`${f}: ${v.join(', ')}`)
+            else if (typeof v === 'object') parts.push(`${f}: ${JSON.stringify(v)}`)
+            else parts.push(`${f}: ${String(v)}`)
+          }
+          return parts.join('\n')
+        }
+        const msg = compileErrors() || 'Ошибка при смене пароля'
+        setMessage({ type: 'error', text: msg })
+      } else {
         setMessage({ type: 'success', text: 'Пароль успешно изменен' })
         setPasswords({ old: '', new: '', confirm: '' })
-      } else {
-        setMessage({ type: 'error', text: 'Неверный текущий пароль' })
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Ошибка при смене пароля' })
@@ -412,16 +377,28 @@ function PasswordSection() {
 
 function ContactSection() {
   const { t } = useTranslation('common')
+  const { userName, userPosition } = useAvatar()
+  const { user } = useAuth()
   const [dob, setDob] = useState<string>('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
 
   useEffect(() => {
     const saved = localStorage.getItem('user.birthDate')
     if (saved) setDob(saved)
-  }, [])
+    
+    // Parse name from userName (format: "FirstName LastName")
+    const nameParts = userName.split(' ')
+    setFirstName(nameParts[0] || '')
+    setLastName(nameParts.slice(1).join(' ') || '')
+    
+    // Set email from user context
+    setEmail(user?.email || '')
+  }, [userName, user])
 
   const saveContacts = () => {
-    if (dob) localStorage.setItem('user.birthDate', dob)
-    // здесь можно добавить сохранение других полей при их добавлении
+    // Contacts are read-only now; nothing to save here
   }
 
   return (
@@ -432,28 +409,43 @@ function ContactSection() {
             <UserCheck size={16} className="inline mr-1" />
             {t('settings.contacts.firstName')}
           </label>
-          <Input placeholder={t('settings.contacts.firstNamePlaceholder')} />
+          <Input 
+            value={firstName}
+            readOnly
+            disabled
+            placeholder={t('settings.contacts.firstNamePlaceholder')} 
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <UserCheck size={16} className="inline mr-1" />
             {t('settings.contacts.lastName')}
           </label>
-          <Input placeholder={t('settings.contacts.lastNamePlaceholder')} />
+          <Input 
+            value={lastName}
+            readOnly
+            disabled
+            placeholder={t('settings.contacts.lastNamePlaceholder')} 
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <Phone size={16} className="inline mr-1" />
             {t('settings.contacts.phone')}
           </label>
-          <Input placeholder="+7 (___) ___-__-__" />
+          <Input placeholder="+7 (___) ___-__-__" readOnly disabled />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <Mail size={16} className="inline mr-1" />
             {t('settings.contacts.email')}
           </label>
-          <Input placeholder="example@yessenov.edu.kz" />
+          <Input 
+            value={email}
+            readOnly
+            disabled
+            placeholder="example@yessenov.edu.kz" 
+          />
         </div>
 
         <div>
@@ -464,14 +456,15 @@ function ContactSection() {
           <Input 
             type="date" 
             value={dob}
-            onChange={(e) => setDob(e.target.value)}
+            readOnly
+            disabled
           />
           <p className="text-xs text-gray-500 mt-1">Формат: ГГГГ-ММ-ДД</p>
         </div>
       </div>
       
       <div className="flex justify-end">
-        <Button className="flex items-center gap-2" onClick={saveContacts}>
+        <Button className="flex items-center gap-2" onClick={saveContacts} disabled>
           <Save size={16} />
           {t('settings.contacts.save')}
         </Button>
@@ -513,145 +506,43 @@ function AboutSection() {
   )
 }
 
-function UploadSection({ type }: { type: 'certificates' | 'courses' }) {
+function ReserveEmailSection() {
   const { t } = useTranslation('common')
-  const [files, setFiles] = useState<File[]>([])
-  const [previews, setPreviews] = useState<string[]>([])
-  const [dragActive, setDragActive] = useState(false)
-
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files
-    if (!selected) return
-    const newFiles = Array.from(selected)
-    setFiles((prev) => [...prev, ...newFiles])
-  }
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const newFiles = Array.from(e.dataTransfer.files)
-      setFiles((prev) => [...prev, ...newFiles])
-    }
-  }
-
-  const handleRemove = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index))
-    setPreviews((prev) => prev.filter((_, i) => i !== index))
-  }
+  const [reserveEmail, setReserveEmail] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    const urls = files.map((file) => URL.createObjectURL(file))
-    setPreviews(urls)
-    return () => urls.forEach((url) => URL.revokeObjectURL(url))
-  }, [files])
+    const saved = localStorage.getItem('user.reserveEmail')
+    if (saved) setReserveEmail(saved)
+  }, [])
 
-  const title = t(`settings.upload.${type}`)
+  const saveReserveEmail = async () => {
+    setIsSaving(true)
+    try {
+      localStorage.setItem('user.reserveEmail', reserveEmail)
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
-      {/* Зона загрузки */}
-      <div
-        className={clsx(
-          'border-2 border-dashed rounded-xl p-8 text-center transition-colors',
-          dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
-        )}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-      >
-        <Upload className="mx-auto text-gray-400 mb-4" size={48} />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          {t('settings.upload.uploadFiles')} {title}
-        </h3>
-        <p className="text-gray-600 mb-4">
-          {t('settings.upload.dragText')}
-        </p>
-        <label className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer transition-colors">
-          <Upload size={16} />
-          {t('settings.upload.choose')}
-          <input 
-            type="file" 
-            multiple 
-            accept="image/*,application/pdf" 
-            onChange={handleUpload}
-            className="hidden"
-          />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          {t('settings.sections.reserveEmail')}
         </label>
-        <p className="text-xs text-gray-500 mt-2">
-          {t('settings.upload.supportedFormats')}
-        </p>
+        <Input
+          type="email"
+          value={reserveEmail}
+          onChange={(e) => setReserveEmail(e.target.value)}
+          placeholder="reserve@example.com"
+        />
+        <p className="text-xs text-gray-500 mt-1">Укажите резервную почту для восстановления доступа</p>
       </div>
-
-      {/* Превью загруженных файлов */}
-      {files.length > 0 && (
-        <div className="space-y-4">
-          <h4 className="font-medium text-gray-900">
-            {t('settings.upload.uploadedFiles')} ({files.length})
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {previews.map((src, idx) => (
-              <div
-                key={idx}
-                className="relative group bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-              >
-                <div className="aspect-video relative">
-                  {files[idx]?.type.startsWith('image/') ? (
-                    <Image
-                      src={src}
-                      alt={`${type}-${idx}`}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full bg-gray-100">
-                      <div className="text-center">
-                        <FileText className="mx-auto text-gray-400 mb-2" size={32} />
-                        <p className="text-xs text-gray-600">{t('settings.upload.pdfFile')}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="p-3">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {files[idx]?.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {(files[idx]?.size / 1024 / 1024).toFixed(2)} {t('settings.upload.mb')}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleRemove(idx)}
-                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="flex justify-end">
-        <Button 
-          disabled={files.length === 0}
-          className="flex items-center gap-2"
-        >
+        <Button onClick={saveReserveEmail} className="flex items-center gap-2" disabled={isSaving}>
           <Save size={16} />
-          {t('settings.upload.save')}
+          {isSaving ? 'Сохранение...' : t('common.save')}
         </Button>
       </div>
     </div>

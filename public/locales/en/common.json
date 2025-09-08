@@ -277,8 +277,7 @@
       "security": "Security",
       "contacts": "Contacts",
       "about": "About Me",
-      "certificates": "Certificates",
-      "courses": "Courses"
+      "reserveEmail": "Reserve email"
     },
     "avatar": {
       "recommendations": "Photo recommendations:",

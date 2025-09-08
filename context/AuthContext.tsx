@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole, Permission, ROLE_PERMISSIONS } from '@/lib/types/auth';
 import { userService } from '@/lib/services/userService';
+import { AuthApi } from '@/lib/services/authApi';
 
 type AuthContextType = {
   user: User | null;
@@ -78,7 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Also update individual localStorage items for AvatarContext
     localStorage.setItem('user.name', anonymousUser.name);
+    if (anonymousUser.position) {
     localStorage.setItem('user.position', anonymousUser.position);
+    }
     
     return true;
   };
@@ -88,48 +91,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === 'undefined') return;
     
     try {
-      // Проверяем пароль
-      const registeredUser = userService.verifyUserPassword(email, password);
-      
-      if (!registeredUser) {
-        throw new Error('Неверный email или пароль.');
+      // Вызываем внешний API авторизации через прокси
+      const resp = await AuthApi.login(email, password);
+      const role = (resp.role as UserRole) || 'student';
+      const rolePermissions = ROLE_PERMISSIONS?.[role] || [];
+      if (!ROLE_PERMISSIONS || !ROLE_PERMISSIONS[role]) {
+        console.warn('ROLE_PERMISSIONS missing for role:', role);
       }
 
-      if (!registeredUser.isActive) {
-        throw new Error('Аккаунт заблокирован. Обратитесь к администратору.');
+      // Try to fetch user profile for richer info
+      let profile: any = null;
+      try {
+        profile = await AuthApi.profile();
+      } catch (e) {
+        console.warn('Profile load failed:', e);
       }
 
-      // Обновляем время последнего входа
-      userService.registerUser(email, registeredUser.name, registeredUser.role);
-
-      const rolePermissions = ROLE_PERMISSIONS?.[registeredUser.role] || [];
-      if (!ROLE_PERMISSIONS || !ROLE_PERMISSIONS[registeredUser.role]) {
-        console.warn('ROLE_PERMISSIONS missing for role:', registeredUser.role);
-      }
+      // Use data from login response first, then profile response
+      const firstName = resp.first_name || profile?.first_name || 'User';
+      const lastName = resp.last_name || profile?.last_name || '';
+      const fullName = lastName ? `${firstName} ${lastName}` : firstName;
+      const username = resp.username || profile?.username || email;
+      const avatar = resp.avatar || profile?.avatar || '/avatar.jpg';
 
       const newUser: User = {
-        id: registeredUser.id,
-        email: registeredUser.email,
-        name: registeredUser.name,
-        position: registeredUser.position,
-        role: registeredUser.role,
+        id: String(resp.id ?? profile?.id ?? 'unknown'),
+        email: email,
+        name: fullName,
+        position: resp.position || 'User',
+        role,
         permissions: rolePermissions,
-        avatar: '/avatar.jpg'
+        avatar: avatar
       };
 
       setUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
+      if (resp.access_token) {
+        localStorage.setItem('auth.token', String(resp.access_token));
+      }
+      // Save username separately if present
+      if (username) {
+        localStorage.setItem('user.username', String(username));
+      }
       
       // Also update individual localStorage items for AvatarContext
       localStorage.setItem('user.name', newUser.name);
       if (newUser.position) {
         localStorage.setItem('user.position', newUser.position);
       }
-      
-      // Проверяем, нужно ли сменить пароль
-      if (registeredUser.isTemporaryPassword) {
-        localStorage.setItem('requirePasswordChange', 'true');
+      if (newUser.avatar) {
+        localStorage.setItem('user.avatar', newUser.avatar);
       }
+      // Если бэкенд присылает флаг обязательной смены пароля:
+      // if (resp.mustChangePassword) localStorage.setItem('requirePasswordChange', 'true');
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -150,12 +164,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     // Проверяем, что мы на клиенте
     if (typeof window === 'undefined') return;
-    
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // ignore
+    }
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('auth.token');
+    localStorage.removeItem('requirePasswordChange');
+    localStorage.removeItem('user.name');
+    localStorage.removeItem('user.position');
+    // Перенаправляем на страницу логина
+    try {
+      window.location.href = '/login';
+    } catch {
+      // ignore
+    }
   };
 
   const hasRole = (role: UserRole) => user?.role === role;
@@ -164,13 +192,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return false;
     if (user.role === 'super_admin') return true;
     const permission = user.permissions.find(p => p.section === section);
-    return permission ? permission.actions.includes(action as string) : false;
+    return permission ? (permission.actions as any).includes(action) : false;
   };
 
   const getUserPermissions = () => user?.permissions || [];
 
   const isAdmin = () => {
-    return user && user.role !== 'student' && user.role !== 'anonymous';
+    return !!user && user.role !== 'student' && user.role !== 'anonymous';
   };
 
   const refreshUser = () => {
@@ -200,6 +228,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('user.name', refreshedUser.name);
         if (refreshedUser.position) {
           localStorage.setItem('user.position', refreshedUser.position);
+        }
+        if (refreshedUser.avatar) {
+          localStorage.setItem('user.avatar', refreshedUser.avatar);
         }
       }
     }

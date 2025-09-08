@@ -20,13 +20,12 @@ export default function Sidebar({ active }: { active?: string }) {
   const { t } = useTranslation('common')
   const pathname = usePathname()
   const { avatar, userName, userPosition } = useAvatar()
-  const { isAdmin, user } = useAuth()
+  const { isAdmin, user, logout } = useAuth()
   const [portfolioOpen, setPortfolioOpen] = useState(false)
   const router = useRouter()
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    router.push('/login')
+  const handleLogout = async () => {
+    await logout()
   }
 
   const menuItems = user?.role === 'anonymous' 

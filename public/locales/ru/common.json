@@ -277,8 +277,7 @@
       "security": "Безопасность",
       "contacts": "Контакты",
       "about": "О себе",
-      "certificates": "Сертификаты",
-      "courses": "Курсы"
+      "reserveEmail": "Резервная почта"
     },
     "avatar": {
       "recommendations": "Рекомендации для фото:",

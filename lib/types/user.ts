@@ -26,7 +26,7 @@ export const INITIAL_USERS: RegisteredUser[] = [
   {
     id: '1',
     email: 'super@admin.com',
-    name: 'Айдар Нурланов',
+    name: 'Абыков Мирас',
     position: 'Директор IT-департамента',
     role: 'super_admin',
     registeredAt: '2024-01-01T00:00:00Z',

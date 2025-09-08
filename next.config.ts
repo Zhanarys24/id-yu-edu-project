@@ -1,12 +1,22 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { NextConfig } from 'next'
 
-const config: CapacitorConfig = {
-  appId: 'com.company.app', // замени на свой
-  appName: 'YU_ID',
-  webDir: '.next', // теперь указываем .next, а не out
-  server: {
-    androidScheme: 'https'
-  }
-};
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '900c15e5d875.ngrok-free.app',
+        port: '',
+        pathname: '/uploads/**',
+      },
+    ],
+  },
+}
 
-export default config;
+export default nextConfig

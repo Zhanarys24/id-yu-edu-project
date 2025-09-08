@@ -6,11 +6,11 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
 import { 
-  Monitor, FileText, Calendar, GraduationCap, BookOpen, 
-  Users, Settings, Bot, Trophy, FileUser, Shield, Globe
+  Monitor, FileUser, Users, GraduationCap, Clock, 
+  BarChart3, Download, Settings, Globe, Shield
 } from 'lucide-react';
 
-export default function AdminPage() {
+export default function ServiceAnalysisPage() {
   const { user, canAccess, isAdmin } = useAuth();
   const { t, i18n } = useTranslation('common');
   const router = useRouter();
@@ -57,84 +57,53 @@ export default function AdminPage() {
     );
   }
 
-  const adminPanels = [
+  const serviceAnalysisPanels = [
     {
-      id: 'news',
-      title: 'Управление новостями',
-      description: 'Добавление, изменение и удаление новостей',
-      icon: <FileText size={24} />,
-      href: '/admin/news',
-      requiredPermission: 'news',
-      color: 'bg-blue-500'
+      id: 'portfolio',
+      title: 'Управление портфолио',
+      description: 'Просмотр и управление портфолио всех пользователей',
+      icon: <FileUser size={24} />,
+      href: '/admin/service-analysis/portfolio',
+      color: 'bg-blue-500',
+      stats: '1,234 записи'
     },
     {
-      id: 'events',
-      title: 'Управление мероприятиями',
-      description: 'Подтверждение, отмена и контроль событий',
-      icon: <Calendar size={24} />,
-      href: '/admin/events',
-      requiredPermission: 'events',
-      color: 'bg-green-500'
+      id: 'employees',
+      title: 'Сотрудники',
+      description: 'Учет рабочего времени, контроль опозданий, анализ посещаемости',
+      icon: <Users size={24} />,
+      href: '/admin/service-analysis/employees',
+      color: 'bg-green-500',
+      stats: '45 сотрудников'
     },
     {
-      id: 'education',
-      title: 'Управление образованием',
-      description: 'Управление карточками образования, науки и воспитания',
+      id: 'students',
+      title: 'Студенты',
+      description: 'Учет посещаемости студентов, анализ активности',
       icon: <GraduationCap size={24} />,
-      href: '/admin/education',
-      requiredPermission: 'education',
-      color: 'bg-purple-500'
+      href: '/admin/service-analysis/students',
+      color: 'bg-purple-500',
+      stats: '1,567 студентов'
     },
     {
-      id: 'eservices',
-      title: 'Управление Е-услугами',
-      description: 'Добавление и управление карточками Е-услуг',
-      icon: <Settings size={24} />,
-      href: '/admin/eservices',
-      requiredPermission: 'eservices',
-      color: 'bg-orange-500'
+      id: 'attendance',
+      title: 'СКУД система',
+      description: 'Система контроля и управления доступом, учет времени входа/выхода',
+      icon: <Clock size={24} />,
+      href: '/admin/service-analysis/attendance',
+      color: 'bg-orange-500',
+      stats: '2,012 записей сегодня'
     },
     {
-      id: 'yessenovai',
-      title: 'Управление YessenovAI',
-      description: 'Контроль и управление YessenovAI',
-      icon: <Bot size={24} />,
-      href: '/admin/yessenovai',
-      requiredPermission: 'yessenovai',
-      color: 'bg-indigo-500'
-    },
-    {
-      id: 'gamification',
-      title: 'Управление YU-Gamification',
-      description: 'Контроль игровых механик и достижений',
-      icon: <Trophy size={24} />,
-      href: '/admin/gamification',
-      requiredPermission: 'gamification',
-      color: 'bg-yellow-500'
-    },
-    {
-      id: 'service-analysis',
-      title: 'Анализ сервиса',
-      description: 'Система учета рабочего времени, управление портфолио, сотрудники и студенты',
-      icon: <Monitor size={24} />,
-      href: '/admin/service-analysis',
-      requiredPermission: 'site_settings',
-      color: 'bg-cyan-500'
-    },
-    {
-      id: 'users',
-      title: 'Управление пользователями',
-      description: 'Управление ролями и правами пользователей (только для супер-админа)',
-      icon: <Shield size={24} />,
-      href: '/admin/users',
-      requiredPermission: 'site_settings',
-      color: 'bg-gray-700'
+      id: 'analytics',
+      title: 'Аналитика',
+      description: 'Общая статистика, отчеты, экспорт данных',
+      icon: <BarChart3 size={24} />,
+      href: '/admin/service-analysis/analytics',
+      color: 'bg-indigo-500',
+      stats: '15 отчетов'
     }
   ];
-
-  const accessiblePanels = (user?.role === 'super_admin')
-    ? adminPanels
-    : adminPanels.filter(panel => canAccess(panel.requiredPermission, 'manage'));
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -144,10 +113,10 @@ export default function AdminPage() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                {t('admin.title')}
+                Анализ сервиса
               </h1>
               <p className="text-gray-600">
-                {t('admin.welcome')}, {user?.name}! {t('admin.selectSection')}
+                Система учета рабочего времени, управление портфолио и аналитика
               </p>
             </div>
             
@@ -181,9 +150,60 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Сетка админ панелей */}
+        {/* Статистические карточки */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                <Users size={24} />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Всего сотрудников</p>
+                <p className="text-2xl font-bold text-gray-900">45</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-green-100 text-green-600">
+                <GraduationCap size={24} />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Всего студентов</p>
+                <p className="text-2xl font-bold text-gray-900">1,567</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-orange-100 text-orange-600">
+                <Clock size={24} />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">На работе сейчас</p>
+                <p className="text-2xl font-bold text-gray-900">38</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-purple-100 text-purple-600">
+                <BarChart3 size={24} />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Опозданий сегодня</p>
+                <p className="text-2xl font-bold text-gray-900">3</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Сетка панелей анализа сервиса */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {accessiblePanels.map((panel) => (
+          {serviceAnalysisPanels.map((panel) => (
             <div
               key={panel.id}
               className="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer"
@@ -201,41 +221,27 @@ export default function AdminPage() {
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-blue-600 font-medium">
-                    Открыть панель
+                    Открыть раздел
                   </span>
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                      {panel.stats}
+                    </span>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Информация о правах */}
-        {user && (
-          <div className="mt-8 bg-white rounded-lg shadow-md border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Ваши права доступа
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {user.permissions.map((permission) => (
-                <div key={permission.section} className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-700 capitalize">
-                    {permission.section}: {permission.actions.join(', ')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Кнопка возврата */}
         <div className="mt-8 text-center">
           <button
-            onClick={() => router.push('/main/news')}
+            onClick={() => router.push('/admin')}
             className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
           >
-            Вернуться на главную
+            Вернуться в админ-панель
           </button>
         </div>
       </div>

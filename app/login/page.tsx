@@ -227,6 +227,17 @@ export default function LoginPage() {
     }
   }, [i18n]);
 
+  // If already authenticated, replace away from /login immediately (client-side UX)
+  useEffect(() => {
+    try {
+      // Presence of auth cookie cannot be read client-side (HttpOnly), so rely on stored user as a hint
+      const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+      if (storedUser) {
+        router.replace('/main/news');
+      }
+    } catch {}
+  }, [router]);
+
   // Функция смены языка (точно как в Header)
   const changeLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedLocale = e.target.value;
@@ -250,7 +261,7 @@ export default function LoginPage() {
     
     try {
       await login(email, password);
-      router.push('/main/news');
+      router.replace('/main/news');
     } catch (error: unknown) {
       showToast((error as Error).message || 'Ошибка входа', 'error');
     }
@@ -259,13 +270,13 @@ export default function LoginPage() {
   const handleECPLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedFile) {
-      router.push('/main/news');
+      router.replace('/main/news');
     }
   };
 
   const handleAnonymousLogin = () => {
     anonymousLogin();
-    router.push('/main/news');
+    router.replace('/main/news');
   };
 
   const renderTabContent = () => {
@@ -283,6 +294,7 @@ export default function LoginPage() {
                 className="w-3/4 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                name="username"
               />
             </div>
 
@@ -299,6 +311,8 @@ export default function LoginPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  name="password"
+
                 />
                 <button
                   type="button"

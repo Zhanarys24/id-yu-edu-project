@@ -54,7 +54,7 @@ export function AvatarProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Update userName and position when user data changes
+  // Update userName, position and avatar when user data changes
   useEffect(() => {
     if (user) {
       if (user.name) {
@@ -64,6 +64,10 @@ export function AvatarProvider({ children }: { children: React.ReactNode }) {
       if (user.position) {
         setUserPosition(user.position)
         localStorage.setItem('user.position', user.position)
+      }
+      if (user.avatar) {
+        setAvatar(user.avatar)
+        localStorage.setItem('user.avatar', user.avatar)
       }
     }
   }, [user])
