@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const PUBLIC_PATHS: RegExp[] = [
   /^\/login(?:\/.*)?$/,
   /^\/public(?:\/.*)?$/,
+  /^\/locales(?:\/.*)?$/,
   /^\/_next(?:\/.*)?$/,
   /^\/favicon\.ico$/,
   /^\/images(?:\/.*)?$/,

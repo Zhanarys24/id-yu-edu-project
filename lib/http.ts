@@ -1,5 +1,7 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
+import { extractMessageFromBackend, mapErrorToFriendlyMessage } from './utils/errorMessages';
+
 type Options = {
   method?: string;
   headers?: Record<string, string>;
@@ -27,8 +29,14 @@ export async function http<T = any>(path: string, opts: Options = {}) {
     ...rest,
   });
   if (!res.ok) {
+    const status = res.status;
     const text = await res.text().catch(() => '');
-    throw new Error(text || `HTTP ${res.status}`);
+    let friendly: string | undefined;
+    try {
+      const json = text ? JSON.parse(text) : undefined;
+      friendly = json ? extractMessageFromBackend(json, status) : undefined;
+    } catch {}
+    throw new Error(friendly || mapErrorToFriendlyMessage(text || `HTTP ${status}`, status));
   }
   const ct = res.headers.get('content-type') || '';
   return ct.includes('application/json') ? (res.json() as Promise<T>) : ((await res.text()) as T);

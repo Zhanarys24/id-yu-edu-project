@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Layout from '@/components/Layout'
-import Image from 'next/image'
+import NextImage from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
@@ -15,6 +15,8 @@ import { useAvatar } from '@/context/AvatarContext'
 import { useAuth } from '@/context/AuthContext'
 import { userService } from '@/lib/services/userService'
 import clsx from 'clsx'
+import { useRouter } from 'next/navigation'
+import { AuthApi } from '@/lib/services/authApi'
 
 export default function SiteSettingsPage() {
   const { t } = useTranslation('common')
@@ -105,25 +107,150 @@ export default function SiteSettingsPage() {
 function AvatarSection() {
   const { t } = useTranslation('common')
   const { avatar, setAvatar, userName, setUserName, userPosition } = useAvatar()
-  const { user } = useAuth()
+  const { user, uploadAvatarFile } = useAuth()
   const [newAvatar, setNewAvatar] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string>('')
+  const [imageOk, setImageOk] = useState(true)
+  const [success, setSuccess] = useState<string>('')
+
+  const isValidAvatar = (src: string | null | undefined) => {
+    if (!src) return false
+    if (src === '/avatar.jpg') return false
+    // allow blobs and http(s) and absolute public paths
+    if (src.startsWith('blob:')) return true
+    if (src.startsWith('http://') || src.startsWith('https://')) return true
+    if (src.startsWith('/')) return true
+    return false
+  }
+  const hasRealAvatar = Boolean(isValidAvatar(avatar) && imageOk)
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(/\s+/)
+    const first = parts[0]?.[0] || ''
+    const second = parts[1]?.[0] || ''
+    return (first + second).toUpperCase()
+  }
+
+  const getColorFromName = (name: string) => {
+    // Хэш -> стабильный цвет (пастельный). Генерируем из имени HEX.
+    let hash = 0
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
+    // Базовые компоненты 0..255
+    let r = (hash & 0xFF)
+    let g = ((hash >> 8) & 0xFF)
+    let b = ((hash >> 16) & 0xFF)
+    // Смягчим к пастельным: смешаем с белым
+    const mix = (c: number) => Math.round((c + 255 + 255) / 3) // 2/3 к белому
+    r = mix(r); g = mix(g); b = mix(b)
+    const toHex = (c: number) => c.toString(16).padStart(2, '0')
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const url = URL.createObjectURL(file)
-      setAvatar(url)
-      setNewAvatar(file)
+    if (!file) return
+
+    // Разрешённые типы: JPG, PNG
+    const allowedTypes = ['image/jpeg', 'image/png']
+    if (!allowedTypes.includes(file.type)) {
+      setError('Поддерживаемые форматы: JPG, PNG')
+      return
     }
+
+    // Максимальный размер файла — 1 МБ
+    const maxSize = 1 * 1024 * 1024
+    if (file.size > maxSize) {
+      setError('Максимальный размер файла: 1 МБ')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const img = new Image()
+      img.onload = async () => {
+        const width = img.naturalWidth
+        const height = img.naturalHeight
+
+        // Убираем требование квадрата и минимального размера: допускаем любые пропорции
+
+        // Если разрешение больше макс, уменьшаем (для JPEG/PNG), сохраняя пропорции
+        const maxDim = 1920
+        const needsResize = width > maxDim || height > maxDim
+
+        const proceedWithFile = async (finalFile: File) => {
+          setError('')
+          const url = URL.createObjectURL(finalFile)
+          setAvatar(url)
+          setNewAvatar(finalFile)
+        }
+
+        if (needsResize) {
+          try {
+            const scale = Math.min(maxDim / width, maxDim / height)
+            const targetW = Math.round(width * scale)
+            const targetH = Math.round(height * scale)
+
+            const canvas = document.createElement('canvas')
+            canvas.width = targetW
+            canvas.height = targetH
+            const ctx = canvas.getContext('2d')
+            if (!ctx) {
+              setError('Не удалось обработать изображение. Попробуйте другое.')
+              return
+            }
+            ctx.drawImage(img, 0, 0, targetW, targetH)
+
+            const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+            const blob: Blob | null = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), mime, 0.9))
+            if (!blob) {
+              setError('Не удалось уменьшить изображение. Попробуйте другое.')
+              return
+            }
+            // Проверим итоговый размер — всё ещё должен быть <= 1 МБ
+            if (blob.size > maxSize) {
+              setError('Даже после уменьшения размер превышает 1 МБ. Выберите другое изображение.')
+              return
+            }
+            const resizedFile = new File([blob], file.name.replace(/\.(jpg|jpeg|png)$/i, '') + (mime === 'image/png' ? '.png' : '.jpg'), { type: mime })
+            await proceedWithFile(resizedFile)
+            return
+          } catch (err) {
+            console.error('Image resize error:', err)
+            setError('Ошибка при обработке изображения. Попробуйте другое.')
+            return
+          }
+        }
+
+        // Всё ок, используем исходный файл
+        proceedWithFile(file)
+      }
+      if (typeof reader.result === 'string') {
+        img.src = reader.result
+      }
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleSave = async () => {
+    if (!newAvatar) return
+
     setIsLoading(true)
-    // Имитация сохранения
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsLoading(false)
-    setNewAvatar(null)
+    setError('')
+    setSuccess('')
+    
+    try {
+      await uploadAvatarFile(newAvatar)
+      setNewAvatar(null)
+      setSuccess('Ваше изображение успешно изменилось')
+      // Авто-сокрытие флэша через 3 секунды
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      console.error('Avatar upload error:', err)
+      setError('Ошибка при загрузке аватарки')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   // Name editing is disabled by requirements; only avatar can be changed
@@ -133,23 +260,32 @@ function AvatarSection() {
       <div className="text-center">
         <div className="relative inline-block">
           <div className="relative w-32 h-32 mx-auto">
-            <Image
-              src={avatar}
-              alt="avatar"
-              fill
-              className="rounded-full object-cover border-4 border-white shadow-lg"
-            />
-            <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center group cursor-pointer">
-              <Camera className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
-            </div>
+            {hasRealAvatar ? (
+              <>
+                <NextImage
+                  src={avatar}
+                  alt="avatar"
+                  fill
+                  className="rounded-full object-cover border-4 border-white shadow-lg"
+                  onError={() => setImageOk(false)}
+                />
+                <div className="absolute inset-0 rounded-full bg-black/0 hover:bg-black/30 transition-colors duration-200 flex items-center justify-center cursor-pointer">
+                  <Camera className="text-white opacity-0 hover:opacity-100 transition-opacity" size={24} />
+                </div>
+              </>
+            ) : (
+              <div className="rounded-full border-4 border-white shadow-lg w-full h-full grid place-items-center text-white text-2xl font-semibold select-none" style={{ backgroundColor: getColorFromName(userName || 'User') }}>
+                {getInitials(userName || 'U U')}
+              </div>
+            )}
           </div>
           <label className="absolute bottom-2 right-2 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-lg cursor-pointer transition-colors">
             <Edit3 size={16} />
             <input
               type="file"
               className="hidden"
-              accept="image/*"
-              onChange={handleFileChange}
+              accept="image/jpeg,image/png"
+              onChange={(e) => { setImageOk(true); handleFileChange(e) }}
             />
           </label>
         </div>
@@ -164,14 +300,19 @@ function AvatarSection() {
       </div>
 
       <div className="bg-gray-50 rounded-xl p-4">
-        <h4 className="font-medium text-gray-900 mb-2">{t('settings.avatar.recommendations')}</h4>
+        <h4 className="font-medium text-gray-900 mb-2">Рекомендации для фото:</h4>
         <ul className="text-sm text-gray-600 space-y-1">
-          <li>• {t('settings.avatar.square')}</li>
-          <li>• {t('settings.avatar.minSize')}</li>
-          <li>• {t('settings.avatar.formats')}</li>
-          <li>• {t('settings.avatar.maxSize')}</li>
+          <li>• Поддерживаемые форматы: JPG, PNG</li>
+          <li>• Максимальный размер файла: 1 МБ</li>
+          <li>• Максимальное разрешение: 1920x1080 пикселей</li>
         </ul>
       </div>
+
+      {(error || success) && (
+        <div className={error ? 'bg-red-50 border border-red-200 rounded-lg p-4' : 'bg-green-50 border border-green-200 rounded-lg p-4'}>
+          <p className={error ? 'text-sm text-red-600' : 'text-sm text-green-700'}>{error || success}</p>
+        </div>
+      )}
 
       <div className="flex justify-end">
         <Button 
@@ -179,8 +320,17 @@ function AvatarSection() {
           onClick={handleSave}
           className="flex items-center gap-2"
         >
-          <Save size={16} />
-          {isLoading ? t('settings.avatar.saving') : t('settings.avatar.save')}
+          {isLoading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Загрузка...
+            </>
+          ) : (
+            <>
+              <Save size={16} />
+              Сохранить
+            </>
+          )}
         </Button>
       </div>
     </div>
@@ -190,6 +340,7 @@ function AvatarSection() {
 function PasswordSection() {
   const { t } = useTranslation('common')
   const { user } = useAuth()
+  const router = useRouter()
   const [showPasswords, setShowPasswords] = useState({
     old: false,
     new: false,
@@ -227,8 +378,19 @@ function PasswordSection() {
       return
     }
 
-    if (passwords.new.length < 6) {
-      setMessage({ type: 'error', text: 'Новый пароль должен содержать минимум 6 символов' })
+    // Усиленные требования к паролю
+    const missingRequirements: string[] = []
+    if (passwords.new.length < 8) missingRequirements.push('минимум 8 символов')
+    if (!/\d/.test(passwords.new)) missingRequirements.push('хотя бы одна цифра')
+    // Спецсимволы: включаем распространённые, в том числе из примера: ! " № ; % : ) (
+    const specialRegex = /[!"№;%:\)\(\-_=+@#$^&*.,<>/?\\|{}\[\]]/
+    if (!specialRegex.test(passwords.new)) missingRequirements.push('хотя бы один специальный символ (! " № ; %)')
+
+    if (missingRequirements.length) {
+      setMessage({ 
+        type: 'error', 
+        text: `Пароль не соответствует требованиям: ${missingRequirements.join('; ')}.` 
+      })
       return
     }
 
@@ -242,8 +404,16 @@ function PasswordSection() {
         body: JSON.stringify({ current_password: passwords.old, new_password: passwords.new })
       })
       const contentType = resp.headers.get('content-type') || ''
-      const data = contentType.includes('application/json') ? await resp.json() : null
+      const isJson = contentType.includes('application/json')
+      const payloadText = await resp.text().catch(() => '')
+      const data = isJson ? (payloadText ? JSON.parse(payloadText) : null) : null
       if (!resp.ok) {
+        // Специальный кейс: неверный текущий пароль
+        if (resp.status === 400) {
+          setMessage({ type: 'error', text: 'Вы ввели текущий пароль неверно.' })
+          return
+        }
+        // Если пришёл JSON — пробуем собрать поля, иначе используем текст ответа
         const compileErrors = () => {
           if (!data) return ''
           const fields = ['detail','message','current_password','old_password','password','new_password','new_password1','new_password2','non_field_errors','errors']
@@ -257,11 +427,21 @@ function PasswordSection() {
           }
           return parts.join('\n')
         }
-        const msg = compileErrors() || 'Ошибка при смене пароля'
+        const msg = compileErrors() || payloadText || 'Ошибка при смене пароля'
         setMessage({ type: 'error', text: msg })
       } else {
+        // Успех: сообщаем и выполняем принудительный выход и редирект на логин
         setMessage({ type: 'success', text: 'Пароль успешно изменен' })
         setPasswords({ old: '', new: '', confirm: '' })
+        try {
+          // Очищаем локальный токен сразу
+          localStorage.removeItem('auth.token')
+          // Пытаемся корректно разлогиниться на бэкенде (если доступно)
+          await AuthApi.logout().catch(() => {})
+        } finally {
+          // Редирект на страницу логина
+          useRouter().push('/login')
+        }
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Ошибка при смене пароля' })
@@ -328,7 +508,7 @@ function PasswordSection() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text sm font-medium text-gray-700 mb-2">
             {t('settings.password.confirm')}
           </label>
           <div className="flex items-center gap-2">
@@ -510,16 +690,61 @@ function ReserveEmailSection() {
   const { t } = useTranslation('common')
   const [reserveEmail, setReserveEmail] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [backendEmail, setBackendEmail] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
+  const loadFromProfile = async () => {
+    setIsLoading(true)
+    try {
+      const r = await fetch('/api/auth/profile', { cache: 'no-store' })
+      const ct = r.headers.get('content-type') || ''
+      const txt = await r.text().catch(() => '')
+      const data = ct.includes('application/json') && txt ? JSON.parse(txt) : null
+      if (r.ok && data) {
+        const apiEmail = data.recovery_email || null
+        setBackendEmail(apiEmail)
+        setReserveEmail(apiEmail || '')
+      } else {
+        setBackendEmail(null)
+      }
+    } catch {
+      setBackendEmail(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const saved = localStorage.getItem('user.reserveEmail')
-    if (saved) setReserveEmail(saved)
+    loadFromProfile()
   }, [])
 
   const saveReserveEmail = async () => {
+    if (!reserveEmail) {
+      setMessage({ type: 'error', text: 'Введите почту' })
+      return
+    }
     setIsSaving(true)
+    setMessage(null)
     try {
-      localStorage.setItem('user.reserveEmail', reserveEmail)
+      const res = await fetch('/api/auth/change-recovery-email', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recovery_email: reserveEmail }),
+        cache: 'no-store',
+      })
+      const contentType = res.headers.get('content-type') || ''
+      const text = await res.text().catch(() => '')
+      const data = contentType.includes('application/json') && text ? JSON.parse(text) : null
+      if (!res.ok) {
+        const msg = (data && (data.detail || data.message || data.error)) || text || 'Не удалось обновить резервную почту'
+        setMessage({ type: 'error', text: String(msg) })
+        return
+      }
+      await loadFromProfile()
+      setMessage({ type: 'success', text: 'Резервная почта обновлена' })
+    } catch (e: any) {
+      setMessage({ type: 'error', text: 'Сервис недоступен. Попробуйте позже.' })
     } finally {
       setIsSaving(false)
     }
@@ -536,13 +761,20 @@ function ReserveEmailSection() {
           value={reserveEmail}
           onChange={(e) => setReserveEmail(e.target.value)}
           placeholder="reserve@example.com"
+          disabled={isLoading}
         />
         <p className="text-xs text-gray-500 mt-1">Укажите резервную почту для восстановления доступа</p>
+        {backendEmail && (
+          <p className="text-xs text-gray-500 mt-1">Сохранено на сервере: {backendEmail}</p>
+        )}
+        {message && (
+          <p className={`text-xs mt-2 ${message.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{message.text}</p>
+        )}
       </div>
       <div className="flex justify-end">
-        <Button onClick={saveReserveEmail} className="flex items-center gap-2" disabled={isSaving}>
+        <Button onClick={saveReserveEmail} className="flex items-center gap-2" disabled={isSaving || isLoading || !reserveEmail}>
           <Save size={16} />
-          {isSaving ? 'Сохранение...' : t('common.save')}
+          {isSaving ? 'Сохранение...' : backendEmail ? t('common.save') : 'Добавить'}
         </Button>
       </div>
     </div>

@@ -2,25 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    const url = process.env.AUTH_PROFILE_URL || 'https://900c15e5d875.ngrok-free.app/api/users/me/';
+    const url = process.env.API_BASE_URL + '/api/users/me/';
     const token = req.cookies.get('auth')?.value;
     const authMode = req.cookies.get('auth_mode')?.value; // 'cookie' means backend session cookie used
-    if (!token) {
+    const backendSession = req.cookies.get('backend_session')?.value;
+
+    if (!token && !backendSession) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Build headers: send both Authorization (if token exists) and backend session cookie (if exists)
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `${process.env.AUTH_TOKEN_SCHEME || 'Bearer'} ${token}`;
+    }
+    if (authMode === 'cookie' && (backendSession || token)) {
+      headers['Cookie'] = `${process.env.AUTH_BACKEND_COOKIE_NAME || 'sessionid'}=${backendSession || token}`;
     }
 
     const res = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(authMode === 'cookie'
-          ? {}
-          : { 'Authorization': `${process.env.AUTH_TOKEN_SCHEME || 'Bearer'} ${token}` }),
-        // If backend requires cookie-based auth, also forward cookie header
-        ...(authMode === 'cookie'
-          ? { 'Cookie': `${process.env.AUTH_BACKEND_COOKIE_NAME || 'sessionid'}=${token}` }
-          : {}),
-      },
+      headers,
       cache: 'no-store',
     });
 
@@ -31,12 +35,12 @@ export async function GET(req: NextRequest) {
 
     const data = await res.json();
     
-    // Filter response to only include required fields
     const filteredResponse = {
       username: data.username || null,
       first_name: data.first_name || null,
       last_name: data.last_name || null,
-      avatar: data.image || data.avatar || null
+      avatar: data.image || data.avatar || null,
+      recovery_email: data.recovery_email || data.reserve_email || null
     };
     
     return NextResponse.json(filteredResponse, { status: res.status });

@@ -1,15 +1,9 @@
 // app/layout.tsx
 
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
 import { AvatarProvider } from "@/context/AvatarContext"
 import { AuthProvider } from '@/context/AuthContext'
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-})
 
 export const metadata: Metadata = {
   title: "Yessenov ID",
@@ -19,7 +13,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
-      <body className={`${inter.variable} antialiased font-sans`}>
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      </head>
+      <body className={`antialiased font-sans`}>
         <AuthProvider>
           <AvatarProvider>
             {children}

@@ -11,9 +11,9 @@ import {
   FileUser, BookMarked, Briefcase, Trophy, Shield
 } from 'lucide-react'
 import Image from 'next/image'
+import { useMemo, useState } from 'react'
 import { useAvatar } from '@/context/AvatarContext'
 import { useAuth } from '@/context/AuthContext'
-import { useState } from 'react'
 import clsx from 'clsx'
 
 export default function Sidebar({ active }: { active?: string }) {
@@ -23,6 +23,36 @@ export default function Sidebar({ active }: { active?: string }) {
   const { isAdmin, user, logout } = useAuth()
   const [portfolioOpen, setPortfolioOpen] = useState(false)
   const router = useRouter()
+  const [imageOk, setImageOk] = useState(true)
+
+  const getInitials = (name: string) => {
+    const parts = (name || '').trim().split(/\s+/)
+    const first = parts[0]?.[0] || ''
+    const second = parts[1]?.[0] || ''
+    return (first + second).toUpperCase() || 'U'
+  }
+
+  const getColorFromName = (name: string) => {
+    let hash = 0
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
+    let r = (hash & 0xFF)
+    let g = ((hash >> 8) & 0xFF)
+    let b = ((hash >> 16) & 0xFF)
+    const mix = (c: number) => Math.round((c + 255 + 255) / 3)
+    r = mix(r); g = mix(g); b = mix(b)
+    const toHex = (c: number) => c.toString(16).padStart(2, '0')
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+  }
+
+  const isValidAvatar = (src: string | null | undefined) => {
+    if (!src) return false
+    if (src === '/avatar.jpg') return false
+    if (src.startsWith('blob:')) return true
+    if (src.startsWith('http://') || src.startsWith('https://')) return true
+    if (src.startsWith('/')) return true
+    return false
+  }
+  const hasRealAvatar = Boolean(isValidAvatar(avatar) && imageOk)
 
   const handleLogout = async () => {
     await logout()
@@ -73,19 +103,29 @@ export default function Sidebar({ active }: { active?: string }) {
               <h2 className="text-xl font-semibold text-blue-700">YESSENOV ID</h2>
             </div>
 
-            <div className="flex items-center mb-6">
-              <Image
-                src={avatar}
-                alt="аватар"
-                width={50}
-                height={50}
-                className="rounded-full object-cover mr-3"
-              />
+            <Link href="/main/site-settings" className="flex items-center mb-6 cursor-pointer">
+              {hasRealAvatar ? (
+                <Image
+                  src={avatar}
+                  alt="аватар"
+                  width={50}
+                  height={50}
+                  className="rounded-full object-cover mr-3"
+                  onError={() => setImageOk(false)}
+                />
+              ) : (
+                <div
+                  className="mr-3 rounded-full w-[50px] h-[50px] grid place-items-center text-white text-sm font-semibold select-none"
+                  style={{ backgroundColor: getColorFromName(userName || 'User') }}
+                >
+                  {getInitials(userName || 'U U')}
+                </div>
+              )}
               <div>
                 <p className="font">{userName}</p>
                 <p className="text-sm text-gray-500">{userPosition || 'Преподаватель'}</p>
               </div>
-            </div>
+            </Link>
 
             <nav className="space-y-2 text-sm">
               {menuItems.map((item) => (

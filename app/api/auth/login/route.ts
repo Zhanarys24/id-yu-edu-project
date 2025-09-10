@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const url = process.env.AUTH_LOGIN_URL || 'https://900c15e5d875.ngrok-free.app/api/users/login/';
+    const url = process.env.API_BASE_URL + '/api/users/login/';
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -21,10 +21,8 @@ export async function POST(req: Request) {
     const data = await res.json();
     
     if (res.ok) {
-      // Prefer explicit token fields
       let token = data && (data.token || data.access || data.access_token);
 
-      // Try to capture backend session cookie in any case (some endpoints require it)
       const setCookie = res.headers.get('set-cookie') || '';
       const backendCookieName = process.env.AUTH_BACKEND_COOKIE_NAME || 'sessionid';
       const match = setCookie.match(new RegExp(`${backendCookieName}=([^;]+)`));
@@ -34,12 +32,24 @@ export async function POST(req: Request) {
         if (!token) token = backendSession;
       }
 
-      // Filter response to only include required fields
+      // Нормализуем аватар
+      const rawAvatar = data.image || data.avatar || data.profile_image || null;
+      let avatar: string | null = null;
+      if (rawAvatar) {
+        if (rawAvatar.startsWith('http')) {
+          avatar = rawAvatar;
+        } else {
+          avatar = process.env.API_BASE_URL 
+            ? process.env.API_BASE_URL + rawAvatar 
+            : rawAvatar;
+        }
+      }
+
       const filteredResponse = {
         username: data.username || null,
         first_name: data.first_name || null,
         last_name: data.last_name || null,
-        avatar: data.image || data.avatar || null,
+        avatar,
         access_token: token || null
       };
 
@@ -47,7 +57,7 @@ export async function POST(req: Request) {
 
       if (token) {
         response.cookies.set('auth', String(token), {
-          httpOnly: true,
+          httpOnly: false,
           sameSite: 'lax',
           path: '/',
           secure: process.env.NODE_ENV === 'production',
@@ -71,10 +81,13 @@ export async function POST(req: Request) {
       return response;
     }
 
+    // Для 400/401 возвращаем понятный текст
+    if (res.status === 400 || res.status === 401 || res.status === 403) {
+      return new NextResponse('Неправильный логин или пароль', { status: res.status });
+    }
+
     return NextResponse.json(data as any, { status: res.status });
   } catch (e: any) {
     return NextResponse.json({ message: e?.message || 'Auth proxy error' }, { status: 500 });
   }
 }
-
-

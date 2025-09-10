@@ -15,6 +15,8 @@ type AuthContextType = {
   getUserPermissions: () => Permission[];
   isAdmin: () => boolean;
   refreshUser: () => void;
+  updateAvatar: (avatar: string) => Promise<void>;
+  uploadAvatarFile: (file: File) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -103,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       let profile: any = null;
       try {
         profile = await AuthApi.profile();
+        console.log('Profile data from API:', profile);
       } catch (e) {
         console.warn('Profile load failed:', e);
       }
@@ -113,6 +116,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const fullName = lastName ? `${firstName} ${lastName}` : firstName;
       const username = resp.username || profile?.username || email;
       const avatar = resp.avatar || profile?.avatar || '/avatar.jpg';
+      
+      console.log('Avatar sources:', { 
+        respAvatar: resp.avatar, 
+        profileAvatar: profile?.avatar, 
+        finalAvatar: avatar 
+      });
 
       const newUser: User = {
         id: String(resp.id ?? profile?.id ?? 'unknown'),
@@ -236,6 +245,80 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateAvatar = async (avatar: string) => {
+    // Проверяем, что мы на клиенте
+    if (typeof window === 'undefined') return;
+    
+    if (!user) {
+      throw new Error('User not logged in');
+    }
+
+    try {
+      // Обновляем аватар через API
+      const response = await AuthApi.updateAvatar(avatar);
+      
+      if (response.success) {
+        // Обновляем пользователя с новым аватаром
+        const updatedUser: User = {
+          ...user,
+          avatar: response.avatar
+        };
+
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Обновляем аватар в localStorage для AvatarContext
+        localStorage.setItem('user.avatar', response.avatar);
+        
+        // Триггерим событие storage для синхронизации между вкладками
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'user.avatar',
+          newValue: response.avatar,
+        }));
+      }
+    } catch (error) {
+      console.error('Avatar update error:', error);
+      throw error;
+    }
+  };
+
+  const uploadAvatarFile = async (file: File) => {
+    // Проверяем, что мы на клиенте
+    if (typeof window === 'undefined') return;
+    
+    if (!user) {
+      throw new Error('User not logged in');
+    }
+
+    try {
+      // Загружаем файл через API
+      const response = await AuthApi.uploadAvatarFile(file);
+      
+      if (response.success) {
+        // Обновляем пользователя с новым аватаром
+        const updatedUser: User = {
+          ...user,
+          avatar: response.avatar
+        };
+
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Обновляем аватар в localStorage для AvatarContext
+        localStorage.setItem('user.avatar', response.avatar);
+        
+        // Триггерим событие storage для синхронизации между вкладками
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'user.avatar',
+          newValue: response.avatar,
+        }));
+      }
+    } catch (error) {
+      console.error('Avatar file upload error:', error);
+      throw error;
+    }
+  };
+
   const value: AuthContextType = {
     user,
     login,
@@ -245,7 +328,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     canAccess,
     getUserPermissions,
     isAdmin,
-    refreshUser
+    refreshUser,
+    updateAvatar,
+    uploadAvatarFile
   };
 
   return (
