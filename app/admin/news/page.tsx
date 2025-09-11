@@ -83,9 +83,14 @@ export default function AdminNewsPage() {
     loadData()
   }, [])
   
-  // Check permissions AFTER all hooks
+  // Check permissions AFTER all hooks and only on client
+  useEffect(() => {
+    if (!user || (user.role !== 'admin_news' && user.role !== 'super_admin')) {
+      router.push('/login')
+    }
+  }, [user, router])
+
   if (!user || (user.role !== 'admin_news' && user.role !== 'super_admin')) {
-    router.push('/login')
     return null
   }
 

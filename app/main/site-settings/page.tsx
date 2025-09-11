@@ -17,6 +17,7 @@ import { userService } from '@/lib/services/userService'
 import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
 import { AuthApi } from '@/lib/services/authApi'
+import { validateEmail } from '@/lib/utils'
 
 export default function SiteSettingsPage() {
   const { t } = useTranslation('common')
@@ -354,6 +355,13 @@ function PasswordSection() {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+  // Auto-dismiss flash toast
+  useEffect(() => {
+    if (!message) return
+    const timer = setTimeout(() => setMessage(null), 3000)
+    return () => clearTimeout(timer)
+  }, [message])
+
   const togglePassword = (field: keyof typeof showPasswords) => {
     setShowPasswords(prev => ({
       ...prev,
@@ -419,7 +427,7 @@ function PasswordSection() {
           const fields = ['detail','message','current_password','old_password','password','new_password','new_password1','new_password2','non_field_errors','errors']
           const parts: string[] = []
           for (const f of fields) {
-            const v = (data as any)[f]
+            const v = (data as Record<string, unknown>)[f]
             if (!v) continue
             if (Array.isArray(v)) parts.push(`${f}: ${v.join(', ')}`)
             else if (typeof v === 'object') parts.push(`${f}: ${JSON.stringify(v)}`)
@@ -440,7 +448,7 @@ function PasswordSection() {
           await AuthApi.logout().catch(() => {})
         } finally {
           // Редирект на страницу логина
-          useRouter().push('/login')
+          router.push('/login')
         }
       }
     } catch (error) {
@@ -530,14 +538,30 @@ function PasswordSection() {
 
       </div>
 
-      {/* Сообщения об ошибках/успехе */}
+      {/* Flash toast */}
       {message && (
-        <div className={`p-3 rounded-lg ${
-          message.type === 'success' 
-            ? 'bg-green-50 border border-green-200 text-green-800' 
-            : 'bg-red-50 border border-red-200 text-red-800'
-        }`}>
-          {message.text}
+        <div
+          className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-white font-semibold min-w-[300px] ${
+            message.type === 'error'
+              ? 'bg-gradient-to-r from-red-500 to-pink-600'
+              : 'bg-gradient-to-r from-green-500 to-emerald-600'
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20">
+              <span className="text-xl">{message.type === 'error' ? '⚠️' : '🎉'}</span>
+            </div>
+            <span className="flex-1">{message.text}</span>
+            <button
+              onClick={() => setMessage(null)}
+              className="ml-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+              aria-label="Close notification"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
 
@@ -719,9 +743,23 @@ function ReserveEmailSection() {
     loadFromProfile()
   }, [])
 
+  // Auto-dismiss flash toast
+  useEffect(() => {
+    if (!message) return
+    const timer = setTimeout(() => setMessage(null), 3000)
+    return () => clearTimeout(timer)
+  }, [message])
+
   const saveReserveEmail = async () => {
     if (!reserveEmail) {
       setMessage({ type: 'error', text: 'Введите почту' })
+      return
+    }
+
+    // Client-side validation
+    const { isValid, error } = validateEmail(String(reserveEmail))
+    if (!isValid) {
+      setMessage({ type: 'error', text: error || 'Невалидный email' })
       return
     }
     setIsSaving(true)
@@ -743,7 +781,7 @@ function ReserveEmailSection() {
       }
       await loadFromProfile()
       setMessage({ type: 'success', text: 'Резервная почта обновлена' })
-    } catch (e: any) {
+    } catch (e) {
       setMessage({ type: 'error', text: 'Сервис недоступен. Попробуйте позже.' })
     } finally {
       setIsSaving(false)
@@ -777,6 +815,32 @@ function ReserveEmailSection() {
           {isSaving ? 'Сохранение...' : backendEmail ? t('common.save') : 'Добавить'}
         </Button>
       </div>
+      {/* Flash toast */}
+      {message && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-white font-semibold min-w-[300px] ${
+            message.type === 'error'
+              ? 'bg-gradient-to-r from-red-500 to-pink-600'
+              : 'bg-gradient-to-r from-green-500 to-emerald-600'
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20">
+              <span className="text-xl">{message.type === 'error' ? '⚠️' : '🎉'}</span>
+            </div>
+            <span className="flex-1">{message.text}</span>
+            <button
+              onClick={() => setMessage(null)}
+              className="ml-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+              aria-label="Close notification"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

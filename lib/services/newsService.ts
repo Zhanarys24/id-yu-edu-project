@@ -91,6 +91,11 @@ class NewsService {
     return this.getAllNews().filter(news => news.status === 'published');
   }
 
+  // Alias for compatibility with hooks expecting "active" news
+  getActiveNews(): NewsItem[] {
+    return this.getPublishedNews();
+  }
+
   getNewsByStatus(status: NewsStatus): NewsItem[] {
     return this.getAllNews().filter(news => news.status === status);
   }

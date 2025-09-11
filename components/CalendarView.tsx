@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin, { DateClickArg, EventClickArg } from '@fullcalendar/interaction';
+import interactionPlugin, { DateClickArg  } from '@fullcalendar/interaction';
 import { Dialog } from '@headlessui/react';
 
 export default function CalendarView() {

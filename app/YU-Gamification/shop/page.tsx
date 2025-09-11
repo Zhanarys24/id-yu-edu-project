@@ -326,7 +326,7 @@ export default function ShopPage() {
                     ].map(({ key, label, count, icon: Icon, color }: { key: string; label: string; count: number; icon: React.ComponentType<{ className?: string }>; color: string }) => (
                       <button
                         key={key}
-                        onClick={() => setCategory(key)}
+                        onClick={() => setCategory(key as "all" | "benefit" | "merch" | "service")}
                         className={`group p-3 rounded-xl text-left transition-all duration-200 border ${
                           category === key
                             ? `bg-gradient-to-r ${color} text-white border-transparent shadow-lg scale-105`
@@ -503,7 +503,7 @@ export default function ShopPage() {
                       <span className="text-sm text-gray-600">Сортировка:</span>
                       <select 
                         value={sortBy} 
-                        onChange={(e) => setSortBy(e.target.value as 'popular' | 'price' | 'newest' | 'rating')}
+                        onChange={(e) => setSortBy(e.target.value as 'popular' | 'price' | 'newest' )}
                         className="h-11 px-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       >
                         <option value="popular">По популярности</option>

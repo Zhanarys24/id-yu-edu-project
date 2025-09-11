@@ -12,6 +12,10 @@ import { useAuth } from '@/context/AuthContext'
 import AchievementSystem from './components/AchievementSystem'
 import EventSystem from './components/EventSystem'
 
+// Disable prerendering/SSG to avoid server evaluation of browser APIs
+export const dynamic = 'force-dynamic'
+// export const revalidate = false
+
 // ClientOnly component to prevent hydration mismatch
 const ClientOnly = ({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) => {
   const [hasMounted, setHasMounted] = useState(false)
@@ -532,15 +536,18 @@ export default function DashboardPage() {
   
   // Генерация ежедневных квестов
   const generateDailyQuests = (): Quest[] => {
-    const today = new Date().toDateString()
-    const savedDaily = localStorage.getItem(`dailyQuests_${today}`)
-    
-    if (savedDaily) {
-      return JSON.parse(savedDaily).map((q: unknown) => ({
-        ...q,
-        icon: <Target className="w-6 h-6" /> // Восстанавливаем иконку при загрузке
-      }))
+    if (typeof window === 'undefined') {
+      return []
     }
+
+    const today = new Date().toDateString()
+    const savedDaily = typeof localStorage !== 'undefined' ? localStorage.getItem(`dailyQuests_${today}`) : null
+    
+  if (savedDaily) {
+    return JSON.parse(savedDaily).map((q: unknown) => 
+      Object.assign({}, q, { icon: <Target className="w-6 h-6" /> })
+    )
+  }
 
     const dailyTemplates = [
       { title: 'Ежедневный вход', description: 'Войдите в систему', total: 1, rewards: { coins: 50, xp: 25 } },
@@ -570,7 +577,9 @@ export default function DashboardPage() {
       return questWithoutIcon
     })
     
-    localStorage.setItem(`dailyQuests_${today}`, JSON.stringify(questsToSave))
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(`dailyQuests_${today}`, JSON.stringify(questsToSave))
+    }
     return dailyQuests
   }
   
@@ -1044,24 +1053,27 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 relative overflow-hidden">
       {/* Falling YU coins background */}
       <div className="absolute inset-0 pointer-events-none select-none z-0">
-        {coins.map(c => (
-          <div
-            key={c.id}
-            className="absolute -top-24 rounded-full bg-white/60 backdrop-blur-sm shadow-md animate-[coin-fall_var(--dur)_linear_infinite]"
-            style={{
-              left: c.left,
-              width: `${c.size}px`,
-              height: `${c.size}px`,
-              animationDelay: c.delay,
-              "--dur": c.duration
-            }}
-          >
-            <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
-              <Image src="/YU-coin.png" alt="YU coin" width={c.size} height={c.size} className="object-contain" />
+        {coins.map(c => {
+          const coinStyle: React.CSSProperties & { '--dur': string } = {
+            left: c.left,
+            width: `${c.size}px`,
+            height: `${c.size}px`,
+            animationDelay: c.delay,
+            "--dur": c.duration
+          };
+
+          return (
+            <div
+              key={c.id}
+              className="absolute -top-24 rounded-full bg-white/60 backdrop-blur-sm shadow-md animate-[coin-fall_var(--dur)_linear_infinite]"
+              style={coinStyle}
+            >
+              <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                <Image src="/YU-coin.png" alt="YU coin" width={c.size} height={c.size} className="object-contain" />
+              </div>
             </div>
-          </div>
-        ))}
-        {/* No static pile; coins fall through and fade only at the end */}
+          );
+        })}
       </div>
       <div className="max-w-7xl mx-auto p-6 relative z-10">
         <div className="flex gap-8">
@@ -2483,9 +2495,11 @@ export default function DashboardPage() {
               <EventSystem userStats={state} />
             )}
 
-            {activeTab === 'achievements' && (
+
+            {/* потом как нибудь решим */}
+            {/* {activeTab === 'achievements' && (
               <AchievementSystem userStats={state} />
-            )}
+            )} */}
           </div>
         </div>
       </div>

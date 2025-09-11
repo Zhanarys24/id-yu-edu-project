@@ -6,7 +6,7 @@ export type LoginResponse = {
   position?: string;
   avatarUrl?: string;
   token?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 import { extractMessageFromBackend, mapErrorToFriendlyMessage } from '../utils/errorMessages';
@@ -47,8 +47,9 @@ export const AuthApi = {
     const data: LoginResponse = JSON.parse(text);
 
     // ✅ сохраняем токен (из proxy приходит как access_token)
-    if ((data as any).access_token) {
-      localStorage.setItem('auth.token', String((data as any).access_token));
+    if ((data as unknown as { access_token?: unknown }).access_token) {
+      const tokenValue = (data as unknown as { access_token?: unknown }).access_token;
+      localStorage.setItem('auth.token', String(tokenValue));
     } else if (data.token) {
       localStorage.setItem('auth.token', data.token);
     }
@@ -57,7 +58,7 @@ export const AuthApi = {
   },
 
   // 🔑 Профиль
-  profile: async (): Promise<any> => {
+  profile: async (): Promise<unknown> => {
     // Use Next.js proxy which authenticates via cookie set at login
     const res = await fetch('/api/auth/profile', { cache: 'no-store' });
 
@@ -95,9 +96,9 @@ export const AuthApi = {
 
     // Успех: обычно приходит JSON от бэкенда
     if (contentType.includes('application/json')) {
-      return JSON.parse(text);
+      return JSON.parse(text) as unknown;
     }
-    return { success: true } as any;
+    return { success: true } as unknown;
   },
 
   // 🔑 Обновление аватара (base64 или URL)

@@ -145,7 +145,7 @@ export default function Header() {
       const greetedToday = localStorage.getItem(key) === '1'
       
       // Always show birthday greeting for testing (remove this line later)
-      const forceShowBirthday = true
+      const forceShowBirthday = false
       
       if (!greetedToday || forceShowBirthday) {
         // Show university birthday greeting every day
@@ -272,6 +272,49 @@ export default function Header() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [])
+
+  // Prefetch key routes after hydration to speed up first navigations
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return
+
+      // Respect Data Saver / slow connections
+      const nav = navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string }
+        mozConnection?: { saveData?: boolean; effectiveType?: string }
+        webkitConnection?: { saveData?: boolean; effectiveType?: string }
+      }
+      const conn = nav?.connection || nav?.mozConnection || nav?.webkitConnection
+      if (conn?.saveData) return
+      const effectiveType: string = conn?.effectiveType ?? ''
+      const slow = ['slow-2g', '2g'].includes(effectiveType)
+      if (slow) return
+
+      const baseRoutes = ['/main/news','/main/calendar','/main/education','/main/science','/main/upbringing','/main/E-services','/main/site-settings']
+      const authOnly = ['/main/yessenovbot','/portfolio','/YU-Gamification','/admin']
+      const routes = user?.role === 'anonymous' ? baseRoutes : [...baseRoutes, ...authOnly]
+
+      const unique = Array.from(new Set(routes))
+      const run = () => {
+        unique.forEach((r, i) => {
+          setTimeout(() => {
+            try {
+              const routerWithPrefetch = router as unknown as { prefetch?: (href: string) => void }
+              if (typeof routerWithPrefetch?.prefetch === 'function') {
+                routerWithPrefetch.prefetch(String(r))
+              }
+            } catch {}
+          }, 200 * i)
+        })
+      }
+
+      if ('requestIdleCallback' in window) {
+        ;(window as Window & typeof globalThis).requestIdleCallback?.(run, { timeout: 2000 })
+      } else {
+        setTimeout(run, 800)
+      }
+    } catch {}
+  }, [user?.role])
 
   return (
     <div className="relative flex justify-end items-center gap-4">

@@ -86,8 +86,9 @@ export async function POST(req: Request) {
       return new NextResponse('Неправильный логин или пароль', { status: res.status });
     }
 
-    return NextResponse.json(data as any, { status: res.status });
-  } catch (e: any) {
-    return NextResponse.json({ message: e?.message || 'Auth proxy error' }, { status: 500 });
+    return NextResponse.json(data as unknown, { status: res.status });
+  } catch (e) {
+    const err = e as Error
+    return NextResponse.json({ message: err.message || 'Auth proxy error' }, { status: 500 });
   }
 }

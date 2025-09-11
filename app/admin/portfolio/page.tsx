@@ -580,25 +580,33 @@ export default function AdminPortfolioPage() {
                   </div>
 
                   {/* Детальная информация в зависимости от типа */}
-                  {selectedItem.type === 'general' && selectedItem.metadata && (
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Детальная информация</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {selectedItem.metadata.fullName && (
-                          <div><span className="font-medium">ФИО:</span> {selectedItem.metadata.fullName}</div>
-                        )}
-                        {selectedItem.metadata.position && (
-                          <div><span className="font-medium">Должность:</span> {selectedItem.metadata.position}</div>
-                        )}
-                        {selectedItem.metadata.department && (
-                          <div><span className="font-medium">Кафедра:</span> {selectedItem.metadata.department}</div>
-                        )}
-                        {selectedItem.metadata.education && (
-                          <div><span className="font-medium">Образование:</span> {selectedItem.metadata.education}</div>
-                        )}
+                  {selectedItem.type === 'general' && selectedItem.metadata && (() => {
+                    const meta = selectedItem.metadata as {
+                      fullName?: string
+                      position?: string
+                      department?: string
+                      education?: string
+                    }
+                    return (
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Детальная информация</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {meta.fullName && (
+                            <div><span className="font-medium">ФИО:</span> {meta.fullName}</div>
+                          )}
+                          {meta.position && (
+                            <div><span className="font-medium">Должность:</span> {meta.position}</div>
+                          )}
+                          {meta.department && (
+                            <div><span className="font-medium">Кафедра:</span> {meta.department}</div>
+                          )}
+                          {meta.education && (
+                            <div><span className="font-medium">Образование:</span> {meta.education}</div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )
+                  })()}
 
                   {/* Файлы */}
                   {selectedItem.attachments && selectedItem.attachments.length > 0 && (

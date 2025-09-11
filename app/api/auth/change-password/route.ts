@@ -123,10 +123,11 @@ export async function POST(req: Request) {
       return new NextResponse('Сервис смены пароля временно недоступен. Попробуйте позже.', { status: 502 })
     }
 
-    const data = await res.json()
-    return NextResponse.json(data as any, { status: res.status })
-  } catch (e: any) {
-    const msg = e?.name === 'AbortError' ? 'Превышено время ожидания. Попробуйте ещё раз.' : 'Ошибка при смене пароля. Попробуйте позже.'
+    const data: unknown = await res.json()
+    return NextResponse.json(data as unknown, { status: res.status })
+  } catch (e) {
+    const err = e as Error & { name?: string }
+    const msg = err?.name === 'AbortError' ? 'Превышено время ожидания. Попробуйте ещё раз.' : 'Ошибка при смене пароля. Попробуйте позже.'
     return new NextResponse(msg, { status: 502 })
   }
 }

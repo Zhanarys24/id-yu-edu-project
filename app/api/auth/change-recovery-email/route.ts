@@ -1,15 +1,20 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { validateEmail } from '@/lib/utils'
 
 async function handleChangeRecoveryEmail(req: Request) {
   try {
-    const base = process.env.API_BASE_URL || 'https://f1d2f00cf49f.ngrok-free.app'
+    const base = process.env.API_BASE_URL || 'https://ae8bf55e6f4a.ngrok-free.app'
     const url = `${base.replace(/\/+$/, '')}/api/users/change_recovery_email/`
 
-    const body = await req.json().catch(() => ({} as any))
-    const recoveryEmail = body.recovery_email
+    const body = await req.json().catch(() => ({} as Record<string, unknown>))
+    const recoveryEmail = (body as Record<string, unknown>)['recovery_email'] as string | undefined
     if (!recoveryEmail) {
-      return new NextResponse('Укажите новую резервную почту.', { status: 400 })
+      return NextResponse.json({ error: 'Укажите новую резервную почту.' }, { status: 400 })
+    }
+    const { isValid, error } = validateEmail(String(recoveryEmail))
+    if (!isValid) {
+      return NextResponse.json({ error: error || 'Невалидный email' }, { status: 400 })
     }
 
     const cookieStore = await cookies()
@@ -82,16 +87,17 @@ async function handleChangeRecoveryEmail(req: Request) {
 
     const contentType = res.headers.get('content-type') || ''
     if (contentType.includes('application/json')) {
-      const data = await res.json().catch(() => ({}))
-      return NextResponse.json(data as any, { status: res.status })
+      const data: unknown = await res.json().catch(() => ({}))
+      return NextResponse.json(data as unknown, { status: res.status })
     }
     const text = await res.text().catch(() => '')
     if (!res.ok) {
       return new NextResponse(text || 'Ошибка при смене резервной почты.', { status: res.status || 502 })
     }
     return NextResponse.json({ message: text || 'ok' }, { status: res.status })
-  } catch (e: any) {
-    const msg = e?.name === 'AbortError' ? 'Превышено время ожидания. Попробуйте ещё раз.' : 'Ошибка сервера. Попробуйте позже.'
+  } catch (e) {
+    const err = e as Error & { name?: string }
+    const msg = err?.name === 'AbortError' ? 'Превышено время ожидания. Попробуйте ещё раз.' : 'Ошибка сервера. Попробуйте позже.'
     return new NextResponse(msg, { status: 502 })
   }
 }

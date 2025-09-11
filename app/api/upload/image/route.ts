@@ -272,8 +272,9 @@ export async function POST(req: NextRequest) {
       }, { status: 200 });
     }
     
-  } catch (e: any) {
-    console.error('Image upload error:', e);
-    return NextResponse.json({ message: e?.message || 'Image upload error' }, { status: 500 });
+  } catch (e) {
+    const err = e as Error
+    console.error('Image upload error:', err);
+    return NextResponse.json({ message: err.message || 'Image upload error' }, { status: 500 });
   }
 }

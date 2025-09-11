@@ -8,8 +8,8 @@ export const useNewsData = () => {
 
   const loadNews = () => {
     try {
-      const activeNews = newsService.getActiveNews();
-      setNewsData(activeNews);
+      const publishedNews = newsService.getPublishedNews();
+      setNewsData(publishedNews);
     } catch (error) {
       console.error('Ошибка загрузки новостей:', error);
     } finally {

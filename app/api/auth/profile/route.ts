@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: 'Profile service invalid response' }, { status: 502 });
     }
 
-    const data = await res.json();
+    const data: Record<string, unknown> = await res.json();
     
     const filteredResponse = {
       username: data.username || null,
@@ -44,8 +44,9 @@ export async function GET(req: NextRequest) {
     };
     
     return NextResponse.json(filteredResponse, { status: res.status });
-  } catch (e: any) {
-    return NextResponse.json({ message: e?.message || 'Profile proxy error' }, { status: 500 });
+  } catch (e) {
+    const err = e as Error
+    return NextResponse.json({ message: err.message || 'Profile proxy error' }, { status: 500 });
   }
 }
 

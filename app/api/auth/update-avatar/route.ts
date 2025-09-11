@@ -92,16 +92,17 @@ export async function POST(req: NextRequest) {
       message: 'Avatar updated successfully',
     });
 
-  } catch (error: any) {
-    console.error('Avatar upload error:', error);
+  } catch (error) {
+    const err = error as Error & { name?: string }
+    console.error('Avatar upload error:', err);
     
     // Handle specific error types
-    if (error.name === 'AbortError') {
+    if (err.name === 'AbortError') {
       return NextResponse.json({ message: 'Request timeout' }, { status: 408 });
     }
     
     return NextResponse.json({ 
-      message: error?.message || 'Internal server error' 
+      message: err.message || 'Internal server error' 
     }, { status: 500 });
   }
 }

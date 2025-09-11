@@ -5,6 +5,7 @@ import { Calendar, Tag, ExternalLink } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { newsService } from '@/lib/services/newsService'
+import { RegisteredUser } from '@/lib/types/user'
 import '@/i18n'
 
 interface NewsItem {
@@ -29,13 +30,13 @@ export default function NewsCard({ news }: NewsCardProps) {
     if (user && user.role !== 'anonymous') {
       try {
         // Создаем объект пользователя для отслеживания
-        const userForTracking = {
+        const userForTracking: RegisteredUser = {
           id: user.id,
           email: user.email,
           name: user.name,
           position: user.position,
           role: user.role,
-          registeredAt: user.registeredAt || new Date().toISOString(),
+          registeredAt: new Date().toISOString(),
           isActive: true,
           passwordHash: '',
           isTemporaryPassword: false

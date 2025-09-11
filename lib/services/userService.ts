@@ -18,7 +18,7 @@ class UserService {
         let migrated = false;
         if (Array.isArray(db.users)) {
           db.users = db.users.map((user) => {
-            const updated: User = { ...user };
+            const updated: RegisteredUser = { ...user };
             const seed = INITIAL_USERS.find(s => s.email.toLowerCase() === (updated.email || '').toLowerCase());
 
             if (!updated.passwordHash) {

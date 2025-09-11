@@ -660,9 +660,13 @@ const MiniCalendar = ({
 interface UserStats {
   level: number
   xp: number
-  events: Event[]
-  [key: string]: unknown
+  events?: Event[]
+  questsCompleted?: number
+  attendanceStreak?: number
+  friendsCount?: number
+  totalCoinsEarned?: number
 }
+
 
 export default function EventSystem({ userStats }: { userStats: UserStats }) {
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | 'all'>('all')

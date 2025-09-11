@@ -191,12 +191,14 @@ export default function StudentsPage() {
         id: '5',
         studentId: '5',
         studentName: 'Асель Толеуова',
-        studentGroup: 'IT-20-1',
-        studentCourse: 4,
-        date: selectedDate,
+        studentGroup: 'ИС-21',
+        studentCourse: 2,
+        date: '2025-09-10',
         status: 'absent',
-        subject: 'Дипломная работа'
+        subject: 'Математика',
+        checkIn: '' // или '' если строка
       }
+
     ];
     setAttendanceRecords(mockRecords);
   };

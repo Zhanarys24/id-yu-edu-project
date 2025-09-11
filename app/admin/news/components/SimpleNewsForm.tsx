@@ -60,13 +60,19 @@ export default function SimpleNewsForm({ news, onClose, onSave }: SimpleNewsForm
 
   const handleInputChange = (field: string, value: string | boolean | string[]) => {
     // Автоматически исправляем путь к изображению, если он не начинается с /
-    if (field === 'image' && value && !value.startsWith('/') && !value.startsWith('http')) {
+    if (
+      field === 'image' &&
+      typeof value === 'string' &&
+      value &&
+      !value.startsWith('/') &&
+      !value.startsWith('http')
+    ) {
       value = `/${value}`
     }
-    
+
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }))
   }
 

@@ -363,10 +363,11 @@ const AchievementModal = ({
 
 // Main achievements component
 interface UserStats {
-  level: number
-  xp: number
-  achievements: Achievement[]
-  [key: string]: unknown
+  questsCompleted?: number;
+  attendanceStreak?: number;
+  friendsCount?: number;
+  totalCoinsEarned?: number;
+  // добавьте другие поля по необходимости
 }
 
 export default function AchievementSystem({ userStats }: { userStats: UserStats }) {

@@ -4,7 +4,7 @@ export type BackendErrorShape = {
   code?: string | number;
   non_field_errors?: string[];
   errors?: Array<{ code?: string; message?: string }>;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const codeToMessage: Record<string, string> = {
@@ -43,9 +43,9 @@ export function mapErrorToFriendlyMessage(err: unknown, status?: number): string
     if (typeof err === 'string') return err;
     if (err instanceof Error && err.message) return err.message;
     if (typeof err === 'object' && err) {
-      const anyErr = err as any;
-      if (anyErr.code && typeof anyErr.code === 'string' && codeToMessage[anyErr.code]) return codeToMessage[anyErr.code];
-      if (anyErr.message && typeof anyErr.message === 'string') return anyErr.message;
+      const obj = err as { code?: unknown; message?: unknown };
+      if (typeof obj.code === 'string' && codeToMessage[obj.code]) return codeToMessage[obj.code];
+      if (typeof obj.message === 'string') return obj.message;
     }
   } catch {}
   if (status === 408) return codeToMessage.TIMEOUT;
