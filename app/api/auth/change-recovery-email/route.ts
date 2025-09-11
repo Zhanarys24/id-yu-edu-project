@@ -4,7 +4,7 @@ import { validateEmail } from '@/lib/utils'
 
 async function handleChangeRecoveryEmail(req: Request) {
   try {
-    const base = process.env.API_BASE_URL || 'https://ae8bf55e6f4a.ngrok-free.app'
+    const base = process.env.API_BASE_URL || 'https://84795a6645c4.ngrok-free.app'
     const url = `${base.replace(/\/+$/, '')}/api/users/change_recovery_email/`
 
     const body = await req.json().catch(() => ({} as Record<string, unknown>))
