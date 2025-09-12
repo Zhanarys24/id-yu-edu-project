@@ -95,12 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Вызываем внешний API авторизации через прокси
       const resp = await AuthApi.login(email, password);
-      const role = (resp.role as UserRole) || 'student';
-      const rolePermissions = ROLE_PERMISSIONS?.[role] || [];
-      if (!ROLE_PERMISSIONS || !ROLE_PERMISSIONS[role]) {
-        console.warn('ROLE_PERMISSIONS missing for role:', role);
-      }
-
+      
       // Try to fetch user profile for richer info
       let profile: any = null;
       try {
@@ -109,7 +104,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.warn('Profile load failed:', e);
       }
-
+  
+      // Определяем роль: сначала из profile, потом из resp, потом по умолчанию
+      let role: UserRole = 'student';
+      
+      // Проверяем profile на наличие роли
+      if (profile?.role) {
+        role = profile.role as UserRole;
+        console.log('Роль из profile:', role);
+      } else if (resp.role) {
+        role = resp.role as UserRole;
+        console.log('Роль из resp:', role);
+      } else {
+        // Если роль не найдена, проверяем по email или другим полям
+        console.log('Роль не найдена в API ответе, используем логику определения роли');
+        
+        // Здесь можно добавить логику определения роли по email или другим полям
+        if (email === 'super@admin.com' || email === 'zhanarys') {
+          role = 'super_admin';
+          console.log('Установлена роль super_admin для:', email);
+        }
+      }
+      
+      const rolePermissions = ROLE_PERMISSIONS?.[role] || [];
+      if (!ROLE_PERMISSIONS || !ROLE_PERMISSIONS[role]) {
+        console.warn('ROLE_PERMISSIONS missing for role:', role);
+      }
+  
       // Use data from login response first, then profile response
       const firstName = resp.first_name || profile?.first_name || 'User';
       const lastName = resp.last_name || profile?.last_name || '';
@@ -122,17 +143,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profileAvatar: profile?.avatar, 
         finalAvatar: avatar 
       });
-
+  
       const newUser: User = {
         id: String(resp.id ?? profile?.id ?? 'unknown'),
         email: email,
         name: fullName,
-        position: resp.position || 'User',
+        position: resp.position || profile?.position || 'User',
         role,
         permissions: rolePermissions,
         avatar: avatar
       };
-
+  
+      console.log('Созданный пользователь:', newUser);
+  
       setUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
       if (resp.access_token) {
@@ -151,9 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (newUser.avatar) {
         localStorage.setItem('user.avatar', newUser.avatar);
       }
-      // Если бэкенд присылает флаг обязательной смены пароля:
-      // if (resp.mustChangePassword) localStorage.setItem('requirePasswordChange', 'true');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       throw error;
     }

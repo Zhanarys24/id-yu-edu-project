@@ -7,6 +7,154 @@ import '@/i18n';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/lib/types/auth';
 
+// Мобильный анимированный фон
+const MobileAnimatedBackground = () => {
+  const mobileImages = [
+    '/OJS-logo.png',
+    '/canvas.png',
+    '/platonus.png',
+    '/studentclubs-logo.png',
+    '/lessons.png',
+    '/dormitory-logo.png'
+  ];
+
+  const mobileElements = useMemo(() => ({
+    images: mobileImages.map((imgSrc, i) => ({
+      id: `mobile-img-${i}`,
+      src: imgSrc,
+      style: {
+        width: '60px',
+        height: '60px',
+        left: `${5 + (i * 15) % 85}%`,
+        top: '-80px',
+        animationDelay: `${i * 1.5}s`,
+        animationDuration: `${6 + Math.random() * 3}s`,
+      }
+    })),
+    shapes: [...Array(6)].map((_, i) => ({
+      id: `mobile-shape-${i}`,
+      style: {
+        width: '80px',
+        height: '80px',
+        left: `${10 + (i * 15) % 75}%`,
+        top: '-100px',
+        animationDelay: `${i * 2 + 0.5}s`,
+        animationDuration: `${8 + Math.random() * 4}s`,
+      }
+    })),
+    dots: [...Array(12)].map((_, i) => ({
+      id: `mobile-dot-${i}`,
+      style: {
+        width: '35px',
+        height: '35px',
+        left: `${3 + (i * 8) % 90}%`,
+        top: '-50px',
+        animationDelay: `${i * 0.8}s`,
+        animationDuration: `${4 + Math.random() * 2}s`,
+      }
+    }))
+  }), []);
+
+  return (
+    <div className="lg:hidden fixed inset-0 z-0 overflow-hidden bg-gradient-to-br from-blue-200 via-indigo-200 to-purple-200">
+      {/* Слой 1: Падающие PNG изображения */}
+      <div className="absolute inset-0">
+        {mobileElements.images.map((item) => (
+          <div
+            key={item.id}
+            className="absolute animate-falling-items-mobile flex items-center justify-center"
+            style={item.style}
+          >
+            <Image 
+              src={item.src}
+              alt=""
+              width={50}
+              height={50}
+              className="object-contain drop-shadow-lg floating-item-mobile"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Слой 2: Цветные блоки */}
+      <div className="absolute inset-0">
+        {mobileElements.shapes.map((item) => (
+          <div
+            key={item.id}
+            className="absolute bg-white/70 rounded-xl shadow-lg backdrop-blur-sm border border-indigo-200 animate-falling-items-slow-mobile flex items-center justify-center"
+            style={item.style}
+          >
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg"></div>
+          </div>
+        ))}
+      </div>
+
+      {/* Слой 3: Мелкие элементы */}
+      <div className="absolute inset-0">
+        {mobileElements.dots.map((item) => (
+          <div
+            key={item.id}
+            className="absolute bg-gradient-to-br from-blue-400 to-purple-500 rounded-full shadow-md animate-falling-small-mobile"
+            style={item.style}
+          ></div>
+        ))}
+      </div>
+
+      {/* Слой 4: Дополнительные декоративные элементы */}
+      <div className="absolute inset-0">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={`deco-${i}`}
+            className="absolute animate-falling-small-mobile"
+            style={{
+              width: '20px',
+              height: '20px',
+              left: `${10 + (i * 12) % 80}%`,
+              top: '-40px',
+              animationDelay: `${i * 0.5}s`,
+              animationDuration: `${3 + Math.random() * 2}s`,
+              background: 'linear-gradient(45deg, #3b82f6, #8b5cf6)',
+              borderRadius: '50%',
+              boxShadow: '0 4px 8px rgba(59, 130, 246, 0.3)',
+            }}
+          ></div>
+        ))}
+      </div>
+
+
+      {/* Стили анимаций для мобильных */}
+      <style jsx global>{`
+        @keyframes falling-items-mobile {
+          0% { transform: translateY(-100px) rotateZ(0deg); opacity: 0; }
+          5% { opacity: 1; }
+          95% { opacity: 1; }
+          100% { transform: translateY(calc(100vh + 100px)) rotateZ(360deg); opacity: 0; }
+        }
+        @keyframes falling-items-slow-mobile {
+          0% { transform: translateY(-120px) rotateZ(0deg) scale(0.5); opacity: 0; }
+          10% { opacity: 1; transform: translateY(-50px) rotateZ(45deg) scale(0.8); }
+          90% { opacity: 1; }
+          100% { transform: translateY(calc(100vh + 120px)) rotateZ(405deg) scale(0.5); opacity: 0; }
+        }
+        @keyframes falling-small-mobile {
+          0% { transform: translateY(-60px) rotateZ(0deg); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateY(calc(100vh + 60px)) rotateZ(720deg); opacity: 0; }
+        }
+        @keyframes floating-mobile {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(3deg); }
+        }
+        .animate-falling-items-mobile { animation: falling-items-mobile infinite linear; }
+        .animate-falling-items-slow-mobile { animation: falling-items-slow-mobile infinite ease-in-out; }
+        .animate-falling-small-mobile { animation: falling-small-mobile infinite linear; }
+        .floating-item-mobile { animation: floating-mobile 4s ease-in-out infinite; }
+      `}</style>
+    </div>
+  );
+};
+
 // Выносим анимированный фон в отдельный компонент
 const AnimatedBackground = () => {
   const fallingImages = [
@@ -291,7 +439,7 @@ export default function LoginPage() {
               <input
                 type="text"
                 placeholder={t('login.emailPlaceholder')}
-                className="w-3/4 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
+                className="w-3/4 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400 mobile-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 name="username"
@@ -304,7 +452,7 @@ export default function LoginPage() {
               <label className="block text-sm font-medium mb-2 text-gray-700">
                 {t('login.passwordLabel')}
               </label>
-              <div className="relative w-3/4">
+              <div className="relative w-3/4 mobile-input">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder={t('login.passwordPlaceholder')}
@@ -341,26 +489,10 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={handleEmailLogin}
-              className="w-3/4 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="w-3/4 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mobile-button"
             >
               {t('login.signInButton')}
             </button>
-
-            {/* Информация для входа */}
-            <div className="w-3/4 p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-semibold text-blue-800 mb-2">Демо аккаунты:</h4>
-              <div className="text-sm text-blue-700 space-y-1">
-                {/* <div><strong>Супер админ:</strong> super@admin.com / admin123</div>
-                <div><strong>Админ новостей:</strong> news@admin.com / news123</div>
-                <div><strong>Админ портфолио:</strong> portfolio@admin.com / port123</div>
-                <div><strong>Студент:</strong> student@yu.edu.kz / stud123</div>
-                <div><strong>Админ мероприятий:</strong> events@admin.com / event123</div> */}
-              </div>
-              <div className="text-xs text-blue-600 mt-3 p-2 bg-blue-100 rounded">
-                <div className="font-medium mb-1">⚠️ Временные пароли:</div>
-                <div>Все пароли кроме супер-админа являются временными и требуют смены в настройках безопасности.</div>
-              </div>
-            </div>
           </div>
         );
       
@@ -488,7 +620,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              className="w-full max-w-3xl bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full max-w-3xl bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed mobile-button"
               disabled={!selectedFile}
               onClick={handleECPLogin}
             >
@@ -509,16 +641,19 @@ export default function LoginPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
-      {/* Left side - Animated Background */}
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50 relative">
+      {/* Mobile Animated Background */}
+      <MobileAnimatedBackground />
+      
+      {/* Left side - Desktop Animated Background */}
       <AnimatedBackground />
 
       {/* Right side - Login form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-start px-6 lg:pl-30 lg:pr-16 pt-8 pb-8 bg-white">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 lg:pl-30 lg:pr-16 pt-8 pb-8 bg-transparent lg:bg-white relative z-5 min-h-screen lg:min-h-0">
         {/* Language Selector - точно как в Header */}
-        <div className="flex justify-end mb-12">
+        <div className="flex justify-end mb-8 lg:mb-12 w-full max-w-md mx-auto">
           <select
-            className="text-sm border border-gray-300 rounded px-2 py-1"
+            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white/90"
             onChange={changeLanguage}
             value={locale}
             aria-label={t('aria.languageSelect')}
@@ -530,17 +665,17 @@ export default function LoginPage() {
           </select>
         </div>
 
-        <div className="w-full max-w-xl ml-2">
-          <h1 className="text-2xl lg:text-3xl mb-8 text-blue-600">
+        <div className="w-full max-w-md mx-auto mobile-form-container lg:ml-2 lg:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:border-radius-none lg:p-0 lg:m-0">
+          <h1 className="text-2xl lg:text-3xl mb-8 text-blue-600 text-center lg:text-left">
             {t('login.title')}
           </h1>
 
-          <div className="flex border-b border-gray-200 mb-8">
+          <div className="flex border-b border-gray-200 mb-8 mobile-tab-container">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`mr-8 pb-3 text-sm font-medium transition-colors ${
+                className={`mr-8 pb-3 text-sm font-medium transition-colors mobile-tab ${
                   activeTab === tab.id
                     ? 'text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-600 hover:text-gray-800'
@@ -558,7 +693,7 @@ export default function LoginPage() {
               <div className="border-t border-gray-200 my-8"></div>
 
               <button 
-                className="w-3/4 border border-blue-600 text-blue-600 py-3 px-4 rounded-lg hover:bg-blue-50 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="w-3/4 border border-blue-600 text-blue-600 py-3 px-4 rounded-lg hover:bg-blue-50 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mobile-button"
                 onClick={handleAnonymousLogin}
               >
                 {t('login.anonymousLogin')}
@@ -611,6 +746,46 @@ export default function LoginPage() {
         @keyframes slideIn {
           from { transform: translateY(16px); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* Дополнительные стили для мобильной адаптации */
+        @media (max-width: 1024px) {
+          .mobile-form-container {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 20px;
+            margin: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+          }
+          
+          .mobile-input {
+            width: 100% !important;
+            max-width: none !important;
+          }
+          
+          .mobile-button {
+            width: 100% !important;
+            max-width: none !important;
+          }
+          
+          .mobile-tab-container {
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+          }
+          
+          .mobile-tab {
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+            padding: 12px 8px;
+            font-size: 14px;
+          }
+          
+          .mobile-form-container h1 {
+            text-align: center;
+          }
         }
       `}</style>
     </div>

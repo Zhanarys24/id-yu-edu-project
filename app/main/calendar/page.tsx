@@ -13,29 +13,12 @@ import { ru, enUS } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
+import { CalendarService, CalendarEvent, CalendarUser, PersonnelSimple, Campus, MeetingRoom } from '@/lib/services/calendarService'
 
 
-// Интерфейсы для типизации
-interface Event {
-  id?: string | number
-  title: string
-  start: string
-  end: string
-  color: string
-  place: string
-  isOnline: boolean
-  link?: string
-  participants: string[]
-}
-
-interface User {
-  id: string | number
-  name: string
-  email: string
-  department: string
-}
-
-const API_BASE = 'http://localhost:8080/api' // настройка для FastAPI
+// Используем типы напрямую из сервиса
+type Event = CalendarEvent;
+type User = CalendarUser;
 
 export default function CalendarPage() {
   const { t, i18n } = useTranslation('common')
@@ -47,7 +30,11 @@ export default function CalendarPage() {
   // Состояния для данных
   const [events, setEvents] = useState<Event[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [participants, setParticipants] = useState<User[]>([])
+  const [personnel, setPersonnel] = useState<PersonnelSimple[]>([])
+  const [participants, setParticipants] = useState<PersonnelSimple[]>([])
+  const [campuses, setCampuses] = useState<Campus[]>([])
+  const [meetingRooms, setMeetingRooms] = useState<MeetingRoom[]>([])
+  const [locations, setLocations] = useState<Array<{id: number, name: string, campus_id: number}>>([])
 
   // Состояния для формы события
   const [newEvent, setNewEvent] = useState({ start: '', color: 'blue' })
@@ -55,9 +42,11 @@ export default function CalendarPage() {
   const [eventStart, setEventStart] = useState('')
   const [eventEnd, setEventEnd] = useState('')
   const [eventColor, setEventColor] = useState('blue')
-  const [eventPlace, setEventPlace] = useState('Атриум')
+  const [eventCampus, setEventCampus] = useState(1)
+  const [eventLocation, setEventLocation] = useState(1)
   const [isOnline, setIsOnline] = useState(false)
   const [eventLink, setEventLink] = useState('')
+  const [eventDescription, setEventDescription] = useState('')
 
   // Рефы и состояния календаря
   const calendarRef = useRef<FullCalendar>(null)
@@ -92,44 +81,65 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     const fetchData = async () => {
       setLoading(true)
       try {
-        const [eRes, uRes] = await Promise.all([
-          fetch(`${API_BASE}/events`),
-          fetch(`${API_BASE}/users`)
+        // Загружаем встречи, персонал, корпуса и места встреч через новый API
+        const [meetingsData, usersData, personnelData, campusesData, meetingRoomsData] = await Promise.all([
+          CalendarService.getAllMeetings(),
+          CalendarService.getUsers(),
+          CalendarService.getPersonnel(),
+          CalendarService.getCampuses(),
+          CalendarService.getMeetingRooms()
         ])
         
-        if (!eRes.ok || !uRes.ok) {
-          throw new Error('Ошибка при загрузке данных')
-        }
-        
-        const [eventsData, usersData] = await Promise.all([eRes.json(), uRes.json()])
+        // Преобразуем встречи в события календаря
+        const calendarEvents = meetingsData.map(meeting => 
+          CalendarService.transformMeetingToEvent(meeting)
+        )
         
         // Валидация и очистка данных событий
-        const validEvents = (eventsData || []).filter((event: unknown) => {
-          const e = event as { start?: string; end?: string; title?: string }
+        const validEvents = calendarEvents.filter((event) => {
           return event && 
-                 typeof e.start === 'string' && 
-                 e.start.length > 0 &&
-                 typeof e.end === 'string' && 
-                 e.end.length > 0 &&
-                 e.title
+                 typeof event.start === 'string' && 
+                 event.start.length > 0 &&
+                 typeof event.end === 'string' && 
+                 event.end.length > 0 &&
+                 event.title
         })
         
         // Валидация данных пользователей
-        const validUsers = (usersData || []).filter((user: unknown) => {
-          const u = user as { id?: string; name?: string; email?: string }
-          return user && u.id && u.name && u.email
+        const validUsers = usersData.filter((user) => {
+          return user && user.id && user.name && user.email
         })
+        
+        // Валидация данных персонала
+        const validPersonnel = personnelData.filter((person) => {
+          return person && person.id && person.full_name
+        })
+        
+        // Преобразуем meeting rooms в locations для обратной совместимости
+        const locationsData = meetingRoomsData.map(room => ({
+          id: room.id,
+          name: room.name,
+          campus_id: room.campus
+        }))
         
         setEvents(validEvents)
         setUsers(validUsers)
+        setPersonnel(validPersonnel)
+        setCampuses(campusesData)
+        setMeetingRooms(meetingRoomsData)
+        setLocations(locationsData)
         
         console.log('Загружено событий:', validEvents.length)
         console.log('Загружено пользователей:', validUsers.length)
+        console.log('Загружено персонала:', validPersonnel.length)
+        console.log('Загружено корпусов:', campusesData.length)
+        console.log('Загружено мест встреч:', meetingRoomsData.length)
         
       } catch (error) {
         console.error('Ошибка при загрузке данных:', error)
         setEvents([])
         setUsers([])
+        setPersonnel([])
       } finally {
         setLoading(false)
       }
@@ -173,57 +183,45 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
 
   // Валидация формы
   const validateForm = (): string | null => {
-    if (!eventTitle.trim()) return t('calendarPage.errors.titleRequired')
-    if (!newEvent.start) return t('calendarPage.errors.dateRequired')
-    if (!eventStart) return t('calendarPage.errors.startTimeRequired')
-    if (!eventEnd) return t('calendarPage.errors.endTimeRequired')
-    if (!eventPlace) return t('calendarPage.errors.placeRequired')
+    if (!eventTitle.trim()) return 'Название встречи обязательно'
+    if (eventTitle.trim().length > 200) return 'Название встречи не должно превышать 200 символов'
+    if (!newEvent.start) return 'Дата встречи обязательна'
+    if (!eventStart) return 'Время начала обязательно'
+    if (!eventEnd) return 'Время окончания обязательно'
+    if (!eventLocation) return 'Место встречи обязательно'
     
     // Проверка времени
     if (eventStart >= eventEnd) {
-      return t('calendarPage.errors.endAfterStart')
+      return 'Время окончания должно быть позже времени начала'
+    }
+    
+    // Проверка даты (не в прошлом)
+    const selectedDate = new Date(newEvent.start)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    if (selectedDate < today) {
+      return 'Нельзя создавать встречи в прошлом'
     }
     
     // Проверка для онлайн встреч
     if (isOnline) {
       if (participants.length === 0) {
-        return t('calendarPage.errors.participantsRequired')
+        return 'Для онлайн встреч необходимо выбрать участников'
       }
       if (!eventLink.trim()) {
-        return t('calendarPage.errors.linkRequired')
+        return 'Для онлайн встреч необходима ссылка'
+      }
+      // Валидация URL
+      try {
+        new URL(eventLink.trim())
+      } catch {
+        return 'Введите корректную ссылку'
       }
     }
     
     return null
   }
 
-  // Функция перезагрузки событий
-  const reloadEvents = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/events`)
-      if (res.ok) {
-        const eventsData = await res.json()
-        const validEvents = (eventsData || []).filter((event: unknown) => {
-          const e = event as { start?: string; end?: string; title?: string }
-          return event && 
-                 typeof e.start === 'string' && 
-                 e.start.length > 0 &&
-                 typeof e.end === 'string' && 
-                 e.end.length > 0 &&
-                 e.title
-        })
-        setEvents(validEvents)
-        console.log('События обновлены:', validEvents)
-        
-        // Принудительное обновление календаря
-        if (calendarRef.current) {
-          calendarRef.current.getApi().refetchEvents()
-        }
-      }
-    } catch (error) {
-      console.error('Ошибка при обновлении событий:', error)
-    }
-  }
 
   // Обработчик добавления события
   const handleAdd = async () => {
@@ -238,70 +236,68 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     const fullEnd = `${newEvent.start}T${eventEnd}`
 
     // Проверка доступности времени и места
-    if (!isTimeSlotAvailable(fullStart, fullEnd, eventPlace)) {
-      alert(t('calendarPage.errors.slotBusy'))
+    const locationName = locations.find(l => l.id === eventLocation)?.name || 'Неизвестное место';
+    if (!isTimeSlotAvailable(fullStart, fullEnd, locationName)) {
+      alert('Выбранное время уже занято в этом месте')
       return
     }
 
-    const newEventObj: Omit<Event, 'id'> = {
+    const newEventObj: Omit<Event, 'id'> & { campusId: number, locationId: number } = {
       title: eventTitle.trim(),
       start: fullStart,
       end: fullEnd,
       color: eventColor,
-      place: eventPlace,
+      place: locations.find(l => l.id === eventLocation)?.name || 'Неизвестное место',
       isOnline,
       link: isOnline ? eventLink.trim() : '',
-      participants: participants.map(p => p.email)
+      participants: participants.map(p => p.full_name), // Используем full_name вместо email
+      description: eventDescription.trim(),
+      campusId: eventCampus,
+      locationId: eventLocation
     }
 
     console.log("Создание события:", newEventObj)
 
     setLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/events`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEventObj)
+      // Создаем встречу через API
+      const savedMeeting = await CalendarService.createMeeting(newEventObj)
+      console.log('Встреча создана на сервере:', savedMeeting)
+      
+      // Преобразуем встречу в событие календаря
+      const eventToAdd = CalendarService.transformMeetingToEvent(savedMeeting)
+      
+      setEvents(prev => {
+        const newEvents = [...prev, eventToAdd]
+        console.log('Обновленный список событий:', newEvents)
+        return newEvents
       })
-
-      if (res.ok) {
-        const savedEvent = await res.json()
-        console.log('Событие сохранено на сервере:', savedEvent)
-        
-        // Обновляем состояние с новым событием
-        const eventToAdd = {
-          ...savedEvent,
-          // Убеждаемся что поля присутствуют
-          title: savedEvent.title || eventTitle.trim(),
-          start: savedEvent.start || fullStart,
-          end: savedEvent.end || fullEnd,
-          color: savedEvent.color || eventColor,
-          place: savedEvent.place || eventPlace
-        }
-        
-        setEvents(prev => {
-          const newEvents = [...prev, eventToAdd]
-          console.log('Обновленный список событий:', newEvents)
-          return newEvents
-        })
-        
-        // Перезагружаем события с сервера для синхронизации
-        setTimeout(() => {
-          reloadEvents()
-        }, 500)
-        
-        resetForm()
-        setModalOpen(false)
-        alert(t('calendarPage.successCreated'))
-        
-      } else {
-        const errorText = await res.text()
-        console.error('Ошибка сервера:', errorText)
-        alert(t('calendarPage.createError') + ': ' + errorText)
+      
+      // Принудительное обновление календаря
+      if (calendarRef.current) {
+        calendarRef.current.getApi().refetchEvents()
       }
+      
+      resetForm()
+      setModalOpen(false)
+      alert('Встреча успешно создана!')
+      
     } catch (error) {
-      console.error('Ошибка при отправке запроса:', error)
-      alert(t('calendarPage.connectionError'))
+      console.error('Ошибка при создании встречи:', error)
+      const errorMessage = (error as Error).message
+      
+      // Более детальная обработка ошибок
+      if (errorMessage.includes('400')) {
+        alert('Ошибка валидации данных. Проверьте правильность заполнения полей.')
+      } else if (errorMessage.includes('401')) {
+        alert('Ошибка авторизации. Войдите в систему заново.')
+      } else if (errorMessage.includes('403')) {
+        alert('Недостаточно прав для создания встречи.')
+      } else if (errorMessage.includes('500')) {
+        alert('Ошибка сервера. Попробуйте позже.')
+      } else {
+        alert('Ошибка при создании встречи: ' + errorMessage)
+      }
     } finally {
       setLoading(false)
     }
@@ -313,9 +309,11 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     setEventStart('')
     setEventEnd('')
     setEventColor('blue')
-    setEventPlace('Атриум')
+    setEventCampus(1)
+    setEventLocation(1)
     setIsOnline(false)
     setEventLink('')
+    setEventDescription('')
     setParticipants([])
     setNewEvent({ start: '', color: 'blue' })
   }
@@ -397,11 +395,11 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     .slice(0, 3)
 
   // Обработчик выбора участников
-  const handleParticipantToggle = (user: User) => {
+  const handleParticipantToggle = (person: PersonnelSimple) => {
     setParticipants(prev =>
-      prev.some(p => p.id === user.id)
-        ? prev.filter(p => p.id !== user.id)
-        : [...prev, user]
+      prev.some(p => p.id === person.id)
+        ? prev.filter(p => p.id !== person.id)
+        : [...prev, person]
     )
   }
 
@@ -499,20 +497,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
           <div className="calendar-header-bar">
             <h2>{t('calendarPage.headerTitle')}</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                onClick={reloadEvents} 
-                disabled={loading}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: loading ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {loading ? t('common.loading') : t('calendarPage.refresh')}
-              </button>
+
               <span style={{ fontSize: '14px', color: '#666', alignSelf: 'center' }}>
                 {t('calendarPage.eventsCount')}: {events.length}
               </span>
@@ -553,10 +538,11 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                 <label>{t('calendarPage.form.title')} *</label>
                 <input
                   type="text"
-                  placeholder={t('calendarPage.form.titlePlaceholder')}
+                  placeholder="Введите название встречи"
                   value={eventTitle}
                   onChange={(e) => setEventTitle(e.target.value)}
                   disabled={loading}
+                  maxLength={200}
                 />
               </div>
 
@@ -605,17 +591,60 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>{t('calendarPage.form.place')} *</label>
+                  <label>Корпус *</label>
                   <select 
-                    value={eventPlace} 
-                    onChange={(e) => setEventPlace(e.target.value)}
+                    value={eventCampus} 
+                    onChange={async (e) => {
+                      const campusId = parseInt(e.target.value);
+                      setEventCampus(campusId);
+                      // Обновляем список мест встреч при смене корпуса
+                      try {
+                        const meetingRoomsData = await CalendarService.getMeetingRooms(campusId);
+                        setMeetingRooms(meetingRoomsData);
+                        const locationsData = meetingRoomsData.map(room => ({
+                          id: room.id,
+                          name: room.name,
+                          campus_id: room.campus
+                        }));
+                        setLocations(locationsData);
+                      } catch (error) {
+                        console.error('Ошибка при загрузке мест встреч:', error);
+                      }
+                    }}
                     disabled={loading}
                   >
-                    {places.map(place => 
-                      <option key={place} value={place}>{place}</option>
+                    {campuses.map(campus => 
+                      <option key={campus.id} value={campus.id}>{campus.name}</option>
                     )}
                   </select>
                 </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Место встречи *</label>
+                  <select 
+                    value={eventLocation} 
+                    onChange={(e) => setEventLocation(parseInt(e.target.value))}
+                    disabled={loading}
+                  >
+                    {locations.filter(loc => loc.campus_id === eventCampus).map(location => 
+                      <option key={location.id} value={location.id}>{location.name}</option>
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Описание встречи</label>
+                <textarea
+                  placeholder="Введите описание встречи (необязательно)"
+                  value={eventDescription}
+                  onChange={(e) => setEventDescription(e.target.value)}
+                  disabled={loading}
+                  rows={3}
+                  className="w-full p-2 border rounded"
+                />
               </div>
 
               <div className="toggle-container">
@@ -638,10 +667,11 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                     <label>{t('calendarPage.form.link')} *</label>
                     <input
                       type="url"
-                      placeholder={t('calendarPage.form.linkPlaceholder')}
+                      placeholder="https://meet.google.com/..."
                       value={eventLink}
                       onChange={(e) => setEventLink(e.target.value)}
                       disabled={loading}
+                      maxLength={200}
                     />
                   </div>
 
@@ -653,28 +683,30 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                         onClick={() => !loading && setDropdownOpen(!dropdownOpen)}
                       >
                         {participants.length > 0 
-                          ? participants.map(p => p.name).join(', ') 
+                          ? participants.map(p => p.full_name).join(', ') 
                           : <span style={{ color: '#aaa' }}>{t('calendarPage.form.noParticipants')}</span>
                         }
                         <span className="arrow">{dropdownOpen ? '▲' : '▼'}</span>
                       </div>
                       {dropdownOpen && (
                         <div className="options">
-                          {users.length === 0 ? (
+                          {personnel.length === 0 ? (
                             <div className="no-users">{t('calendarPage.form.noUsers')}</div>
                           ) : (
-                            users.map(user => (
-                              <label key={user.id}>
+                            personnel.map(person => (
+                              <label key={person.id}>
                                 <input
                                   type="checkbox"
-                                  checked={participants.some(p => p.id === user.id)}
-                                  onChange={() => handleParticipantToggle(user)}
+                                  checked={participants.some(p => p.id === person.id)}
+                                  onChange={() => handleParticipantToggle(person)}
                                   disabled={loading}
                                 />
-                                <span>{user.name}</span>
-                                <small style={{ color: '#666', fontSize: '12px' }}>
-                                  {user.department}
-                                </small>
+                                <span>{person.full_name}</span>
+                                {person.work_phone && (
+                                  <small style={{ color: '#666', fontSize: '12px' }}>
+                                    {person.work_phone}
+                                  </small>
+                                )}
                               </label>
                             ))
                           )}
@@ -690,15 +722,23 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                   className="add-btn" 
                   onClick={handleAdd}
                   disabled={loading}
+                  style={{ 
+                    opacity: loading ? 0.6 : 1,
+                    cursor: loading ? 'not-allowed' : 'pointer'
+                  }}
                 >
-                  {loading ? t('calendarPage.form.adding') : t('calendarPage.form.add')}
+                  {loading ? 'Создание...' : 'Создать встречу'}
                 </button>
                 <button 
                   className="cancel-btn" 
                   onClick={handleCloseModal}
                   disabled={loading}
+                  style={{ 
+                    opacity: loading ? 0.6 : 1,
+                    cursor: loading ? 'not-allowed' : 'pointer'
+                  }}
                 >
-                  {t('calendarPage.form.cancel')}
+                  Отмена
                 </button>
               </div>
             </div>
