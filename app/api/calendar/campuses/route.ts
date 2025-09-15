@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'https://435ee3adc448.ngrok-free.app';
+const API_BASE_URL = 'https://8af0cec014ee.ngrok-free.app';
 
 const DEFAULT_CAMPUSES = [
-  { id: 1, name: 'Главный корпус', status: 'active' },
-  { id: 2, name: 'Корпус А', status: 'active' },
-  { id: 3, name: 'Корпус Б', status: 'active' }
+  { id: 1, name: 'Технопарк', status: 'active' }
 ];
 
 export async function GET() {
@@ -30,6 +28,12 @@ export async function GET() {
 
     const data = await response.json();
     console.log('Campuses data received:', data);
+    
+    // Обрабатываем ответ в формате {count, size, next, previous, results}
+    if (data.results && Array.isArray(data.results)) {
+      return NextResponse.json(data.results);
+    }
+    
     return NextResponse.json(Array.isArray(data) ? data : DEFAULT_CAMPUSES);
   } catch (error) {
     console.warn('Error fetching campuses:', error);

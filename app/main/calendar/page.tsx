@@ -13,7 +13,7 @@ import { ru, enUS } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
-import { CalendarService, CalendarEvent, CalendarUser, PersonnelSimple, Campus, MeetingRoom } from '@/lib/services/calendarService'
+import { CalendarService, CalendarEvent, CalendarUser, PersonnelSimple, ExternalParticipant } from '@/lib/services/calendarService'
 
 
 // Используем типы напрямую из сервиса
@@ -30,11 +30,11 @@ export default function CalendarPage() {
   // Состояния для данных
   const [events, setEvents] = useState<Event[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [personnel, setPersonnel] = useState<PersonnelSimple[]>([])
   const [participants, setParticipants] = useState<PersonnelSimple[]>([])
-  const [campuses, setCampuses] = useState<Campus[]>([])
-  const [meetingRooms, setMeetingRooms] = useState<MeetingRoom[]>([])
+  const [campuses, setCampuses] = useState<Array<{id: number, name: string}>>([])
   const [locations, setLocations] = useState<Array<{id: number, name: string, campus_id: number}>>([])
+  const [personnel, setPersonnel] = useState<PersonnelSimple[]>([])
+  const [participantSearch, setParticipantSearch] = useState('')
 
   // Состояния для формы события
   const [newEvent, setNewEvent] = useState({ start: '', color: 'blue' })
@@ -42,8 +42,8 @@ export default function CalendarPage() {
   const [eventStart, setEventStart] = useState('')
   const [eventEnd, setEventEnd] = useState('')
   const [eventColor, setEventColor] = useState('blue')
-  const [eventCampus, setEventCampus] = useState(1)
-  const [eventLocation, setEventLocation] = useState(1)
+  const [eventCampus, setEventCampus] = useState<number | null>(null)
+  const [eventLocation, setEventLocation] = useState<number | null>(null)
   const [isOnline, setIsOnline] = useState(false)
   const [eventLink, setEventLink] = useState('')
   const [eventDescription, setEventDescription] = useState('')
@@ -81,18 +81,33 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     const fetchData = async () => {
       setLoading(true)
       try {
-        // Загружаем встречи, персонал, корпуса и места встреч через новый API
-        const [meetingsData, usersData, personnelData, campusesData, meetingRoomsData] = await Promise.all([
+        console.log('🚀 Начинаем загрузку данных...');
+        
+        // Сначала тестируем подключение к API
+        const connectionTest = await CalendarService.testConnection();
+        console.log('📡 Тест подключения:', connectionTest.message);
+        
+        if (!connectionTest.success) {
+          console.warn('⚠️ Проблема с подключением к API, но продолжаем...');
+        }
+        
+        // Загружаем все данные параллельно, включая участников
+        const [meetingsData, usersData, campusesData, locationsData, externalParticipantsData] = await Promise.all([
           CalendarService.getAllMeetings(),
           CalendarService.getUsers(),
-          CalendarService.getPersonnel(),
           CalendarService.getCampuses(),
-          CalendarService.getMeetingRooms()
+          CalendarService.getLocations(),
+          CalendarService.getAllExternalParticipants() // ДОБАВЛЯЕМ ЗАГРУЗКУ УЧАСТНИКОВ
         ])
         
         // Преобразуем встречи в события календаря
         const calendarEvents = meetingsData.map(meeting => 
           CalendarService.transformMeetingToEvent(meeting)
+        )
+        
+        // Преобразуем внешних участников в PersonnelSimple для совместимости
+        const personnelData = externalParticipantsData.map(participant => 
+          CalendarService.transformExternalToPersonnel(participant)
         )
         
         // Валидация и очистка данных событий
@@ -115,31 +130,25 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
           return person && person.id && person.full_name
         })
         
-        // Преобразуем meeting rooms в locations для обратной совместимости
-        const locationsData = meetingRoomsData.map(room => ({
-          id: room.id,
-          name: room.name,
-          campus_id: room.campus
-        }))
-        
         setEvents(validEvents)
         setUsers(validUsers)
-        setPersonnel(validPersonnel)
+        setPersonnel(validPersonnel) // УСТАНАВЛИВАЕМ УЧАСТНИКОВ
         setCampuses(campusesData)
-        setMeetingRooms(meetingRoomsData)
         setLocations(locationsData)
         
-        console.log('Загружено событий:', validEvents.length)
-        console.log('Загружено пользователей:', validUsers.length)
-        console.log('Загружено персонала:', validPersonnel.length)
-        console.log('Загружено корпусов:', campusesData.length)
-        console.log('Загружено мест встреч:', meetingRoomsData.length)
+        console.log('✅ Загружено событий:', validEvents.length)
+        console.log('✅ Загружено пользователей:', validUsers.length)
+        console.log('✅ Загружено участников из внешнего API:', validPersonnel.length)
+        console.log('✅ Загружено корпусов:', campusesData.length)
+        console.log('✅ Загружено мест:', locationsData.length)
         
       } catch (error) {
-        console.error('Ошибка при загрузке данных:', error)
+        console.error('❌ Ошибка при загрузке данных:', error)
         setEvents([])
         setUsers([])
-        setPersonnel([])
+        setPersonnel([]) // ДОБАВЛЯЕМ СБРОС УЧАСТНИКОВ
+        setCampuses([])
+        setLocations([])
       } finally {
         setLoading(false)
       }
@@ -150,6 +159,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
 
   // Обработчик клика по дате
   const handleDateClick = (arg: DateClickArg) => {
+    console.log('📅 Открываем модальное окно, текущее количество участников:', participants.length);
     setNewEvent({ ...newEvent, start: arg.dateStr })
     setModalOpen(true)
   }
@@ -242,34 +252,35 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
       return
     }
 
-    const newEventObj: Omit<Event, 'id'> & { campusId: number, locationId: number } = {
+    // Правильный формат для API
+    const meetingData = {
       title: eventTitle.trim(),
-      start: fullStart,
-      end: fullEnd,
-      color: eventColor,
-      place: locations.find(l => l.id === eventLocation)?.name || 'Неизвестное место',
-      isOnline,
-      link: isOnline ? eventLink.trim() : '',
-      participants: participants.map(p => p.full_name), // Используем full_name вместо email
-      description: eventDescription.trim(),
-      campusId: eventCampus,
-      locationId: eventLocation
+      date: newEvent.start,  // YYYY-MM-DD
+      time_start: eventStart,  // HH:MM
+      time_end: eventEnd,      // HH:MM
+      campus: eventCampus,     // ID корпуса
+      location: eventLocation, // ID места
+      guests: participants.map(p => p.id), // Массив ID участников
+      description: eventDescription.trim() || null,
+      link: isOnline ? eventLink.trim() : null,
+      color: eventColor
     }
 
-    console.log("Создание события:", newEventObj)
+    console.log("Создание встречи:", meetingData)
 
     setLoading(true)
     try {
       // Создаем встречу через API
-      const savedMeeting = await CalendarService.createMeeting(newEventObj)
+      const savedMeeting = await CalendarService.createMeeting(meetingData)
       console.log('Встреча создана на сервере:', savedMeeting)
       
       // Преобразуем встречу в событие календаря
       const eventToAdd = CalendarService.transformMeetingToEvent(savedMeeting)
+      console.log('Преобразованное событие:', eventToAdd)
       
       setEvents(prev => {
         const newEvents = [...prev, eventToAdd]
-        console.log('Обновленный список событий:', newEvents)
+        console.log('✅ Добавлено событие, всего:', newEvents.length)
         return newEvents
       })
       
@@ -309,8 +320,8 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     setEventStart('')
     setEventEnd('')
     setEventColor('blue')
-    setEventCampus(1)
-    setEventLocation(1)
+    setEventCampus(null)
+    setEventLocation(null)
     setIsOnline(false)
     setEventLink('')
     setEventDescription('')
@@ -347,19 +358,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     }
     
     // Безопасное получение точек для дней с событиями
-    const dots = events.filter(event => {
-      if (!event.start || typeof event.start !== 'string') {
-        return false
-      }
-      try {
-        const eventDateStr = event.start.slice(0, 10)
-        const cellDateStr = date.toISOString().slice(0, 10)
-        return eventDateStr === cellDateStr
-      } catch (error) {
-        console.warn('Ошибка при сравнении дат:', event.start, error)
-        return false
-      }
-    })
+    const dots = [] // ← ПРОСТО ВОЗВРАЩАЕМ ПУСТОЙ МАССИВ
     
     return { date, inMonth, dots }
   })
@@ -395,13 +394,364 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     .slice(0, 3)
 
   // Обработчик выбора участников
-  const handleParticipantToggle = (person: PersonnelSimple) => {
+  const handleParticipantToggle = (user: PersonnelSimple) => {
     setParticipants(prev =>
-      prev.some(p => p.id === person.id)
-        ? prev.filter(p => p.id !== person.id)
-        : [...prev, person]
+      prev.some(p => p.id === user.id)
+        ? prev.filter(p => p.id !== user.id)
+        : [...prev, user]
     )
   }
+
+  // Функция для принудительной перезагрузки участников
+  const loadParticipants = async () => {
+    setLoading(true);
+    try {
+      console.log('🔄 Принудительная перезагрузка участников...');
+      const externalParticipantsData = await CalendarService.getAllExternalParticipants();
+      const personnelData = externalParticipantsData.map(participant => 
+        CalendarService.transformExternalToPersonnel(participant)
+      );
+      const validPersonnel = personnelData.filter((person) => {
+        return person && person.id && person.full_name
+      });
+      setPersonnel(validPersonnel); // Обновляем основной список участников
+      console.log('✅ Перезагружено участников:', validPersonnel.length);
+    } catch (error) {
+      console.error('❌ Ошибка при перезагрузке участников:', error);
+      alert('Ошибка при загрузке участников: ' + (error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // useEffect для очистки участников при выключении онлайн встречи
+  useEffect(() => {
+    if (!isOnline) {
+      // При выключении онлайн встречи очищаем выбранных участников
+      console.log('🔄 Выключена онлайн встреча, очищаем выбранных участников...');
+      setParticipants([]);
+    }
+  }, [isOnline]);
+
+  // useEffect для модального окна больше не нужен, так как участники загружаются при входе на страницу
+
+  // Компонент dropdown для участников
+  const ParticipantsDropdown = () => (
+    <div className="form-group">
+      <label style={{
+        display: 'block',
+        marginBottom: '12px',
+        fontWeight: '600',
+        color: '#2c3e50',
+        fontSize: '16px'
+      }}>
+        👥 {t('calendarPage.form.participants')} *
+      </label>
+      
+      {/* Поле с выбранными участниками */}
+      <div style={{ 
+        minHeight: '60px',
+        border: '2px solid #e1e5e9',
+        borderRadius: '12px',
+        padding: '12px',
+        backgroundColor: '#f8f9fa',
+        marginBottom: '12px',
+        transition: 'border-color 0.3s ease',
+        position: 'relative'
+      }}>
+        {participants.length === 0 ? (
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            color: '#6c757d', 
+            fontSize: '14px',
+            height: '36px'
+          }}>
+            <span style={{ marginRight: '8px' }}>🔍</span>
+            Выберите участников из списка ниже
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {participants.map(person => (
+              <div
+                key={person.id}
+                style={{
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  padding: '8px 12px',
+                  borderRadius: '20px',
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 4px rgba(0,123,255,0.2)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#0056b3';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#007bff';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                <span style={{ fontWeight: '500' }}>{person.full_name}</span>
+                <button
+                  type="button"
+                  onClick={() => handleParticipantToggle(person)}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    border: 'none',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontSize: '14px',                    // ← Уменьшили размер шрифта
+                    padding: '0',                        // ← Убрали padding
+                    borderRadius: '50%',
+                    width: '18px',                       // ← Уменьшили размер
+                    height: '18px',                      // ← Уменьшили размер
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background-color 0.2s ease',
+                    lineHeight: '1',                     // ← Добавили line-height
+                    minWidth: '18px',                    // ← Добавили min-width
+                    minHeight: '18px'                    // ← Добавили min-height
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Счетчик выбранных участников */}
+        {participants.length > 0 && (
+          <div style={{
+            position: 'absolute',
+            top: '8px',
+            right: '12px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            fontSize: '11px',
+            padding: '2px 6px',
+            borderRadius: '10px',
+            fontWeight: '600'
+          }}>
+            {participants.length}
+          </div>
+        )}
+      </div>
+      
+      {/* Поиск участников */}
+      <div style={{ marginBottom: '12px' }}>
+        <input
+          type="text"
+          placeholder="🔍 Поиск участников..."
+          value={participantSearch}
+          onChange={(e) => setParticipantSearch(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '12px 16px',
+            border: '2px solid #e1e5e9',
+            borderRadius: '8px',
+            fontSize: '14px',
+            outline: 'none',
+            transition: 'border-color 0.3s ease',
+            boxSizing: 'border-box'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#007bff'}
+          onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
+        />
+      </div>
+      
+      {/* Выпадающий список участников */}
+      <div style={{ position: 'relative' }}>
+        <div 
+          onClick={() => {
+            if (!loading) {
+              setDropdownOpen(!dropdownOpen);
+            }
+          }}
+          style={{ 
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.6 : 1,
+            padding: '12px 16px',
+            border: '2px solid #e1e5e9',
+            borderRadius: '8px',
+            backgroundColor: 'white',
+            minHeight: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => !loading && (e.target.style.borderColor = '#007bff')}
+          onMouseLeave={(e) => !loading && (e.target.style.borderColor = '#e1e5e9')}
+        >
+          <span style={{ 
+            color: loading ? '#6c757d' : '#495057',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}>
+            {loading ? '⏳ Загрузка участников...' : 
+             personnel.length === 0 ? '❌ Нет доступных участников' : 
+             `📋 Выберите из ${personnel.length} участников`}
+          </span>
+          <span style={{ 
+            fontSize: '12px',
+            color: '#6c757d',
+            transition: 'transform 0.3s ease',
+            transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+          }}>
+            ▼
+          </span>
+        </div>
+        
+        {dropdownOpen && (
+          <div 
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              backgroundColor: 'white',
+              border: '2px solid #e1e5e9',
+              borderRadius: '8px',
+              maxHeight: '300px',
+              overflowY: 'auto',
+              zIndex: 1000,
+              boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+              marginTop: '4px'
+            }}
+          >
+            {loading ? (
+              <div style={{ 
+                padding: '20px', 
+                textAlign: 'center',
+                color: '#6c757d'
+              }}>
+                <div style={{ fontSize: '18px', marginBottom: '8px' }}>⏳</div>
+                Загрузка участников...
+              </div>
+            ) : personnel.length === 0 ? (
+              <div style={{ 
+                padding: '20px', 
+                textAlign: 'center', 
+                color: '#6c757d'
+              }}>
+                <div style={{ fontSize: '18px', marginBottom: '8px' }}>❌</div>
+                Участники не найдены
+              </div>
+            ) : (
+              personnel
+                .filter(person => {
+                  const isNotSelected = !participants.some(p => p.id === person.id);
+                  const matchesSearch = person.full_name.toLowerCase().includes(participantSearch.toLowerCase());
+                  return isNotSelected && matchesSearch;
+                })
+                .map(person => (
+                  <div
+                    key={person.id}
+                    onClick={() => handleParticipantToggle(person)}
+                    style={{ 
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      borderBottom: '1px solid #f8f9fa',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#f8f9fa';
+                      e.target.style.paddingLeft = '20px';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.paddingLeft = '16px';
+                    }}
+                  >
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      backgroundColor: '#007bff',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}>
+                      {person.full_name.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontWeight: '500', 
+                        color: '#2c3e50',
+                        fontSize: '14px'
+                      }}>
+                        {person.full_name}
+                      </div>
+                      {person.work_phone && (
+                        <div style={{ 
+                          color: '#6c757d', 
+                          fontSize: '12px',
+                          marginTop: '2px'
+                        }}>
+                          📞 {person.work_phone}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{
+                      color: '#28a745',
+                      fontSize: '16px',
+                      fontWeight: 'bold'
+                    }}>
+                      +
+                    </div>
+                  </div>
+                ))
+            )}
+            
+            {/* Показываем количество отфильтрованных результатов */}
+            {participantSearch && personnel.filter(person => 
+              !participants.some(p => p.id === person.id) && 
+              person.full_name.toLowerCase().includes(participantSearch.toLowerCase())
+            ).length === 0 && (
+              <div style={{ 
+                padding: '20px', 
+                textAlign: 'center', 
+                color: '#6c757d',
+                fontSize: '14px'
+              }}>
+                🔍 По запросу "{participantSearch}" ничего не найдено
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {/* Статистика */}
+      <div style={{ 
+        marginTop: '12px',
+        padding: '8px 12px',
+        backgroundColor: '#e9ecef',
+        borderRadius: '6px',
+        fontSize: '12px',
+        color: '#6c757d',
+        display: 'flex',
+        justifyContent: 'space-between'
+      }}>
+        <span>Выбрано: <strong>{participants.length}</strong></span>
+        <span>Доступно: <strong>{personnel.length}</strong></span>
+      </div>
+    </div>
+  );
 
   return (
     <Layout active="calendar">
@@ -410,7 +760,10 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
           <h1 className="calendar-title">{t('calendarPage.title')}</h1>
           <button 
             className="calendar-booking-btn" 
-            onClick={() => setModalOpen(true)}
+            onClick={() => {
+              console.log('📅 Открываем модальное окно через кнопку, текущее количество участников:', participants.length);
+              setModalOpen(true);
+            }}
             disabled={loading}
           >
             {loading ? t('common.loading') : t('calendarPage.book')}
@@ -507,6 +860,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
+            timeZone="local" // ← ДОБАВЛЯЕМ ЭТУ СТРОКУ
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
@@ -593,26 +947,16 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                 <div className="form-group">
                   <label>Корпус *</label>
                   <select 
-                    value={eventCampus} 
-                    onChange={async (e) => {
-                      const campusId = parseInt(e.target.value);
+                    value={eventCampus || ''}
+                    onChange={(e) => {
+                      console.log('🏢 Выбран корпус:', e.target.value);
+                      const campusId = e.target.value ? parseInt(e.target.value) : null;
                       setEventCampus(campusId);
-                      // Обновляем список мест встреч при смене корпуса
-                      try {
-                        const meetingRoomsData = await CalendarService.getMeetingRooms(campusId);
-                        setMeetingRooms(meetingRoomsData);
-                        const locationsData = meetingRoomsData.map(room => ({
-                          id: room.id,
-                          name: room.name,
-                          campus_id: room.campus
-                        }));
-                        setLocations(locationsData);
-                      } catch (error) {
-                        console.error('Ошибка при загрузке мест встреч:', error);
-                      }
+                      setEventLocation(null); // Сбрасываем выбранное место при смене корпуса
                     }}
                     disabled={loading}
                   >
+                    <option value="">-- Выберите корпус --</option>
                     {campuses.map(campus => 
                       <option key={campus.id} value={campus.id}>{campus.name}</option>
                     )}
@@ -624,14 +968,25 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                 <div className="form-group">
                   <label>Место встречи *</label>
                   <select 
-                    value={eventLocation} 
-                    onChange={(e) => setEventLocation(parseInt(e.target.value))}
+                    value={eventLocation || ''}
+                    onChange={(e) => {
+                      console.log('🏢 Выбрано место:', e.target.value);
+                      setEventLocation(e.target.value ? parseInt(e.target.value) : null);
+                    }}
                     disabled={loading}
                   >
-                    {locations.filter(loc => loc.campus_id === eventCampus).map(location => 
-                      <option key={location.id} value={location.id}>{location.name}</option>
+                    <option value="">-- Выберите место встречи --</option>
+                    {locations.map(location => 
+                      <option key={location.id} value={location.id}>
+                        {location.name} {location.campus_name ? `(${location.campus_name})` : ''}
+                      </option>
                     )}
                   </select>
+                  {/* Отладочная информация */}
+                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                    <div>Всего мест: {locations.length}</div>
+                    <div>Выбрано место: {eventLocation || 'нет'}</div>
+                  </div>
                 </div>
               </div>
 
@@ -675,45 +1030,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label>{t('calendarPage.form.participants')} *</label>
-                    <div className="custom-dropdown">
-                      <div 
-                        className="selected-list" 
-                        onClick={() => !loading && setDropdownOpen(!dropdownOpen)}
-                      >
-                        {participants.length > 0 
-                          ? participants.map(p => p.full_name).join(', ') 
-                          : <span style={{ color: '#aaa' }}>{t('calendarPage.form.noParticipants')}</span>
-                        }
-                        <span className="arrow">{dropdownOpen ? '▲' : '▼'}</span>
-                      </div>
-                      {dropdownOpen && (
-                        <div className="options">
-                          {personnel.length === 0 ? (
-                            <div className="no-users">{t('calendarPage.form.noUsers')}</div>
-                          ) : (
-                            personnel.map(person => (
-                              <label key={person.id}>
-                                <input
-                                  type="checkbox"
-                                  checked={participants.some(p => p.id === person.id)}
-                                  onChange={() => handleParticipantToggle(person)}
-                                  disabled={loading}
-                                />
-                                <span>{person.full_name}</span>
-                                {person.work_phone && (
-                                  <small style={{ color: '#666', fontSize: '12px' }}>
-                                    {person.work_phone}
-                                  </small>
-                                )}
-                              </label>
-                            ))
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {ParticipantsDropdown()}
                 </>
               )}
 

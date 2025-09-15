@@ -1,54 +1,14 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'https://435ee3adc448.ngrok-free.app';
+const API_BASE_URL = 'https://8af0cec014ee.ngrok-free.app';
 
 const DEFAULT_MEETING_ROOMS = [
   { 
     id: 1, 
-    name: 'Атриум', 
+    name: 'Кабинет номер 2', 
     campus: 1, 
-    campus_name: 'Главный корпус', 
-    color: '#3B82F6', 
-    status: 'active' 
-  },
-  { 
-    id: 2, 
-    name: 'Конференц-зал', 
-    campus: 1, 
-    campus_name: 'Главный корпус', 
-    color: '#10B981', 
-    status: 'active' 
-  },
-  { 
-    id: 3, 
-    name: 'Аудитория 101', 
-    campus: 1, 
-    campus_name: 'Главный корпус', 
-    color: '#F59E0B', 
-    status: 'active' 
-  },
-  { 
-    id: 4, 
-    name: 'Аудитория 201', 
-    campus: 2, 
-    campus_name: 'Корпус А', 
-    color: '#EF4444', 
-    status: 'active' 
-  },
-  { 
-    id: 5, 
-    name: 'Переговорная 301', 
-    campus: 2, 
-    campus_name: 'Корпус А', 
-    color: '#8B5CF6', 
-    status: 'active' 
-  },
-  { 
-    id: 6, 
-    name: 'Зал заседаний', 
-    campus: 3, 
-    campus_name: 'Корпус Б', 
-    color: '#06B6D4', 
+    campus_name: 'Технопарк', 
+    color: '#07F', 
     status: 'active' 
   }
 ];
@@ -85,7 +45,23 @@ export async function GET(req: Request) {
 
     const data = await response.json();
     console.log('Meeting rooms data received:', data);
-    return NextResponse.json(Array.isArray(data) ? data : DEFAULT_MEETING_ROOMS);
+    
+    // Обрабатываем ответ в формате {count, size, next, previous, results}
+    let rooms = [];
+    if (data.results && Array.isArray(data.results)) {
+      rooms = data.results;
+    } else if (Array.isArray(data)) {
+      rooms = data;
+    } else {
+      rooms = DEFAULT_MEETING_ROOMS;
+    }
+    
+    // Фильтруем по корпусу если указан
+    if (campusId) {
+      rooms = rooms.filter(room => room.campus === parseInt(campusId));
+    }
+    
+    return NextResponse.json(rooms);
   } catch (error) {
     console.warn('Error fetching meeting rooms:', error);
     const { searchParams } = new URL(req.url);
@@ -96,4 +72,6 @@ export async function GET(req: Request) {
     return NextResponse.json(filteredRooms);
   }
 }
+
+
 

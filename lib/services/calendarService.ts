@@ -1,4 +1,4 @@
-import { extractMessageFromBackend, mapErrorToFriendlyMessage } from '../utils/errorMessages';
+// Новый чистый calendarService.ts с интеграцией вашего API
 
 // Типы для календаря
 export interface CalendarEvent {
@@ -17,19 +17,29 @@ export interface CalendarEvent {
   created_at?: string;
 }
 
-// Типы для API создания встреч
-export interface MeetingChange {
-  title: string;
-  date: string; // YYYY-MM-DD format
-  time_start: string; // HH:MM format
-  time_end: string; // HH:MM format
-  campus: number;
-  location: number;
-  guests?: number[];
-  description?: string | null;
-  link?: string | null;
+// Типы для вашего API участников
+export interface ExternalParticipant {
+  id: number;
+  full_name: string;
+  work_phone: string | null;
 }
 
+export interface ExternalParticipantsResponse {
+  count: number;
+  size: number;
+  next: string | null;
+  previous: string | null;
+  results: ExternalParticipant[];
+}
+
+// Тип для совместимости с существующим кодом
+export interface PersonnelSimple {
+  id: number;
+  full_name: string;
+  work_phone?: string;
+}
+
+// Типы для пользователей (для совместимости)
 export interface CalendarUser {
   id: string | number;
   name: string;
@@ -37,73 +47,124 @@ export interface CalendarUser {
   department: string;
 }
 
-export interface CalendarMeeting {
-  id: string | number;
-  title: string;
-  start_time: string;
-  end_time: string;
-  location?: string;
-  is_online: boolean;
-  meeting_link?: string;
-  participants: CalendarUser[];
-  description?: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
+// Типы для корпусов
+export interface Campus {
+  id: number;
+  name: string;
 }
 
-// Утилита для построения URL - используем локальные API routes
-const buildUrl = (path: string) => {
-  // Используем локальные API routes вместо прямых запросов к внешнему API
-  if (path.startsWith('auth/calendar/')) {
-    const calendarPath = path.replace('auth/calendar/', '');
-    // Маппинг для правильных endpoints
-    if (calendarPath === 'create/meeting/') {
-      return '/api/calendar/create/meeting';
-    }
-    if (calendarPath === 'all_meetings/') {
-      return '/api/calendar/meetings';
-    }
-    return `/api/calendar/${calendarPath}`;
-  }
-  if (path.startsWith('auth/users/')) {
-    return `/api/calendar/users`;
-  }
-  return `/api/${path}`;
-};
+// Типы для мест встреч
+export interface MeetingRoom {
+  id: number;
+  name: string;
+  campus: number;
+}
 
-// Утилита для получения заголовков с авторизацией
-const getAuthHeaders = (): HeadersInit => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('auth.token') : null;
-  
-  const headers: HeadersInit = {
+// Базовый URL для вашего API
+const EXTERNAL_API_BASE = 'https://8af0cec014ee.ngrok-free.app';
+
+// Утилита для получения заголовков
+const getHeaders = (): HeadersInit => {
+  return {
     'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true', // Для обхода предупреждения ngrok
   };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  return headers;
 };
 
 export const CalendarService = {
-  // Тестировать подключение к API
-  testConnection: async (): Promise<{success: boolean, message: string, status?: number}> => {
+  // Получить участников через наш API route (без CORS проблем)
+  getExternalParticipants: async (page: number = 1, pageSize: number = 100): Promise<ExternalParticipantsResponse> => {
     try {
-      const url = buildUrl('auth/calendar/all_meetings/');
-      console.log('Тестируем подключение к локальному API:', url);
+      const url = `/api/calendar/personnel?page=${page}&size=${pageSize}`;
+      console.log('🔄 Загружаем участников через API route:', url);
       
       const response = await fetch(url, {
         method: 'GET',
-        headers: getAuthHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ExternalParticipantsResponse = await response.json();
+      console.log(`✅ Загружено участников: ${data.results.length} из ${data.count}`);
+      return data;
+    } catch (error) {
+      console.error('❌ Ошибка при загрузке участников:', error);
+      throw error;
+    }
+  },
+
+  // Получить всех участников (с пагинацией и сортировкой)
+  getAllExternalParticipants: async (): Promise<ExternalParticipant[]> => {
+    try {
+      const allParticipants: ExternalParticipant[] = [];
+      let page = 1;
+      let hasMore = true;
+
+      console.log('🚀 Начинаем загрузку всех участников...');
+
+      while (hasMore) {
+        console.log(`📄 Загружаем страницу ${page}...`);
+        const response = await CalendarService.getExternalParticipants(page, 100);
+        allParticipants.push(...response.results);
+        
+        hasMore = response.next !== null;
+        page++;
+        
+        // Защита от бесконечного цикла
+        if (page > 50) {
+          console.warn('⚠️ Достигнут лимит страниц (50), прерываем загрузку');
+          break;
+        }
+      }
+
+      // Сортируем участников по алфавиту
+      const sortedParticipants = allParticipants.sort((a, b) => {
+        return a.full_name.localeCompare(b.full_name, 'ru', { 
+          numeric: true, 
+          sensitivity: 'base' 
+        });
+      });
+
+      console.log(`✅ Всего загружено и отсортировано участников: ${sortedParticipants.length}`);
+      return sortedParticipants;
+    } catch (error) {
+      console.error('❌ Ошибка при загрузке всех участников:', error);
+      throw error;
+    }
+  },
+
+  // Преобразовать внешнего участника в PersonnelSimple для совместимости
+  transformExternalToPersonnel: (external: ExternalParticipant): PersonnelSimple => {
+    return {
+      id: external.id,
+      full_name: external.full_name,
+      work_phone: external.work_phone || undefined,
+    };
+  },
+
+  // Тестировать подключение к вашему API
+  testConnection: async (): Promise<{success: boolean, message: string, status?: number}> => {
+    try {
+      const url = `/api/calendar/personnel?page=1&size=5`;
+      console.log('🧪 Тестируем подключение через API route:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         cache: 'no-store',
       });
 
       const responseText = await response.text();
-      console.log('Ответ локального API:', {
+      console.log('📡 Ответ API route:', {
         status: response.status,
-        contentType: response.headers.get('content-type'),
         text: responseText.substring(0, 200) + (responseText.length > 200 ? '...' : '')
       });
 
@@ -112,328 +173,197 @@ export const CalendarService = {
           const data = JSON.parse(responseText);
           return {
             success: true,
-            message: `✅ Локальный API работает! Загружено встреч: ${Array.isArray(data) ? data.length : 'неизвестно'}`,
+            message: `✅ API работает! Найдено участников: ${data.count || 'неизвестно'}`,
             status: response.status
           };
         } catch (parseError) {
           return {
             success: false,
-            message: `❌ Локальный API вернул невалидный JSON. Ответ: ${responseText.substring(0, 100)}...`,
+            message: `❌ API вернул невалидный JSON. Ответ: ${responseText.substring(0, 100)}...`,
             status: response.status
           };
         }
       } else {
         return {
           success: false,
-          message: `❌ Ошибка локального API: ${response.status} - ${responseText.substring(0, 100)}...`,
+          message: `❌ Ошибка API: ${response.status} - ${responseText.substring(0, 100)}...`,
           status: response.status
         };
       }
     } catch (error) {
-      console.error('Ошибка подключения к локальному API:', error);
+      console.error('❌ Ошибка подключения к API route:', error);
       return {
         success: false,
-        message: `❌ Ошибка подключения к локальному API: ${(error as Error).message}`
+        message: `❌ Ошибка подключения: ${(error as Error).message}`
       };
     }
   },
-  // Получить все встречи
-  getAllMeetings: async (): Promise<CalendarMeeting[]> => {
-    try {
-      const url = buildUrl('auth/calendar/all_meetings/');
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-        cache: 'no-store',
-      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage: string;
-        
-        // Проверяем, является ли ответ HTML (обычно страница ошибки)
-        if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
-          errorMessage = `Сервер вернул HTML вместо JSON. Возможно, API недоступен или URL неправильный. Статус: ${response.status}`;
-        } else {
-          try {
-            const errorData = JSON.parse(errorText);
-            errorMessage = extractMessageFromBackend(errorData, response.status) || mapErrorToFriendlyMessage(errorText, response.status);
-          } catch {
-            errorMessage = mapErrorToFriendlyMessage(errorText, response.status);
-          }
-        }
-        
-        throw new Error(errorMessage || `Ошибка загрузки встреч (${response.status})`);
-      }
-
-      const data = await response.json();
-      console.log('Загружены встречи:', data);
-      
-      // Преобразуем данные API в формат календаря
-      return Array.isArray(data) ? data : [];
-    } catch (error) {
-      console.error('Ошибка при загрузке встреч:', error);
-      throw error;
-    }
+  // Заглушки для совместимости с существующим кодом
+  // Эти методы можно будет реализовать позже или удалить если не нужны
+  
+  getAllMeetings: async (): Promise<any[]> => {
+    console.log('⚠️ getAllMeetings не реализован - возвращаем пустой массив');
+    return [];
   },
 
-  // Создать новую встречу
-  createMeeting: async (meetingData: Omit<CalendarEvent, 'id'> & { campusId?: number, locationId?: number }): Promise<CalendarMeeting> => {
-    try {
-      const url = buildUrl('auth/calendar/create/meeting/');
-      
-      // Преобразуем данные в формат API
-      const startDate = new Date(meetingData.start);
-      const endDate = new Date(meetingData.end);
-      
-      const apiData: MeetingChange = {
-        title: meetingData.title,
-        date: startDate.toISOString().split('T')[0], // YYYY-MM-DD
-        time_start: startDate.toTimeString().slice(0, 5), // HH:MM
-        time_end: endDate.toTimeString().slice(0, 5), // HH:MM
-        campus: meetingData.campusId || 1,
-        location: meetingData.locationId || 1,
-        guests: [], // Пока отправляем пустой массив, так как у нас нет ID пользователей
-        description: meetingData.description || null,
-        link: meetingData.link || null,
-      };
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(apiData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage: string;
-        
-        // Проверяем, является ли ответ HTML (обычно страница ошибки)
-        if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
-          errorMessage = `Сервер вернул HTML вместо JSON. Возможно, API недоступен или URL неправильный. Статус: ${response.status}`;
-        } else {
-          try {
-            const errorData = JSON.parse(errorText);
-            errorMessage = extractMessageFromBackend(errorData, response.status) || mapErrorToFriendlyMessage(errorText, response.status);
-          } catch {
-            errorMessage = mapErrorToFriendlyMessage(errorText, response.status);
-          }
-        }
-        
-        throw new Error(errorMessage || `Ошибка создания встречи (${response.status})`);
-      }
-
-      const data = await response.json();
-      console.log('Создана встреча:', data);
-      return data;
-    } catch (error) {
-      console.error('Ошибка при создании встречи:', error);
-      throw error;
-    }
-  },
-
-  // Обновить встречу
-  updateMeeting: async (id: string | number, meetingData: Partial<CalendarEvent>): Promise<CalendarMeeting> => {
-    try {
-      const url = buildUrl(`auth/calendar/meetings/${id}/`);
-      
-      const apiData: Record<string, unknown> = {};
-      if (meetingData.title) apiData.title = meetingData.title;
-      if (meetingData.start) apiData.start_time = meetingData.start;
-      if (meetingData.end) apiData.end_time = meetingData.end;
-      if (meetingData.place) apiData.location = meetingData.place;
-      if (typeof meetingData.isOnline === 'boolean') apiData.is_online = meetingData.isOnline;
-      if (meetingData.link !== undefined) apiData.meeting_link = meetingData.link;
-      if (meetingData.participants) apiData.participants = meetingData.participants;
-      if (meetingData.description !== undefined) apiData.description = meetingData.description;
-
-      const response = await fetch(url, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(apiData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage: string;
-        
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = extractMessageFromBackend(errorData, response.status) || mapErrorToFriendlyMessage(errorText, response.status);
-        } catch {
-          errorMessage = mapErrorToFriendlyMessage(errorText, response.status);
-        }
-        
-        throw new Error(errorMessage || `Ошибка обновления встречи (${response.status})`);
-      }
-
-      const data = await response.json();
-      console.log('Обновлена встреча:', data);
-      return data;
-    } catch (error) {
-      console.error('Ошибка при обновлении встречи:', error);
-      throw error;
-    }
-  },
-
-  // Удалить встречу
-  deleteMeeting: async (id: string | number): Promise<void> => {
-    try {
-      const url = buildUrl(`auth/calendar/meetings/${id}/`);
-      
-      const response = await fetch(url, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage: string;
-        
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = extractMessageFromBackend(errorData, response.status) || mapErrorToFriendlyMessage(errorText, response.status);
-        } catch {
-          errorMessage = mapErrorToFriendlyMessage(errorText, response.status);
-        }
-        
-        throw new Error(errorMessage || `Ошибка удаления встречи (${response.status})`);
-      }
-
-      console.log('Встреча удалена:', id);
-    } catch (error) {
-      console.error('Ошибка при удалении встречи:', error);
-      throw error;
-    }
-  },
-
-  // Получить пользователей (если есть отдельный API)
   getUsers: async (): Promise<CalendarUser[]> => {
+    console.log('⚠️ getUsers не реализован - возвращаем пустой массив');
+    return [];
+  },
+
+  getPersonnel: async (): Promise<PersonnelSimple[]> => {
+    console.log('⚠️ getPersonnel не реализован - используйте getAllExternalParticipants');
+    return [];
+  },
+
+  getCampuses: async (): Promise<Campus[]> => {
     try {
-      // Если есть отдельный API для пользователей
-      const url = buildUrl('auth/users/');
-      const response = await fetch(url, {
+      console.log('🏢 Загружаем корпуса...');
+      const response = await fetch('/api/calendar/campuses', {
         method: 'GET',
-        headers: getAuthHeaders(),
-        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) {
-        console.warn('API пользователей недоступен, возвращаем пустой массив');
-        return [];
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return Array.isArray(data) ? data : [];
+      const campuses = await response.json();
+      console.log('✅ Загружено корпусов:', campuses.length);
+      console.log('📋 Корпуса:', campuses);
+      return campuses;
     } catch (error) {
-      console.warn('Ошибка при загрузке пользователей:', error);
+      console.error('❌ Ошибка при загрузке корпусов:', error);
       return [];
     }
   },
 
-  // Получить список корпусов
-  getCampuses: async (): Promise<Array<{id: number, name: string}>> => {
-    try {
-      const url = buildUrl('auth/calendar/campuses/');
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-        cache: 'no-store',
-      });
-
-      if (!response.ok) {
-        console.warn('API корпусов недоступен, возвращаем дефолтные');
-        return [
-          { id: 1, name: 'Главный корпус' },
-          { id: 2, name: 'Корпус А' },
-          { id: 3, name: 'Корпус Б' }
-        ];
-      }
-
-      const data = await response.json();
-      return Array.isArray(data) ? data : [];
-    } catch (error) {
-      console.warn('Ошибка при загрузке корпусов:', error);
-      return [
-        { id: 1, name: 'Главный корпус' },
-        { id: 2, name: 'Корпус А' },
-        { id: 3, name: 'Корпус Б' }
-      ];
-    }
+  getMeetingRooms: async (): Promise<MeetingRoom[]> => {
+    console.log('⚠️ getMeetingRooms не реализован - возвращаем пустой массив');
+    return [];
   },
 
-  // Получить список мест
   getLocations: async (campusId?: number): Promise<Array<{id: number, name: string, campus_id: number}>> => {
     try {
-      const url = campusId 
-        ? buildUrl(`auth/calendar/locations/?campus=${campusId}`)
-        : buildUrl('auth/calendar/locations/');
+      console.log(' Загружаем места встреч...', campusId ? `для корпуса ${campusId}` : 'все места');
       
+      const url = campusId 
+        ? `/api/calendar/meeting-rooms?campus=${campusId}`
+        : '/api/calendar/meeting-rooms';
+        
+      console.log(' URL для загрузки мест:', url);
+        
       const response = await fetch(url, {
         method: 'GET',
-        headers: getAuthHeaders(),
-        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
+      console.log('📡 Статус ответа API мест:', response.status);
+
       if (!response.ok) {
-        console.warn('API мест недоступен, возвращаем дефолтные');
-        return [
-          { id: 1, name: 'Атриум', campus_id: 1 },
-          { id: 2, name: 'Конференц-зал', campus_id: 1 },
-          { id: 3, name: 'Аудитория 101', campus_id: 1 },
-          { id: 4, name: 'Аудитория 201', campus_id: 2 }
-        ];
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return Array.isArray(data) ? data : [];
+      const meetingRooms = await response.json();
+      console.log('📋 Получены места встреч из API:', meetingRooms);
+      
+      // Преобразуем формат данных из API в формат, ожидаемый компонентом
+      const locations = meetingRooms.map(room => ({
+        id: room.id,
+        name: room.name,
+        campus_id: room.campus
+      }));
+      
+      console.log('✅ Загружено мест встреч:', locations.length);
+      console.log('📋 Преобразованные места:', locations);
+      return locations;
     } catch (error) {
-      console.warn('Ошибка при загрузке мест:', error);
-      return [
-        { id: 1, name: 'Атриум', campus_id: 1 },
-        { id: 2, name: 'Конференц-зал', campus_id: 1 },
-        { id: 3, name: 'Аудитория 101', campus_id: 1 },
-        { id: 4, name: 'Аудитория 201', campus_id: 2 }
-      ];
+      console.error('❌ Ошибка при загрузке мест встреч:', error);
+      return [];
     }
   },
 
-  // Преобразовать встречу API в событие календаря
-  transformMeetingToEvent: (meeting: CalendarMeeting): CalendarEvent => {
-    return {
-      id: meeting.id,
-      title: meeting.title,
-      start: meeting.start_time,
-      end: meeting.end_time,
-      color: 'blue', // Можно добавить логику для цветов
-      place: meeting.location || '',
-      isOnline: meeting.is_online,
-      link: meeting.meeting_link,
-      participants: meeting.participants.map(p => p.email),
-      description: meeting.description,
-      created_by: meeting.created_by,
-      created_at: meeting.created_at,
-      updated_at: meeting.updated_at,
-    };
+  createMeeting: async (meetingData: any): Promise<any> => {
+    try {
+      console.log('📅 Создаем встречу...');
+      console.log('📋 Данные встречи:', meetingData);
+      
+      const response = await fetch('/api/calendar/create/meeting', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(meetingData),
+      });
+
+      console.log('📡 Статус ответа API создания встречи:', response.status);
+      console.log('📡 Headers ответа:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        // Сначала получаем текст ответа
+        const responseText = await response.text();
+        console.log('📡 Текст ошибки:', responseText);
+        
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        
+        // Пытаемся распарсить JSON только если есть содержимое
+        if (responseText.trim()) {
+          try {
+            const errorData = JSON.parse(responseText);
+            errorMessage += `, message: ${errorData.details || errorData.error || responseText}`;
+          } catch (parseError) {
+            errorMessage += `, message: ${responseText}`;
+          }
+        }
+        
+        console.error('❌ Полная ошибка:', errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      // Проверяем, есть ли содержимое в успешном ответе
+      const responseText = await response.text();
+      console.log('📡 Текст успешного ответа:', responseText);
+      
+      if (!responseText.trim()) {
+        console.log('⚠️ Пустой ответ от API');
+        throw new Error('Пустой ответ от сервера');
+      }
+      
+      try {
+        const result = JSON.parse(responseText);
+        console.log('✅ Встреча создана успешно:', result);
+        return result;
+      } catch (parseError) {
+        console.error('❌ Ошибка парсинга JSON:', parseError);
+        console.log('📡 Полный ответ:', responseText);
+        throw new Error(`Ошибка парсинга ответа: ${parseError.message}`);
+      }
+      
+    } catch (error) {
+      console.error('❌ Ошибка при создании встречи:', error);
+      throw error;
+    }
   },
 
-  // Преобразовать событие календаря в встречу API
-  transformEventToMeeting: (event: CalendarEvent): Omit<CalendarMeeting, 'id' | 'created_at' | 'updated_at'> => {
+  transformMeetingToEvent: (meeting: any): CalendarEvent => {
+    console.log('⚠️ transformMeetingToEvent не реализован');
     return {
-      title: event.title,
-      start_time: event.start,
-      end_time: event.end,
-      location: event.place,
-      is_online: event.isOnline,
-      meeting_link: event.link,
-      participants: event.participants.map(email => ({
-        id: email, // Временное решение, нужно получать ID пользователя
-        name: email,
-        email: email,
-        department: '',
-      })),
-      description: event.description || '',
-      created_by: event.created_by || 'current_user',
+      id: meeting.id || Date.now(),
+      title: meeting.title || 'Без названия',
+      start: meeting.start_time || new Date().toISOString(),
+      end: meeting.end_time || new Date().toISOString(),
+      color: 'blue',
+      place: meeting.location || 'Не указано',
+      isOnline: meeting.is_online || false,
+      link: meeting.meeting_link || '',
+      participants: meeting.participants || [],
+      description: meeting.description || '',
+      created_by: meeting.created_by || 'unknown',
     };
   },
 };

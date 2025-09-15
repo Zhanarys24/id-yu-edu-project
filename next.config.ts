@@ -20,19 +20,19 @@ const nextConfig: NextConfig = {
       // ngrok-домены
       {
         protocol: 'https',
-        hostname: '3e81d9dc4bcc.ngrok-free.app',
+        hostname: '8af0cec014ee.ngrok-free.app',
         port: '',
         pathname: '/uploads/**',
       },
       {
         protocol: 'https',
-        hostname: '3e81d9dc4bcc.ngrok-free.app',
+        hostname: '8af0cec014ee.ngrok-free.app',
         port: '',
         pathname: '/uploads/**',
       },
       {
         protocol: 'https',
-        hostname: '3e81d9dc4bcc.ngrok-free.app',
+        hostname: '8af0cec014ee.ngrok-free.app',
         port: '',
         pathname: '/uploads/**',
       },
