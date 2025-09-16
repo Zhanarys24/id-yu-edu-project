@@ -27,6 +27,14 @@ export default function CalendarPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
+  
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5000); // Показываем 5 секунд
+  };
+
   // Состояния для данных
   const [events, setEvents] = useState<Event[]>([])
   const [users, setUsers] = useState<User[]>([])
@@ -238,7 +246,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     // Валидация формы
     const validationError = validateForm()
     if (validationError) {
-      alert(validationError)
+      showToast(validationError, 'error')
       return
     }
 
@@ -248,7 +256,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     // Проверка доступности времени и места
     const locationName = locations.find(l => l.id === eventLocation)?.name || 'Неизвестное место';
     if (!isTimeSlotAvailable(fullStart, fullEnd, locationName)) {
-      alert('Выбранное время уже занято в этом месте')
+      showToast('Выбранное время уже занято в этом месте', 'error')
       return
     }
 
@@ -291,23 +299,25 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
       
       resetForm()
       setModalOpen(false)
-      alert('Встреча успешно создана!')
+      showToast('Встреча успешно создана!', 'success')
       
     } catch (error) {
       console.error('Ошибка при создании встречи:', error)
       const errorMessage = (error as Error).message
       
       // Более детальная обработка ошибок
-      if (errorMessage.includes('400')) {
-        alert('Ошибка валидации данных. Проверьте правильность заполнения полей.')
+      if (errorMessage.includes('уже занято')) {
+        showToast('Выбранное время и место уже занято. Пожалуйста, выберите другое время или место.', 'error')
+      } else if (errorMessage.includes('400')) {
+        showToast('Ошибка валидации данных. Проверьте правильность заполнения полей.', 'error')
       } else if (errorMessage.includes('401')) {
-        alert('Ошибка авторизации. Войдите в систему заново.')
+        showToast('Ошибка авторизации. Войдите в систему заново.', 'error')
       } else if (errorMessage.includes('403')) {
-        alert('Недостаточно прав для создания встречи.')
+        showToast('Недостаточно прав для создания встречи.', 'error')
       } else if (errorMessage.includes('500')) {
-        alert('Ошибка сервера. Попробуйте позже.')
+        showToast('Ошибка сервера. Попробуйте позже.', 'error')
       } else {
-        alert('Ошибка при создании встречи: ' + errorMessage)
+        showToast('Ошибка при создании встречи: ' + errorMessage, 'error')
       }
     } finally {
       setLoading(false)
@@ -1061,6 +1071,43 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
             </div>
           </div>
         )}
+
+        {/* Enhanced Toast */}
+        {toast && (
+          <div
+            className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-white font-semibold min-w-[300px] animate-[slideIn_0.3s_ease-out] ${
+              toast.type === 'error'
+                ? 'bg-gradient-to-r from-red-500 to-pink-600'
+                : 'bg-gradient-to-r from-green-500 to-emerald-600'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-white/20`}>
+                {toast.type === 'error' ? (
+                  <span className="text-xl">⚠️</span>
+                ) : (
+                  <span className="text-xl">✅</span>
+                )}
+              </div>
+              <span>{toast.message}</span>
+              <button
+                onClick={() => setToast(null)}
+                className="ml-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                aria-label="Close notification"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Toast animation keyframes */}
+        <style jsx global>{`
+          @keyframes slideIn {
+            from { transform: translateY(16px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+          }
+        `}</style>
       </div>
     </Layout>
   )

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = 'https://8af0cec014ee.ngrok-free.app';
+const API_BASE_URL = 'https://6673d47c36db.ngrok-free.app';
 
 const DEFAULT_MEETING_ROOMS = [
   { 

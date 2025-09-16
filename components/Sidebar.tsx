@@ -74,8 +74,8 @@ export default function Sidebar({ active }: { active?: string }) {
         { icon: <BookOpen size={20} />, label: 'Наука', href: '/main/science' },
         { icon: <Users size={20} />, label: 'Воспитание', href: '/main/upbringing' },
         { icon: <FileText size={20} />, label: 'Электронные услуги', href: '/main/E-services' },
-        { icon: <Bot size={20} />, label: 'YessenovAI', href: '/main/yessenovbot' },
-        { icon: <Coins size={20} />, label: 'YU-Геймификация', href: '/YU-Gamification' },
+        { icon: <Bot size={20} />, label: 'YessenovAI', href: '/main/coming-soon/YessenovAI' },
+        { icon: <Coins size={20} />, label: 'YU-Геймификация', href: '/main/coming-soon/YU-Gamification' },
       ]
 
   const portfolioItems = [

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'https://435ee3adc448.ngrok-free.app';
+const API_BASE_URL = process.env.API_BASE_URL || 'https://6673d47c36db.ngrok-free.app';
 
 const DEFAULT_LOCATIONS = [
   { id: 1, name: 'Атриум', campus_id: 1 },

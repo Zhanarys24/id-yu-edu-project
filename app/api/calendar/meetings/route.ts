@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'https://435ee3adc448.ngrok-free.app';
+const API_BASE_URL = process.env.API_BASE_URL || 'https://6673d47c36db.ngrok-free.app';
 
 export async function GET() {
   try {
@@ -30,40 +30,6 @@ export async function GET() {
     console.error('Error fetching meetings:', error);
     return NextResponse.json(
       { error: 'Failed to fetch meetings', details: (error as Error).message },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    console.log('Creating meeting with data:', body);
-    
-    const response = await fetch(`${API_BASE_URL}/auth/calendar/create/meeting/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      },
-      body: JSON.stringify(body),
-    });
-
-    console.log('Create meeting API response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Create meeting API error:', errorText);
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('Meeting created successfully:', data);
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Error creating meeting:', error);
-    return NextResponse.json(
-      { error: 'Failed to create meeting', details: (error as Error).message },
       { status: 500 }
     );
   }

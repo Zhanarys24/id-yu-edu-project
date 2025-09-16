@@ -61,7 +61,7 @@ export interface MeetingRoom {
 }
 
 // Базовый URL для вашего API
-const EXTERNAL_API_BASE = 'https://8af0cec014ee.ngrok-free.app';
+const EXTERNAL_API_BASE = 'https://6673d47c36db.ngrok-free.app';
 
 // Утилита для получения заголовков
 const getHeaders = (): HeadersInit => {
@@ -255,7 +255,7 @@ export const CalendarService = {
         : '/api/calendar/meeting-rooms';
         
       console.log(' URL для загрузки мест:', url);
-        
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -292,6 +292,14 @@ export const CalendarService = {
     try {
       console.log('📅 Создаем встречу...');
       console.log('📋 Данные встречи:', meetingData);
+      
+      // Валидация данных перед отправкой
+      const requiredFields = ['title', 'date', 'time_start', 'time_end', 'campus', 'location'];
+      const missingFields = requiredFields.filter(field => !meetingData[field]);
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Отсутствуют обязательные поля: ${missingFields.join(', ')}`);
+      }
       
       const response = await fetch('/api/calendar/create/meeting', {
         method: 'POST',
@@ -337,6 +345,17 @@ export const CalendarService = {
       try {
         const result = JSON.parse(responseText);
         console.log('✅ Встреча создана успешно:', result);
+        console.log('🔍 Структура ответа API:', {
+          id: result.id,
+          title: result.title,
+          date: result.date,
+          time_start: result.time_start,
+          time_end: result.time_end,
+          start_time: result.start_time,
+          end_time: result.end_time,
+          location: result.location,
+          location_name: result.location_name
+        });
         return result;
       } catch (parseError) {
         console.error('❌ Ошибка парсинга JSON:', parseError);
@@ -351,19 +370,43 @@ export const CalendarService = {
   },
 
   transformMeetingToEvent: (meeting: any): CalendarEvent => {
-    console.log('⚠️ transformMeetingToEvent не реализован');
+    console.log('⚠️ Преобразуем встречу в событие календаря:', meeting);
+    
+    // Формируем правильные даты из отдельных полей
+    let startDateTime: string;
+    let endDateTime: string;
+    
+    if (meeting.start_time && meeting.end_time) {
+      // Если API вернул готовые datetime поля
+      startDateTime = meeting.start_time;
+      endDateTime = meeting.end_time;
+    } else if (meeting.date && meeting.time_start && meeting.time_end) {
+      // Если API вернул отдельные поля date, time_start, time_end
+      startDateTime = `${meeting.date}T${meeting.time_start}`;
+      endDateTime = `${meeting.date}T${meeting.time_end}`;
+    } else {
+      // Fallback на текущую дату
+      console.warn('⚠️ Не удалось определить дату встречи, используем текущую дату');
+      startDateTime = new Date().toISOString();
+      endDateTime = new Date().toISOString();
+    }
+    
+    console.log('⚠️ Сформированные даты:', { startDateTime, endDateTime });
+    
     return {
       id: meeting.id || Date.now(),
       title: meeting.title || 'Без названия',
-      start: meeting.start_time || new Date().toISOString(),
-      end: meeting.end_time || new Date().toISOString(),
-      color: 'blue',
-      place: meeting.location || 'Не указано',
+      start: startDateTime,
+      end: endDateTime,
+      color: meeting.color || 'blue',
+      place: meeting.location_name || meeting.location || 'Не указано',
       isOnline: meeting.is_online || false,
-      link: meeting.meeting_link || '',
-      participants: meeting.participants || [],
+      link: meeting.meeting_link || meeting.link || '',
+      participants: meeting.participants || meeting.guests || [],
       description: meeting.description || '',
       created_by: meeting.created_by || 'unknown',
+      updated_at: meeting.updated_at,
+      created_at: meeting.created_at,
     };
   },
 };
