@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Обновленный URL для вашего API
-const API_BASE_URL = 'https://31f494e70eb1.ngrok-free.app';
+const API_BASE_URL = 'https://98f262a3eb5e.ngrok-free.app';
 
 // Дефолтные данные на случай если API недоступен
 const DEFAULT_PERSONNEL = [

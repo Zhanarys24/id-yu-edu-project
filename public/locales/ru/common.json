@@ -286,7 +286,9 @@
       "formats": "Поддерживаемые форматы: JPG, PNG, GIF",
       "maxSize": "Максимальный размер файла: 5 МБ",
       "saving": "Сохранение...",
-      "save": "Сохранить изменения"
+      "save": "Сохранить изменения",
+      "downloadInstruction": "Скачать инструкцию",
+      "downloadEmployeeInstruction": "Инструкция для сотрудников"
     },
     "password": {
       "securityTitle": "Безопасность вашего аккаунта",

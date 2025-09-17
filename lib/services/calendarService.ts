@@ -61,7 +61,7 @@ export interface MeetingRoom {
 }
 
 // Базовый URL для вашего API
-const EXTERNAL_API_BASE = 'https://6673d47c36db.ngrok-free.app';
+const EXTERNAL_API_BASE = 'https://98f262a3eb5e.ngrok-free.app';
 
 // Утилита для получения заголовков
 const getHeaders = (): HeadersInit => {
@@ -203,18 +203,92 @@ export const CalendarService = {
   // Эти методы можно будет реализовать позже или удалить если не нужны
   
   getAllMeetings: async (): Promise<any[]> => {
-    console.log('⚠️ getAllMeetings не реализован - возвращаем пустой массив');
-    return [];
+    try {
+      console.log(' Загружаем все встречи из API...');
+      
+      const response = await fetch('/api/calendar/meetings', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        console.error('❌ Ошибка при загрузке встреч:', response.status);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Загружено встреч:', data.count || 0);
+      console.log('📋 Данные встреч:', data);
+      
+      // API возвращает данные в формате {count, results, ...}
+      // Нужно извлечь массив results
+      const meetings = data.results || data;
+      console.log('📋 Извлеченные встречи:', meetings);
+      
+      return Array.isArray(meetings) ? meetings : [];
+    } catch (error) {
+      console.error('❌ Ошибка при загрузке встреч:', error);
+      return [];
+    }
   },
 
   getUsers: async (): Promise<CalendarUser[]> => {
-    console.log('⚠️ getUsers не реализован - возвращаем пустой массив');
-    return [];
+    try {
+      console.log('🔄 Загружаем пользователей из API...');
+      
+      const response = await fetch('/api/calendar/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        console.error('❌ Ошибка при загрузке пользователей:', response.status);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Загружено пользователей:', data.length || 0);
+      console.log('📋 Данные пользователей:', data);
+      
+      return data;
+    } catch (error) {
+      console.error('❌ Ошибка при загрузке пользователей:', error);
+      return [];
+    }
   },
 
   getPersonnel: async (): Promise<PersonnelSimple[]> => {
-    console.log('⚠️ getPersonnel не реализован - используйте getAllExternalParticipants');
-    return [];
+    try {
+      console.log('🔄 Загружаем персонал из API...');
+      
+      const response = await fetch('/api/calendar/personnel', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        console.error('❌ Ошибка при загрузке персонала:', response.status);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Загружено персонала:', data.length || 0);
+      console.log('📋 Данные персонала:', data);
+      
+      return data;
+    } catch (error) {
+      console.error('❌ Ошибка при загрузке персонала:', error);
+      return [];
+    }
   },
 
   getCampuses: async (): Promise<Campus[]> => {
@@ -408,5 +482,102 @@ export const CalendarService = {
       updated_at: meeting.updated_at,
       created_at: meeting.created_at,
     };
+  },
+
+  // Обновить мероприятие по ID
+  updateMeeting: async (id: number, meetingData: any): Promise<any> => {
+    try {
+      console.log('🔄 Обновляем мероприятие по ID:', id);
+      console.log('📋 Данные для обновления:', meetingData);
+      
+      const response = await fetch('/api/calendar/update/meeting', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, ...meetingData }),
+      });
+
+      console.log('📡 Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Ошибка при обновлении мероприятия:', response.status);
+        console.error('❌ Текст ошибки:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Мероприятие обновлено:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Ошибка при обновлении мероприятия:', error);
+      throw error;
+    }
+  },
+
+  // Удалить мероприятие
+  deleteMeeting: async (id: number): Promise<void> => {
+    try {
+      console.log('🔄 Удаляем мероприятие:', id);
+      
+      const response = await fetch(`/api/calendar/delete/meeting?id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('❌ Ошибка при удалении мероприятия:', response.status);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log('✅ Мероприятие удалено');
+    } catch (error) {
+      console.error('❌ Ошибка при удалении мероприятия:', error);
+      throw error;
+    }
+  },
+
+  // Обновить мероприятие по полям
+  updateMeetingByFields: async (searchFields: any, updatedData: any): Promise<any> => {
+    try {
+      console.log(' Обновляем мероприятие по полям...');
+      console.log('🔍 Поисковые поля:', searchFields);
+      console.log(' Данные для обновления:', updatedData);
+      
+      const response = await fetch('/api/calendar/update/meeting-by-fields', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ searchFields, updatedData }),
+      });
+
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Ошибка при обновлении мероприятия по полям:', response.status);
+        console.error('❌ Error text:', errorText);
+        
+        // Пытаемся распарсить JSON ошибку
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(`HTTP ${response.status}: ${errorData.error || errorData.message || errorText}`);
+        } catch (parseError) {
+          throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 200)}`);
+        }
+      }
+
+      const data = await response.json();
+      console.log('✅ Мероприятие обновлено по полям:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Ошибка при обновлении мероприятия по полям:', error);
+      throw error;
+    }
   },
 };

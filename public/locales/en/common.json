@@ -286,7 +286,8 @@
       "formats": "Supported formats: JPG, PNG, GIF",
       "maxSize": "Maximum file size: 5 MB",
       "saving": "Saving...",
-      "save": "Save changes"
+      "save": "Save changes",
+      "downloadInstruction": "Download instruction"
     },
     "password": {
       "securityTitle": "Your account security",

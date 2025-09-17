@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import '@/i18n' 
 import { 
   Edit3, X, User, Lock, Phone, Info,
-  Camera, Save, Mail, UserCheck, Shield, Eye, EyeOff, Calendar
+  Camera, Save, Mail, UserCheck, Shield, Eye, EyeOff, Calendar, FileText
 } from 'lucide-react'
 import { useAvatar } from '@/context/AvatarContext'
 import { useAuth } from '@/context/AuthContext'
@@ -18,6 +18,7 @@ import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
 import { AuthApi } from '@/lib/services/authApi'
 import { validateEmail } from '@/lib/utils'
+import { exportStudentInstructionToWord, exportEmployeeInstructionToWord } from '@/lib/utils/wordExport'
 
 export default function SiteSettingsPage() {
   const { t } = useTranslation('common')
@@ -254,6 +255,46 @@ function AvatarSection() {
     }
   }
 
+  const handleDownloadInstruction = () => {
+    if (!user) {
+      setError('Пользователь не авторизован')
+      return
+    }
+
+    // Получаем логин и пароль пользователя
+    const userLogin = user.email || 'student'
+    const userPassword = 'Временный пароль' // В реальном приложении это должно быть получено из контекста или API
+
+    try {
+      exportStudentInstructionToWord(userLogin, userPassword)
+      setSuccess('Инструкция успешно скачана')
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (error) {
+      console.error('Ошибка при скачивании инструкции:', error)
+      setError('Ошибка при скачивании инструкции')
+    }
+  }
+
+  const handleDownloadEmployeeInstruction = async () => {
+    if (!user) {
+      setError('Пользователь не авторизован')
+      return
+    }
+
+    // Получаем логин и пароль пользователя
+    const userLogin = user.email || 'employee'
+    const userPassword = 'Временный пароль' // В реальном приложении это должно быть получено из контекста или API
+
+    try {
+      await exportEmployeeInstructionToWord(userLogin, userPassword)
+      setSuccess('Инструкция для сотрудников успешно скачана')
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (error) {
+      console.error('Ошибка при скачивании инструкции сотрудников:', error)
+      setError('Ошибка при скачивании инструкции сотрудников')
+    }
+  }
+
   // Name editing is disabled by requirements; only avatar can be changed
 
   return (
@@ -300,11 +341,30 @@ function AvatarSection() {
         </div>
       </div>
 
+      {/* Кнопки инструкций */}
+      <div className="flex justify-center gap-4">
+        <Button 
+          onClick={handleDownloadInstruction}
+          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+        >
+          <FileText size={16} />
+          {t('settings.avatar.downloadInstruction')}
+        </Button>
+        
+        <Button 
+          onClick={handleDownloadEmployeeInstruction}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <FileText size={16} />
+          {t('settings.avatar.downloadEmployeeInstruction')}
+        </Button>
+      </div>
+
       <div className="bg-gray-50 rounded-xl p-4">
-        <h4 className="font-medium text-gray-900 mb-2">Рекомендации для фото:</h4>
+        <h4 className="font-medium text-gray-900 mb-2">{t('settings.avatar.recommendations')}</h4>
         <ul className="text-sm text-gray-600 space-y-1">
-          <li>• Поддерживаемые форматы: JPG, PNG</li>
-          <li>• Максимальный размер файла: 1 МБ</li>
+          <li>• {t('settings.avatar.formats')}</li>
+          <li>• {t('settings.avatar.maxSize')}</li>
           <li>• Максимальное разрешение: 1920x1080 пикселей</li>
         </ul>
       </div>
@@ -324,12 +384,12 @@ function AvatarSection() {
           {isLoading ? (
             <>
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Загрузка...
+              {t('settings.avatar.saving')}
             </>
           ) : (
             <>
               <Save size={16} />
-              Сохранить
+              {t('settings.avatar.save')}
             </>
           )}
         </Button>

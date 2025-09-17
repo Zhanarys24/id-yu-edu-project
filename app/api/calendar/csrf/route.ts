@@ -4,14 +4,11 @@ const API_BASE_URL = process.env.API_BASE_URL || 'https://7584e68761c7.ngrok-fre
 
 export async function GET(req: NextRequest) {
   try {
-    console.log('=== FETCH MEETINGS API CALLED ===');
+    console.log('=== GET CSRF TOKEN API CALLED ===');
     
     // Получаем cookies для авторизации
     const authCookie = req.cookies.get('auth')?.value;
     const backendSessionCookie = req.cookies.get('backend_session')?.value;
-    
-    console.log('🔐 Auth cookie exists:', !!authCookie);
-    console.log('🔐 Backend session cookie exists:', !!backendSessionCookie);
     
     // Подготавливаем заголовки
     const headers: Record<string, string> = {
@@ -19,7 +16,6 @@ export async function GET(req: NextRequest) {
       'ngrok-skip-browser-warning': 'true',
     };
     
-    // Добавляем авторизацию если есть токены
     if (authCookie) {
       headers['Authorization'] = `Bearer ${authCookie}`;
     }
@@ -28,29 +24,34 @@ export async function GET(req: NextRequest) {
       headers['Cookie'] = `backend_session=${backendSessionCookie}`;
     }
     
-    console.log(' Fetching meetings from:', `${API_BASE_URL}/auth/calendar/all_meetings/`);
+    // Попробуем получить CSRF токен
+    const csrfUrl = `${API_BASE_URL}/auth/calendar/csrf/`;
+    console.log('�� Getting CSRF token from:', csrfUrl);
     
-    const response = await fetch(`${API_BASE_URL}/auth/calendar/all_meetings/`, {
+    const response = await fetch(csrfUrl, {
       method: 'GET',
       headers,
-      cache: 'no-store',
     });
 
-    console.log(' Meetings API response status:', response.status);
+    console.log('📡 CSRF response status:', response.status);
 
-    if (!response.ok) {
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ CSRF token received:', data);
+      return NextResponse.json(data);
+    } else {
       const errorText = await response.text();
-      console.error('❌ Meetings API error:', errorText);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error('❌ CSRF API error:', errorText);
+      return NextResponse.json(
+        { error: 'Failed to get CSRF token', details: errorText },
+        { status: response.status }
+      );
     }
-
-    const data = await response.json();
-    console.log('✅ Meetings data received:', data);
-    return NextResponse.json(data);
+    
   } catch (error) {
-    console.error('❌ Error fetching meetings:', error);
+    console.error('❌ Error getting CSRF token:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch meetings', details: (error as Error).message },
+      { error: 'Failed to get CSRF token', details: (error as Error).message },
       { status: 500 }
     );
   }

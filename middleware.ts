@@ -16,6 +16,16 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isPublic = PUBLIC_PATHS.some((re) => re.test(pathname));
   const authCookie = req.cookies.get('auth')?.value;
+  
+  // Debug logging for API calendar routes
+  if (pathname.startsWith('/api/calendar')) {
+    console.log(' === MIDDLEWARE DEBUG ===');
+    console.log(' Path:', pathname);
+    console.log('🔍 Is public:', isPublic);
+    console.log('🔍 Auth cookie exists:', !!authCookie);
+    console.log(' Auth cookie value:', authCookie?.substring(0, 20) + '...');
+    console.log('🔍 All cookies:', req.cookies.getAll().map(c => `${c.name}=${c.value?.substring(0, 20)}...`));
+  }
 
   // If user is authenticated and tries to visit /login, redirect to home
   if (authCookie && /^\/login(?:\/.*)?$/.test(pathname)) {
@@ -24,11 +34,16 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (isPublic) return NextResponse.next();
+  if (isPublic) {
+    console.log('✅ Public path, allowing access to:', pathname);
+    return NextResponse.next();
+  }
 
   if (!authCookie) {
+    console.log('❌ No auth cookie found for:', pathname);
     // For API requests, return 403 instead of redirecting
     if (pathname.startsWith('/api')) {
+      console.log('❌ Blocking API request due to missing auth cookie');
       return new NextResponse('Forbidden', { status: 403 });
     }
 
@@ -40,6 +55,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  console.log('✅ Auth cookie found, allowing access to:', pathname);
   return NextResponse.next();
 }
 
