@@ -25,7 +25,7 @@ type AppNotification = {
 export default function Header() {
   const { t, i18n } = useTranslation('common')
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, logout } = useAuth() // Добавляем logout
   const [isOpen, setIsOpen] = useState(false) // notifications modal
   const [isExpanded, setIsExpanded] = useState(false)
   const [notifications, setNotifications] = useState<AppNotification[]>([])
@@ -260,6 +260,15 @@ export default function Header() {
     ? []
     : [
         { icon: <Settings size={20} />, label: t('account.settings'), href: '/main/site-settings' },
+        { 
+          icon: <LogOut size={20} />, 
+          label: t('account.logout', 'Выйти'), 
+          href: '#', 
+          onClick: async () => {
+            await logout()
+            setIsAppMapOpen(false)
+          }
+        },
       ]
 
   useEffect(() => {
@@ -533,15 +542,26 @@ export default function Header() {
                       {accountItems
                         .filter(i => i.label.toLowerCase().includes(query.toLowerCase()))
                         .map(item => (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setIsAppMapOpen(false)}
-                            className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                          >
-                            <span className="text-gray-600 flex-shrink-0">{item.icon}</span>
-                            <span className="text-sm text-gray-700" suppressHydrationWarning>{item.label}</span>
-                          </Link>
+                          (item as any).onClick ? (
+                            <button
+                              key={item.label}
+                              onClick={(item as any).onClick}
+                              className="flex items-center gap-2 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors w-full text-left"
+                            >
+                              <span className="text-gray-600 flex-shrink-0">{(item as any).icon}</span>
+                              <span className="text-sm text-gray-700" suppressHydrationWarning>{item.label}</span>
+                            </button>
+                          ) : (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => setIsAppMapOpen(false)}
+                              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <span className="text-gray-600 flex-shrink-0">{item.icon}</span>
+                              <span className="text-sm text-gray-700" suppressHydrationWarning>{item.label}</span>
+                            </Link>
+                          )
                         ))}
                     </div>
                   </div>

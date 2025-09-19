@@ -14,6 +14,7 @@ import { Edit3, Plus, Trash2, Save, X, BookOpen, Award, Briefcase, Activity, Fil
 import FileUpload from '@/components/FileUpload'
 import clsx from 'clsx'
 import { exportPortfolioToWord } from '@/lib/utils/wordExport'
+import { publicationsService, PublicationByYear, PublicationStats } from '@/lib/services/publicationsService'
 
 function PortfolioContent() {
   const { t } = useTranslation()
@@ -477,265 +478,279 @@ function GeneralSection() {
 
 function PublicationsSection() {
   const { user } = useAuth()
-  const [publications, setPublications] = useState<Publication[]>([])
-  const [isAdding, setIsAdding] = useState(false)
-  const [formData, setFormData] = useState({
-    title: '',
-    authors: [''],
-    journal: '',
-    year: '',
-    doi: '',
-    url: '',
-    impactFactor: '',
-    citations: ''
-  })
+  const [publicationsByYear, setPublicationsByYear] = useState<PublicationByYear[]>([])
+  const [stats, setStats] = useState<PublicationStats | null>(null)
+  const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (user) {
-      const userPublications = portfolioService.getUserPublications(user.id)
-      setPublications(userPublications)
+      loadPublications()
     }
   }, [user])
 
-  const handleAdd = () => {
+  const loadPublications = () => {
     if (!user) return
-
-    const newPublication = portfolioService.addPublication(user.id, {
-      ...formData,
-      impactFactor: formData.impactFactor ? parseFloat(formData.impactFactor) : undefined,
-      citations: formData.citations ? parseInt(formData.citations) : undefined
-    })
-
-    setPublications(prev => [...prev, newPublication])
-    setFormData({
-      title: '',
-      authors: [''],
-      journal: '',
-      year: '',
-      doi: '',
-      url: '',
-      impactFactor: '',
-      citations: ''
-    })
-    setIsAdding(false)
-  }
-
-  const handleDelete = (id: string) => {
-    if (portfolioService.deletePortfolioItem(id)) {
-      setPublications(prev => prev.filter(pub => pub.id !== id))
+    
+    setLoading(true)
+    
+    try {
+      const publications = publicationsService.getUserPublicationsByYear(user.id)
+      const publicationStats = publicationsService.getPublicationsStats(user.id)
+      
+      setPublicationsByYear(publications)
+      setStats(publicationStats)
+      
+      // Автоматически выбираем год с наибольшим количеством публикаций
+      const yearWithMostPublications = publications.reduce((max, current) => 
+        current.count > max.count ? current : max
+      )
+      setSelectedYear(yearWithMostPublications.year)
+    } catch (error) {
+      console.error('Error loading publications:', error)
+    } finally {
+      setLoading(false)
     }
-  }
-
-  const addAuthor = () => {
-    setFormData(prev => ({
-      ...prev,
-      authors: [...prev.authors, '']
-    }))
-  }
-
-  const removeAuthor = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      authors: prev.authors.filter((_, i) => i !== index)
-    }))
-  }
-
-  const updateAuthor = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      authors: prev.authors.map((author, i) => i === index ? value : author)
-    }))
   }
 
   if (!user) {
     return <div className="text-center text-gray-500">Пользователь не авторизован</div>
   }
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Загрузка публикаций...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
+      {/* Заголовок и статистика */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Публикации и научная деятельность</h2>
-        {!isAdding && (
-          <Button onClick={() => setIsAdding(true)} className="flex items-center gap-2">
-            <Plus size={16} />
-            Добавить публикацию
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Публикации и научная деятельность</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Научные публикации за последние 10 лет
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={loadPublications}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <BookOpen size={16} />
+            Обновить
           </Button>
-        )}
+        </div>
       </div>
 
-      {isAdding && (
-        <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Название публикации</label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Введите название"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Журнал</label>
-              <Input
-                value={formData.journal}
-                onChange={(e) => setFormData(prev => ({ ...prev, journal: e.target.value }))}
-                placeholder="Название журнала"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Год</label>
-              <Input
-                value={formData.year}
-                onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
-                placeholder="2024"
-                type="number"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">DOI</label>
-              <Input
-                value={formData.doi}
-                onChange={(e) => setFormData(prev => ({ ...prev, doi: e.target.value }))}
-                placeholder="10.1000/..."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">URL</label>
-              <Input
-                value={formData.url}
-                onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                placeholder="https://..."
-                type="url"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Импакт-фактор</label>
-              <Input
-                value={formData.impactFactor}
-                onChange={(e) => setFormData(prev => ({ ...prev, impactFactor: e.target.value }))}
-                placeholder="3.5"
-                type="number"
-                step="0.1"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Цитирования</label>
-              <Input
-                value={formData.citations}
-                onChange={(e) => setFormData(prev => ({ ...prev, citations: e.target.value }))}
-                placeholder="42"
-                type="number"
-              />
-            </div>
+      {/* Общая статистика */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl text-center border border-blue-200">
+            <div className="text-3xl font-bold text-blue-600">{stats.total}</div>
+            <div className="text-sm text-blue-800 font-medium">Всего публикаций</div>
           </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">Авторы</label>
-              <Button type="button" onClick={addAuthor} variant="outline" className="px-3 py-1 text-sm">
-                <Plus size={16} />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {formData.authors.map((author, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={author}
-                    onChange={(e) => updateAuthor(index, e.target.value)}
-                    placeholder="ФИО автора"
-                  />
-                  {formData.authors.length > 1 && (
-                    <Button
-                      type="button"
-                      onClick={() => removeAuthor(index)}
-                      variant="outline"
-                      className="px-3 py-1 text-sm text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
+          <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl text-center border border-green-200">
+            <div className="text-3xl font-bold text-green-600">{stats.journals}</div>
+            <div className="text-sm text-green-800 font-medium">Журналов</div>
           </div>
-
-          <div className="flex gap-2">
-            <Button onClick={handleAdd} className="flex items-center gap-2">
-              <Save size={16} />
-              Добавить
-            </Button>
-            <Button variant="outline" onClick={() => setIsAdding(false)} className="flex items-center gap-2">
-              <X size={16} />
-              Отмена
-            </Button>
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl text-center border border-purple-200">
+            <div className="text-3xl font-bold text-purple-600">{stats.withDOI}</div>
+            <div className="text-sm text-purple-800 font-medium">С DOI</div>
+          </div>
+          <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-xl text-center border border-orange-200">
+            <div className="text-3xl font-bold text-orange-600">{stats.recentYear}</div>
+            <div className="text-sm text-orange-800 font-medium">В этом году</div>
           </div>
         </div>
       )}
 
-      <div className="space-y-4">
-        {publications.map((pub) => (
-          <div key={pub.id} className="bg-white border border-gray-200 rounded-lg p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900 mb-2">{pub.title}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium">Авторы:</span> {pub.authors.join(', ')}
-                  </div>
-                  {pub.journal && (
-                    <div>
-                      <span className="font-medium">Журнал:</span> {pub.journal}
-                    </div>
-                  )}
-                  <div>
-                    <span className="font-medium">Год:</span> {pub.year}
-                  </div>
-                  {pub.doi && (
-                    <div>
-                      <span className="font-medium">DOI:</span> {pub.doi}
-                    </div>
-                  )}
-                  {pub.impactFactor && (
-                    <div>
-                      <span className="font-medium">Импакт-фактор:</span> {pub.impactFactor}
-                    </div>
-                  )}
-                  {pub.citations && (
-                    <div>
-                      <span className="font-medium">Цитирования:</span> {pub.citations}
-                    </div>
-                  )}
-                </div>
-                {pub.url && (
-                  <a 
-                    href={pub.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 text-sm mt-2 inline-block"
-                  >
-                    Открыть публикацию →
-                  </a>
-                )}
+      {/* Навигация по годам */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Публикации по годам</h3>
+        <div className="grid grid-cols-5 lg:grid-cols-10 gap-2">
+          {publicationsByYear.map((yearData) => (
+            <button
+              key={yearData.year}
+              onClick={() => setSelectedYear(yearData.year)}
+              className={clsx(
+                'relative p-3 rounded-lg text-center transition-all duration-200 hover:scale-105',
+                selectedYear === yearData.year
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : yearData.count > 0
+                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-50 text-gray-400'
+              )}
+            >
+              <div className="text-sm font-medium">{yearData.year}</div>
+              <div className={clsx(
+                'text-lg font-bold mt-1',
+                selectedYear === yearData.year ? 'text-white' : 'text-gray-600'
+              )}>
+                {yearData.count}
               </div>
-              <Button
-                onClick={() => handleDelete(pub.id)}
-                variant="outline"
-                className="text-red-600 hover:text-red-700 ml-4"
-              >
-                <Trash2 size={16} />
-              </Button>
+              {yearData.count > 0 && (
+                <div className={clsx(
+                  'absolute -top-1 -right-1 w-3 h-3 rounded-full',
+                  selectedYear === yearData.year ? 'bg-white' : 'bg-blue-500'
+                )} />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Детали выбранного года */}
+      {selectedYear && (
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-gray-900">
+              Публикации {selectedYear} года
+            </h3>
+            <div className="text-sm text-gray-600">
+              {publicationsByYear.find(y => y.year === selectedYear)?.count || 0} публикаций
             </div>
           </div>
-        ))}
-        
-        {publications.length === 0 && !isAdding && (
-          <div className="text-center text-gray-500 py-8">
-            <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
-            <p>У вас пока нет публикаций</p>
-            <p className="text-sm">Добавьте свою первую публикацию</p>
+
+          {(() => {
+            const yearPublications = publicationsByYear.find(y => y.year === selectedYear)?.publications || [];
+            
+            if (yearPublications.length === 0) {
+              return (
+                <div className="text-center py-12">
+                  <BookOpen size={48} className="mx-auto text-gray-300 mb-4" />
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">Публикаций не найдено</h4>
+                  <p className="text-gray-600">
+                    В {selectedYear} году публикаций не было
+                  </p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-4">
+                {yearPublications.map((pub, index) => (
+                  <div key={pub.id} className="bg-gray-50 border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium">
+                            #{index + 1}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {pub.date}
+                          </div>
+                        </div>
+                        
+                        <h4 className="font-semibold text-gray-900 mb-3 text-lg leading-tight">
+                          {pub.title}
+                        </h4>
+                        
+                        {pub.description && (
+                          <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                            {pub.description}
+                          </p>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
+                          <div>
+                            <span className="font-medium text-gray-800">Авторы:</span> 
+                            <span className="ml-1">{pub.authors.join(', ')}</span>
+                          </div>
+                          
+                          {pub.journal && (
+                            <div>
+                              <span className="font-medium text-gray-800">Журнал:</span> 
+                              <span className="ml-1">{pub.journal}</span>
+                            </div>
+                          )}
+                          
+                          {pub.doi && (
+                            <div>
+                              <span className="font-medium text-gray-800">DOI:</span> 
+                              <span className="ml-1 font-mono text-xs">{pub.doi}</span>
+                            </div>
+                          )}
+                          
+                          {pub.impactFactor && (
+                            <div>
+                              <span className="font-medium text-gray-800">Импакт-фактор:</span> 
+                              <span className="ml-1 font-semibold text-blue-600">{pub.impactFactor}</span>
+                            </div>
+                          )}
+                          
+                          {pub.citations && (
+                            <div>
+                              <span className="font-medium text-gray-800">Цитирования:</span> 
+                              <span className="ml-1 font-semibold text-green-600">{pub.citations}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {pub.url && (
+                          <a 
+                            href={pub.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            <BookOpen size={14} />
+                            Открыть публикацию
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* График активности */}
+      {stats && stats.total > 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">График активности</h3>
+          <div className="grid grid-cols-10 gap-2">
+            {publicationsByYear.map((yearData) => (
+              <div key={yearData.year} className="text-center">
+                <div className="text-xs text-gray-600 mb-2">{yearData.year}</div>
+                <div className="bg-gray-100 rounded-lg h-24 flex items-end justify-center">
+                  <div 
+                    className={clsx(
+                      'w-full rounded-lg transition-all duration-300',
+                      yearData.count > 0 
+                        ? 'bg-gradient-to-t from-blue-500 to-blue-400' 
+                        : 'bg-gray-200'
+                    )}
+                    style={{ 
+                      height: yearData.count > 0 
+                        ? `${Math.max(20, (yearData.count / Math.max(...publicationsByYear.map(y => y.count))) * 80)}px`
+                        : '20px'
+                    }}
+                  >
+                    {yearData.count > 0 && (
+                      <div className="text-white text-xs font-bold flex items-center justify-center h-full">
+                        {yearData.count}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

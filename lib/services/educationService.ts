@@ -8,7 +8,39 @@ class EducationService {
   getAllCards(): EducationCard[] {
     try {
       const cards = localStorage.getItem(this.CARDS_KEY);
-      return cards ? JSON.parse(cards) : this.getInitialCards();
+      if (cards) {
+        const parsedCards = JSON.parse(cards);
+        let needsUpdate = false;
+        
+        // Удаляем карточку Canvas, если она существует
+        let filteredCards = parsedCards.filter((card: EducationCard) => card.id !== 'canvas');
+        if (filteredCards.length !== parsedCards.length) {
+          needsUpdate = true;
+          console.log('Карточка Canvas удалена из localStorage');
+        }
+        
+        // Обновляем ссылку Platonus, если она старая
+        filteredCards = filteredCards.map((card: EducationCard) => {
+          if (card.id === 'platonus' && card.href === 'https://platonus.kz') {
+            needsUpdate = true;
+            console.log('Ссылка Platonus обновлена в localStorage');
+            return {
+              ...card,
+              href: 'https://platonus.yu.edu.kz/',
+              updatedAt: new Date().toISOString()
+            };
+          }
+          return card;
+        });
+        
+        // Если были изменения, обновляем localStorage
+        if (needsUpdate) {
+          this.saveCards(filteredCards);
+        }
+        
+        return filteredCards;
+      }
+      return this.getInitialCards();
     } catch (error) {
       console.error('Ошибка загрузки карточек:', error);
       return this.getInitialCards();
@@ -208,6 +240,22 @@ class EducationService {
     );
   }
 
+  // Метод для принудительного обновления данных из getInitialCards
+  forceUpdateCards(): void {
+    const newCards = this.getInitialCards();
+    this.saveCards(newCards);
+    console.log('Карточки принудительно обновлены');
+  }
+
+  // Метод для сброса всех данных
+  resetData(): void {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(this.CARDS_KEY);
+      localStorage.removeItem(this.CLICKS_KEY);
+      console.log('Все данные сброшены');
+    }
+  }
+
   // Приватные методы
   private saveCards(cards: EducationCard[]): void {
     localStorage.setItem(this.CARDS_KEY, JSON.stringify(cards));
@@ -247,7 +295,7 @@ class EducationService {
         title: 'Platonus',
         description: 'Информационная система Platonus',
         image: '/platonus.png',
-        href: 'https://platonus.kz',
+        href: 'https://platonus.yu.edu.kz/',
         ctaLabel: 'Войти',
         category: 'education',
         isActive: true,

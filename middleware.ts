@@ -14,6 +14,13 @@ const PUBLIC_PATHS: RegExp[] = [
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  
+  // ВРЕМЕННО ОТКЛЮЧЕНО: Пропускаем все запросы без проверки авторизации
+  console.log('🚫 AUTH DISABLED: Allowing access to:', pathname);
+  return NextResponse.next();
+  
+  // Закомментированный код для быстрого восстановления:
+  /*
   const isPublic = PUBLIC_PATHS.some((re) => re.test(pathname));
   const authCookie = req.cookies.get('auth')?.value;
   
@@ -57,6 +64,7 @@ export function middleware(req: NextRequest) {
 
   console.log('✅ Auth cookie found, allowing access to:', pathname);
   return NextResponse.next();
+  */
 }
 
 export const config = {
