@@ -61,7 +61,7 @@ export interface MeetingRoom {
 }
 
 // Базовый URL для вашего API
-const EXTERNAL_API_BASE = 'https://98f262a3eb5e.ngrok-free.app';
+const EXTERNAL_API_BASE = 'https://dba33ae368da.ngrok-free.app';
 
 // Утилита для получения заголовков
 const getHeaders = (): HeadersInit => {
@@ -123,8 +123,17 @@ export const CalendarService = {
         }
       }
 
+      // Дедупликация по ID перед сортировкой
+      const uniqueParticipants = allParticipants.reduce((unique, participant) => {
+        const exists = unique.some(p => p.id === participant.id);
+        if (!exists) {
+          unique.push(participant);
+        }
+        return unique;
+      }, [] as ExternalParticipant[]);
+
       // Сортируем участников по алфавиту
-      const sortedParticipants = allParticipants.sort((a, b) => {
+      const sortedParticipants = uniqueParticipants.sort((a, b) => {
         return a.full_name.localeCompare(b.full_name, 'ru', { 
           numeric: true, 
           sensitivity: 'base' 

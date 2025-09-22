@@ -125,6 +125,19 @@ function AvatarSection() {
     if (src.startsWith('/')) return true
     return false
   }
+
+  const normalizeAvatarUrl = (src: string | null | undefined) => {
+    if (!src) return null
+    
+    // Handle malformed URLs with triple slashes (http:///uploads/...)
+    if (src.startsWith('http:///') || src.startsWith('https:///')) {
+      // Remove the extra slash to make it a valid URL
+      return src.replace(/^https?:\/\//, 'https://')
+    }
+    
+    return src
+  }
+
   const hasRealAvatar = Boolean(isValidAvatar(avatar) && imageOk)
 
   const getInitials = (name: string) => {
@@ -305,7 +318,7 @@ function AvatarSection() {
             {hasRealAvatar ? (
               <>
                 <NextImage
-                  src={avatar}
+                  src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
                   alt="avatar"
                   fill
                   className="rounded-full object-cover border-4 border-white shadow-lg"
@@ -336,7 +349,7 @@ function AvatarSection() {
             <div className="flex items-center justify-center gap-2">
               <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
             </div>
-            <p className="text-gray-600">{userPosition || user?.position || t('profile.teacher')}</p>
+            <p className="text-gray-600">{userPosition || user?.position || 'Преподаватель'}</p>
           </div>
         </div>
       </div>

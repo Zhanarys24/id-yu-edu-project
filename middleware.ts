@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// 🔧 ФЛАГ ДЛЯ ВРЕМЕННОГО ОТКЛЮЧЕНИЯ АУТЕНТИФИКАЦИИ
+// Установите в false, чтобы разрешить доступ всем пользователям
+const AUTH_REQUIRED = true;
+
 // Public paths that do NOT require auth
 const PUBLIC_PATHS: RegExp[] = [
   /^\/login(?:\/.*)?$/,
@@ -14,13 +18,6 @@ const PUBLIC_PATHS: RegExp[] = [
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  
-  // ВРЕМЕННО ОТКЛЮЧЕНО: Пропускаем все запросы без проверки авторизации
-  console.log('🚫 AUTH DISABLED: Allowing access to:', pathname);
-  return NextResponse.next();
-  
-  // Закомментированный код для быстрого восстановления:
-  /*
   const isPublic = PUBLIC_PATHS.some((re) => re.test(pathname));
   const authCookie = req.cookies.get('auth')?.value;
   
@@ -39,6 +36,12 @@ export function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = '/main/news';
     return NextResponse.redirect(url);
+  }
+
+  // 🔒 ВКЛЮЧАЕМ АУТЕНТИФИКАЦИЮ
+  if (!AUTH_REQUIRED) {
+    console.log('🔓 Auth disabled - allowing access to:', pathname);
+    return NextResponse.next();
   }
 
   if (isPublic) {
@@ -64,7 +67,6 @@ export function middleware(req: NextRequest) {
 
   console.log('✅ Auth cookie found, allowing access to:', pathname);
   return NextResponse.next();
-  */
 }
 
 export const config = {

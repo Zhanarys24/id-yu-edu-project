@@ -35,11 +35,24 @@ export async function GET(req: NextRequest) {
 
     const data: Record<string, unknown> = await res.json();
     
+    // Нормализуем аватар (как в login route)
+    const rawAvatar = data.image || data.avatar || data.profile_image || null;
+    let avatar: string | null = null;
+    if (rawAvatar) {
+      if (rawAvatar.startsWith('http')) {
+        avatar = rawAvatar;
+      } else {
+        avatar = process.env.API_BASE_URL 
+          ? process.env.API_BASE_URL + rawAvatar 
+          : rawAvatar;
+      }
+    }
+    
     const filteredResponse = {
       username: data.username || null,
       first_name: data.first_name || null,
       last_name: data.last_name || null,
-      avatar: data.image || data.avatar || null,
+      avatar,
       recovery_email: data.recovery_email || data.reserve_email || null
     };
     

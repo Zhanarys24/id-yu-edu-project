@@ -13,6 +13,40 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+// Список факультетов
+const FACULTIES = [
+  'Педагогика',
+  'Филология и спорт', 
+  'Бизнес и туризм',
+  'Право и международные отношения',
+  'Компьютерные науки и искусственный интеллект',
+  'Инжиниринг',
+  'Морская академия',
+  'Естественные науки',
+  'Казахская филология',
+  'Менеджмент',
+  'Правоведение',
+  'Компьютерные технологии',
+  'Нефтехимический инжиниринг',
+  'Морская техника и технологии',
+  'Фундаментальные науки',
+  'Мировые языки',
+  'Экономика и финансы',
+  'Международные отношения',
+  'SMART технологии',
+  'Экология и геология',
+  'Машиностроение и логистика',
+  'Общая педагогика',
+  'Физическая культура и спорт',
+  'Туризм',
+  'Ассамблея народа Казахстана',
+  'Yessenov 01 AI School',
+  'Строительный инжиниринг',
+  'История и традиционное искусство',
+  'Английская филология',
+  'Энергетика'
+];
+
 // Типы для системы учета посещаемости студентов
 type StudentAttendanceRecord = {
   id: string;
@@ -40,6 +74,7 @@ type Student = {
   enrollmentDate: string;
   isActive: boolean;
   major: string;
+  faculty: string;
   gpa?: number;
 };
 
@@ -53,6 +88,7 @@ export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterCourse, setFilterCourse] = useState<string>('all');
+  const [filterFaculty, setFilterFaculty] = useState<string>('all');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showStudentDetails, setShowStudentDetails] = useState(false);
 
@@ -77,6 +113,7 @@ export default function StudentsPage() {
         enrollmentDate: '2021-09-01',
         isActive: true,
         major: 'Информационные технологии',
+        faculty: 'Компьютерные науки и искусственный интеллект',
         gpa: 3.8
       },
       {
@@ -89,6 +126,7 @@ export default function StudentsPage() {
         enrollmentDate: '2021-09-01',
         isActive: true,
         major: 'Информационные технологии',
+        faculty: 'Компьютерные технологии',
         gpa: 3.9
       },
       {
@@ -101,6 +139,7 @@ export default function StudentsPage() {
         enrollmentDate: '2022-09-01',
         isActive: true,
         major: 'Бизнес-администрирование',
+        faculty: 'Бизнес и туризм',
         gpa: 3.6
       },
       {
@@ -113,6 +152,7 @@ export default function StudentsPage() {
         enrollmentDate: '2023-09-01',
         isActive: true,
         major: 'Инженерия',
+        faculty: 'Инжиниринг',
         gpa: 3.7
       },
       {
@@ -125,7 +165,47 @@ export default function StudentsPage() {
         enrollmentDate: '2020-09-01',
         isActive: true,
         major: 'Информационные технологии',
+        faculty: 'SMART технологии',
         gpa: 3.5
+      },
+      {
+        id: '6',
+        name: 'Ерлан Мухтаров',
+        group: 'MAR-22-1',
+        course: 2,
+        email: 'erlan@student.yu.edu.kz',
+        phone: '+7 777 666 6666',
+        enrollmentDate: '2022-09-01',
+        isActive: true,
+        major: 'Морские технологии',
+        faculty: 'Морская академия',
+        gpa: 3.4
+      },
+      {
+        id: '7',
+        name: 'Динара Аскарова',
+        group: 'PED-23-1',
+        course: 1,
+        email: 'dinara@student.yu.edu.kz',
+        phone: '+7 777 777 7777',
+        enrollmentDate: '2023-09-01',
+        isActive: true,
+        major: 'Педагогические науки',
+        faculty: 'Педагогика',
+        gpa: 3.8
+      },
+      {
+        id: '8',
+        name: 'Арман Садыков',
+        group: 'LAW-21-1',
+        course: 3,
+        email: 'arman@student.yu.edu.kz',
+        phone: '+7 777 888 8888',
+        enrollmentDate: '2021-09-01',
+        isActive: true,
+        major: 'Юриспруденция',
+        faculty: 'Право и международные отношения',
+        gpa: 3.6
       }
     ];
     setStudents(mockStudents);
@@ -249,33 +329,87 @@ export default function StudentsPage() {
   };
 
   const filteredRecords = attendanceRecords.filter(record => {
+    const student = students.find(s => s.id === record.studentId);
     const matchesSearch = record.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          record.studentGroup.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (record.subject && record.subject.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = filterStatus === 'all' || record.status === filterStatus;
     const matchesCourse = filterCourse === 'all' || record.studentCourse.toString() === filterCourse;
-    return matchesSearch && matchesStatus && matchesCourse;
+    const matchesFaculty = filterFaculty === 'all' || (student && student.faculty === filterFaculty);
+    return matchesSearch && matchesStatus && matchesCourse && matchesFaculty;
   });
 
   const exportToExcel = () => {
-    // Экспорт всех данных студентов
-    const headers = ['Время', 'Имя', 'Группа', 'Курс', 'Предмет', 'Время прихода', 'Время ухода', 'Статус', 'Часов присутствия'];
+    // Экспорт всех данных студентов с более подробной информацией
+    const headers = [
+      'Дата', 
+      'Имя студента', 
+      'Группа', 
+      'Курс', 
+      'Факультет', 
+      'Предмет', 
+      'Время прихода', 
+      'Время ухода', 
+      'Статус', 
+      'Часов присутствия',
+      'Минут опоздания'
+    ];
+    
     const csvData = [
-      headers.join(','),
-      ...attendanceRecords.map(record => [
-        record.date,
-        record.studentName,
-        record.studentGroup,
-        record.studentCourse.toString(),
-        record.subject || '-',
-        record.checkIn,
-        record.checkOut || '-',
-        record.status,
-        record.attendanceHours?.toString() || '-'
-      ].join(','))
+      createCSVRow(headers),
+      ...filteredRecords.map(record => {
+        const student = students.find(s => s.id === record.studentId);
+        return createCSVRow([
+          record.date,
+          record.studentName,
+          record.studentGroup,
+          record.studentCourse.toString(),
+          student?.faculty || 'Не указан',
+          record.subject || '-',
+          record.checkIn || '-',
+          record.checkOut || '-',
+          getStatusText(record.status),
+          record.attendanceHours?.toString() || '-',
+          record.lateMinutes?.toString() || '-'
+        ]);
+      })
     ].join('\n');
     
     downloadCSV(csvData, `students_attendance_${selectedDate}.csv`);
+  };
+
+  const exportAllStudentsData = () => {
+    // Экспорт всех студентов с их полной информацией
+    const headers = [
+      'Имя студента',
+      'Группа', 
+      'Курс',
+      'Факультет',
+      'Специальность',
+      'Email',
+      'Телефон',
+      'Дата поступления',
+      'Средний балл',
+      'Статус активности'
+    ];
+    
+    const csvData = [
+      createCSVRow(headers),
+      ...students.map(student => createCSVRow([
+        student.name,
+        student.group,
+        student.course.toString(),
+        student.faculty,
+        student.major,
+        student.email,
+        student.phone,
+        student.enrollmentDate,
+        student.gpa?.toString() || 'Не указан',
+        student.isActive ? 'Активен' : 'Неактивен'
+      ]))
+    ].join('\n');
+    
+    downloadCSV(csvData, `all_students_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const exportStudentData = (studentId: string) => {
@@ -307,11 +441,25 @@ export default function StudentsPage() {
       attendanceRate: (studentRecords.filter(r => r.status === 'present' || r.status === 'late').length / studentRecords.length) * 100 || 0
     };
     
-    const headers = ['Имя', 'Группа', 'Курс', 'Специальность', 'Email', 'Телефон', 'Дата поступления', 'Общее количество дней посещения', 'Количество опозданий', 'Средняя посещаемость (часы)', 'Процент посещаемости'];
+    const headers = [
+      'Имя студента', 
+      'Группа', 
+      'Курс', 
+      'Факультет', 
+      'Специальность', 
+      'Email', 
+      'Телефон', 
+      'Дата поступления', 
+      'Общее количество дней посещения', 
+      'Количество опозданий', 
+      'Средняя посещаемость (часы)', 
+      'Процент посещаемости'
+    ];
     const summaryRow = [
       exportData.name,
       exportData.group,
       exportData.course.toString(),
+      student.faculty,
       exportData.major,
       exportData.email,
       exportData.phone,
@@ -322,31 +470,45 @@ export default function StudentsPage() {
       `${exportData.attendanceRate.toFixed(1)}%`
     ];
     
-    const recordHeaders = ['Дата', 'Время прихода', 'Время ухода', 'Статус', 'Предмет', 'Часов присутствия', 'Минут опоздания'];
+    const recordHeaders = [
+      'Дата', 
+      'Время прихода', 
+      'Время ухода', 
+      'Статус', 
+      'Предмет', 
+      'Часов присутствия', 
+      'Минут опоздания'
+    ];
     const recordRows = exportData.attendanceRecords.map(record => [
       record.date,
-      record.checkIn,
+      record.checkIn || '-',
       record.checkOut || '-',
-      record.status,
+      getStatusText(record.status),
       record.subject || '-',
       record.attendanceHours?.toFixed(2) || '-',
       record.lateMinutes?.toString() || '-'
     ]);
     
     const csvData = [
-      headers.join(','),
-      summaryRow.join(','),
+      createCSVRow(headers),
+      createCSVRow(summaryRow),
       '',
       'Детальные записи посещаемости:',
-      recordHeaders.join(','),
-      ...recordRows.map(row => row.join(','))
+      createCSVRow(recordHeaders),
+      ...recordRows.map(row => createCSVRow(row))
     ].join('\n');
     
     downloadCSV(csvData, `student_${student.name.replace(/\s+/g, '_')}_${selectedDate}.csv`);
   };
 
   const downloadCSV = (csvData: string, filename: string) => {
-    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    // Добавляем BOM для правильного отображения кириллицы в Excel
+    const BOM = '\uFEFF';
+    const csvWithBOM = BOM + csvData;
+    
+    const blob = new Blob([csvWithBOM], { 
+      type: 'application/vnd.ms-excel;charset=utf-8;' 
+    });
     const link = document.createElement('a');
     
     if (link.download !== undefined) {
@@ -358,6 +520,19 @@ export default function StudentsPage() {
       link.click();
       document.body.removeChild(link);
     }
+  };
+
+  // Функция для правильного экранирования CSV данных
+  const escapeCSV = (value: string): string => {
+    if (value.includes(';') || value.includes(',') || value.includes('"') || value.includes('\n')) {
+      return `"${value.replace(/"/g, '""')}"`;
+    }
+    return value;
+  };
+
+  // Функция для создания CSV строки с правильным разделителем
+  const createCSVRow = (values: string[]): string => {
+    return values.map(escapeCSV).join(';');
   };
 
   const getAttendanceStats = () => {
@@ -453,23 +628,27 @@ export default function StudentsPage() {
 
         {/* Фильтры и поиск */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <Input
-                  placeholder="Поиск по имени, группе или предмету..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+          {/* Поиск */}
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Input
+                placeholder="Поиск по имени, группе или предмету..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
-            <div className="flex gap-4">
+          </div>
+
+          {/* Фильтры */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Статус</label>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">Все статусы</option>
                 <option value="present">Присутствует</option>
@@ -477,10 +656,14 @@ export default function StudentsPage() {
                 <option value="absent">Отсутствует</option>
                 <option value="early_leave">Ушел раньше</option>
               </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Курс</label>
               <select
                 value={filterCourse}
                 onChange={(e) => setFilterCourse(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">Все курсы</option>
                 <option value="1">1 курс</option>
@@ -488,21 +671,49 @@ export default function StudentsPage() {
                 <option value="3">3 курс</option>
                 <option value="4">4 курс</option>
               </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Факультет</label>
+              <select
+                value={filterFaculty}
+                onChange={(e) => setFilterFaculty(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Все факультеты</option>
+                {FACULTIES.map((faculty) => (
+                  <option key={faculty} value={faculty}>
+                    {faculty}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <Button onClick={loadAttendanceRecords} variant="outline">
-                <RefreshCw size={16} className="mr-2" />
-                Обновить
-              </Button>
-              <Button onClick={exportToExcel} className="bg-green-600 hover:bg-green-700">
-                <FileSpreadsheet size={16} className="mr-2" />
-                Экспорт Excel
-              </Button>
             </div>
+          </div>
+
+          {/* Кнопки действий */}
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={loadAttendanceRecords} variant="outline" className="flex items-center">
+              <RefreshCw size={16} className="mr-2" />
+              Обновить
+            </Button>
+            <Button onClick={exportToExcel} className="bg-green-600 hover:bg-green-700 flex items-center">
+              <FileSpreadsheet size={16} className="mr-2" />
+              Экспорт посещаемости
+            </Button>
+            <Button onClick={exportAllStudentsData} className="bg-blue-600 hover:bg-blue-700 flex items-center">
+              <Users size={16} className="mr-2" />
+              Экспорт студентов
+            </Button>
           </div>
         </div>
 
@@ -517,6 +728,9 @@ export default function StudentsPage() {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Группа / Курс
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Факультет
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Предмет
@@ -559,6 +773,11 @@ export default function StudentsPage() {
                       <div>
                         <div className="font-medium">{record.studentGroup}</div>
                         <div className="text-gray-500">{record.studentCourse} курс</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <div className="text-sm text-gray-900">
+                        {students.find(s => s.id === record.studentId)?.faculty || '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -660,6 +879,10 @@ export default function StudentsPage() {
                   <div>
                     <label className="text-sm font-medium text-gray-600">Специальность</label>
                     <p className="text-gray-900">{selectedStudent.major}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Факультет</label>
+                    <p className="text-gray-900">{selectedStudent.faculty}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-600">Email</label>

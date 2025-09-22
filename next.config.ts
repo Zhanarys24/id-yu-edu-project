@@ -20,19 +20,52 @@ const nextConfig: NextConfig = {
       // ngrok-домены
       {
         protocol: 'https',
-        hostname: '7584e68761c7.ngrok-free.app',
+        hostname: 'dba33ae368da.ngrok-free.app',
         port: '',
         pathname: '/uploads/**',
       },
       {
         protocol: 'https',
-        hostname: '7584e68761c7.ngrok-free.app',
+        hostname: 'dba33ae368da.ngrok-free.app',
         port: '',
         pathname: '/uploads/**',
       },
       {
         protocol: 'https',
-        hostname: '7584e68761c7.ngrok-free.app',
+        hostname: 'dba33ae368da.ngrok-free.app',
+        port: '',
+        pathname: '/uploads/**',
+      },
+      // Handle malformed URLs with empty hostname (http:///uploads/...)
+      {
+        protocol: 'http',
+        hostname: '',
+        port: '',
+        pathname: '/uploads/**',
+      },
+      // Handle uploads hostname specifically
+      {
+        protocol: 'http',
+        hostname: 'uploads',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'uploads',
+        port: '',
+        pathname: '/**',
+      },
+      // Handle any hostname for uploads (fallback)
+      {
+        protocol: 'http',
+        hostname: '*',
+        port: '',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*',
         port: '',
         pathname: '/uploads/**',
       },

@@ -452,6 +452,19 @@ export default function DashboardPage() {
   const { user } = useAuth()
   const router = useRouter()
   
+  // Avatar URL normalization helper
+  const normalizeAvatarUrl = (src: string | null | undefined) => {
+    if (!src) return null
+    
+    // Handle malformed URLs with triple slashes (http:///uploads/...)
+    if (src.startsWith('http:///') || src.startsWith('https:///')) {
+      // Remove the extra slash to make it a valid URL
+      return src.replace(/^https?:\/\//, 'https://')
+    }
+    
+    return src
+  }
+  
   // Toast system
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -1091,7 +1104,7 @@ export default function DashboardPage() {
                       </div>
                       }>
                         <Image
-                          src={avatar}
+                          src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
                           alt="avatar"
                           width={48}
                           height={48}
@@ -1689,7 +1702,7 @@ export default function DashboardPage() {
                             </div>
                           }>
                             <Image
-                              src={avatar}
+                              src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
                               alt="avatar"
                               width={64}
                               height={64}
@@ -1770,7 +1783,7 @@ export default function DashboardPage() {
                                 }>
                                   <div className="relative">
                                     <Image
-                                      src={avatar}
+                                      src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
                                       alt="avatar"
                                       width={80}
                                       height={80}
@@ -1817,7 +1830,7 @@ export default function DashboardPage() {
                                 }>
                                   <div className="relative">
                                     <Image
-                                      src={avatar}
+                                      src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
                                       alt="avatar"
                                       width={112}
                                       height={112}
@@ -1868,7 +1881,7 @@ export default function DashboardPage() {
                                 }>
                                   <div className="relative">
                                     <Image
-                                      src={avatar}
+                                      src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
                                       alt="avatar"
                                       width={80}
                                       height={80}
@@ -1963,7 +1976,7 @@ export default function DashboardPage() {
                                 }>
                                   {isUser ? (
                                     <Image
-                                      src={avatar}
+                                      src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
                                       alt="avatar"
                                       width={48}
                                       height={48}
@@ -2100,7 +2113,7 @@ export default function DashboardPage() {
                           </div>
                             }>
                               <Image
-                                src={avatar}
+                                src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
                                 alt="avatar"
                                 width={128}
                                 height={128}

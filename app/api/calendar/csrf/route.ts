@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'https://7584e68761c7.ngrok-free.app';
+const API_BASE_URL = process.env.API_BASE_URL || 'https://dba33ae368da.ngrok-free.app';
 
 export async function GET(req: NextRequest) {
   try {
@@ -56,4 +56,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
 

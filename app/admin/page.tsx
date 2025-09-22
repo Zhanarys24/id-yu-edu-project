@@ -6,8 +6,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
 import { 
-  Monitor, FileText, Calendar, GraduationCap, BookOpen, 
-  Users, Settings, Bot, Trophy, FileUser, Shield, Globe
+  Monitor, Calendar, Shield, Globe
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -59,15 +58,6 @@ export default function AdminPage() {
 
   const adminPanels = [
     {
-      id: 'news',
-      title: 'Управление новостями',
-      description: 'Добавление, изменение и удаление новостей',
-      icon: <FileText size={24} />,
-      href: '/admin/news',
-      requiredPermission: 'news',
-      color: 'bg-blue-500'
-    },
-    {
       id: 'events',
       title: 'Управление мероприятиями',
       description: 'Подтверждение, отмена и контроль событий',
@@ -75,42 +65,6 @@ export default function AdminPage() {
       href: '/admin/events',
       requiredPermission: 'events',
       color: 'bg-green-500'
-    },
-    {
-      id: 'education',
-      title: 'Управление образованием',
-      description: 'Управление карточками образования, науки и воспитания',
-      icon: <GraduationCap size={24} />,
-      href: '/admin/education',
-      requiredPermission: 'education',
-      color: 'bg-purple-500'
-    },
-    {
-      id: 'eservices',
-      title: 'Управление Е-услугами',
-      description: 'Добавление и управление карточками Е-услуг',
-      icon: <Settings size={24} />,
-      href: '/admin/eservices',
-      requiredPermission: 'eservices',
-      color: 'bg-orange-500'
-    },
-    {
-      id: 'yessenovai',
-      title: 'Управление YessenovAI',
-      description: 'Контроль и управление YessenovAI',
-      icon: <Bot size={24} />,
-      href: '/admin/yessenovai',
-      requiredPermission: 'yessenovai',
-      color: 'bg-indigo-500'
-    },
-    {
-      id: 'gamification',
-      title: 'Управление YU-Gamification',
-      description: 'Контроль игровых механик и достижений',
-      icon: <Trophy size={24} />,
-      href: '/admin/gamification',
-      requiredPermission: 'gamification',
-      color: 'bg-yellow-500'
     },
     {
       id: 'service-analysis',
@@ -170,12 +124,7 @@ export default function AdminPage() {
             <Shield size={16} className="text-blue-500" />
             <span className="text-sm text-blue-600 font-medium">
               {t('admin.role')}: {user?.role === 'super_admin' ? t('admin.superAdmin') : 
-                     user?.role === 'admin_news' ? t('admin.adminNews') :
                      user?.role === 'admin_events' ? t('admin.adminEvents') :
-                     user?.role === 'admin_education' ? t('admin.adminEducation') :
-                     user?.role === 'admin_eservices' ? t('admin.adminEservices') :
-                     user?.role === 'admin_yessenovai' ? t('admin.adminYessenovai') :
-                     user?.role === 'admin_gamification' ? t('admin.adminGamification') :
                      user?.role === 'admin_portfolio' ? t('admin.adminPortfolio') : t('admin.student')}
             </span>
           </div>

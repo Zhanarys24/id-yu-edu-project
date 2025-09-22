@@ -52,6 +52,18 @@ export default function Sidebar({ active }: { active?: string }) {
     if (src.startsWith('/')) return true
     return false
   }
+
+  const normalizeAvatarUrl = (src: string | null | undefined) => {
+    if (!src) return null
+    
+    // Handle malformed URLs with triple slashes (http:///uploads/...)
+    if (src.startsWith('http:///') || src.startsWith('https:///')) {
+      // Remove the extra slash to make it a valid URL
+      return src.replace(/^https?:\/\//, 'https://')
+    }
+    
+    return src
+  }
   const hasRealAvatar = Boolean(isValidAvatar(avatar) && imageOk)
 
   const handleLogout = async () => {
@@ -106,7 +118,7 @@ export default function Sidebar({ active }: { active?: string }) {
             <Link href="/main/site-settings" className="flex items-center mb-6 cursor-pointer">
               {hasRealAvatar ? (
                 <Image
-                  src={avatar}
+                  src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
                   alt="аватар"
                   width={50}
                   height={50}

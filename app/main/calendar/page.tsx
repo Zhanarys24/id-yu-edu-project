@@ -14,6 +14,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
 import { CalendarService, CalendarEvent, CalendarUser, PersonnelSimple, ExternalParticipant } from '@/lib/services/calendarService'
+import { LocalStorageService, LocalEvent } from '@/lib/services/localStorageService'
+import { WebSocketService } from '@/lib/services/websocketService'
 
 
 // Используем типы напрямую из сервиса
@@ -133,10 +135,19 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
           return user && user.id && user.name && user.email
         })
         
-        // Валидация данных персонала
-        const validPersonnel = personnelData.filter((person) => {
-          return person && person.id && person.full_name
-        })
+        // Валидация данных персонала с дедупликацией
+        const validPersonnel = personnelData
+          .filter((person) => {
+            return person && person.id && person.full_name
+          })
+          .reduce((unique, person) => {
+            // Проверяем, есть ли уже участник с таким ID
+            const exists = unique.some(p => p.id === person.id);
+            if (!exists) {
+              unique.push(person);
+            }
+            return unique;
+          }, [] as PersonnelSimple[]);
         
         setEvents(validEvents)
         setUsers(validUsers)
@@ -421,9 +432,19 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
       const personnelData = externalParticipantsData.map(participant => 
         CalendarService.transformExternalToPersonnel(participant)
       );
-      const validPersonnel = personnelData.filter((person) => {
-        return person && person.id && person.full_name
-      });
+      // В функции loadParticipants также добавим дедупликацию
+      const validPersonnel = personnelData
+        .filter((person) => {
+          return person && person.id && person.full_name
+        })
+        .reduce((unique, person) => {
+          // Проверяем, есть ли уже участник с таким ID
+          const exists = unique.some(p => p.id === person.id);
+          if (!exists) {
+            unique.push(person);
+          }
+          return unique;
+        }, [] as PersonnelSimple[]);
       setPersonnel(validPersonnel); // Обновляем основной список участников
       console.log('✅ Перезагружено участников:', validPersonnel.length);
     } catch (error) {
@@ -446,322 +467,426 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
   // useEffect для модального окна больше не нужен, так как участники загружаются при входе на страницу
 
   // Компонент dropdown для участников
-  const ParticipantsDropdown = () => (
-    <div className="form-group">
-      <label style={{
-        display: 'block',
-        marginBottom: '12px',
-        fontWeight: '600',
-        color: '#2c3e50',
-        fontSize: '16px'
-      }}>
-        👥 {t('calendarPage.form.participants')} *
-      </label>
-      
-      {/* Поле с выбранными участниками */}
-      <div style={{ 
-        minHeight: '60px',
-        border: '2px solid #e1e5e9',
-        borderRadius: '12px',
-        padding: '12px',
-        backgroundColor: '#f8f9fa',
-        marginBottom: '12px',
-        transition: 'border-color 0.3s ease',
-        position: 'relative'
-      }}>
-        {participants.length === 0 ? (
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            color: '#6c757d', 
-            fontSize: '14px',
-            height: '36px'
-          }}>
-            <span style={{ marginRight: '8px' }}>🔍</span>
-            Выберите участников из списка ниже
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {participants.map(person => (
-              <div
-                key={person.id}
-                style={{
-                  backgroundColor: '#007bff',
-                  color: 'white',
-                  padding: '8px 12px',
-                  borderRadius: '20px',
-                  fontSize: '13px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 2px 4px rgba(0,123,255,0.2)',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#0056b3';
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#007bff';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                <span style={{ fontWeight: '500' }}>{person.full_name}</span>
-                <button
-                  type="button"
-                  onClick={() => handleParticipantToggle(person)}
+  const ParticipantsDropdown = () => {
+    // Добавляем дедупликацию участников
+    const uniquePersonnel = personnel.reduce((unique, person) => {
+      const exists = unique.some(p => p.id === person.id);
+      if (!exists) {
+        unique.push(person);
+      }
+      return unique;
+    }, [] as PersonnelSimple[]);
+
+    return (
+      <div className="form-group">
+        <label style={{
+          display: 'block',
+          marginBottom: '12px',
+          fontWeight: '600',
+          color: '#2c3e50',
+          fontSize: '16px'
+        }}>
+          👥 {t('calendarPage.form.participants')} *
+        </label>
+        
+        {/* Поле с выбранными участниками */}
+        <div style={{ 
+          minHeight: '60px',
+          border: '2px solid #e1e5e9',
+          borderRadius: '12px',
+          padding: '12px',
+          backgroundColor: '#f8f9fa',
+          marginBottom: '12px',
+          transition: 'border-color 0.3s ease',
+          position: 'relative'
+        }}>
+          {participants.length === 0 ? (
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              color: '#6c757d', 
+              fontSize: '14px',
+              height: '36px'
+            }}>
+              <span style={{ marginRight: '8px' }}>🔍</span>
+              Выберите участников из списка ниже
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {participants.map(person => (
+                <div
+                  key={person.id}
                   style={{
-                    background: 'rgba(255,255,255,0.2)',
-                    border: 'none',
+                    backgroundColor: '#007bff',
                     color: 'white',
-                    cursor: 'pointer',
-                    fontSize: '14px',                    // ← Уменьшили размер шрифта
-                    padding: '0',                        // ← Убрали padding
-                    borderRadius: '50%',
-                    width: '18px',                       // ← Уменьшили размер
-                    height: '18px',                      // ← Уменьшили размер
+                    padding: '8px 12px',
+                    borderRadius: '20px',
+                    fontSize: '13px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'background-color 0.2s ease',
-                    lineHeight: '1',                     // ← Добавили line-height
-                    minWidth: '18px',                    // ← Добавили min-width
-                    minHeight: '18px'                    // ← Добавили min-height
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(0,123,255,0.2)',
+                    transition: 'all 0.2s ease'
                   }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#0056b3';
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#007bff';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
                 >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        
-        {/* Счетчик выбранных участников */}
-        {participants.length > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: '8px',
-            right: '12px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            fontSize: '11px',
-            padding: '2px 6px',
-            borderRadius: '10px',
-            fontWeight: '600'
-          }}>
-            {participants.length}
-          </div>
-        )}
-      </div>
-      
-      {/* Поиск участников */}
-      <div style={{ marginBottom: '12px' }}>
-        <input
-          type="text"
-          placeholder="🔍 Поиск участников..."
-          value={participantSearch}
-          onChange={(e) => setParticipantSearch(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '12px 16px',
-            border: '2px solid #e1e5e9',
-            borderRadius: '8px',
-            fontSize: '14px',
-            outline: 'none',
-            transition: 'border-color 0.3s ease',
-            boxSizing: 'border-box'
-          }}
-          onFocus={(e) => e.target.style.borderColor = '#007bff'}
-          onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
-        />
-      </div>
-      
-      {/* Выпадающий список участников */}
-      <div style={{ position: 'relative' }}>
-        <div 
-          onClick={() => {
-            if (!loading) {
-              setDropdownOpen(!dropdownOpen);
-            }
-          }}
-          style={{ 
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.6 : 1,
-            padding: '12px 16px',
-            border: '2px solid #e1e5e9',
-            borderRadius: '8px',
-            backgroundColor: 'white',
-            minHeight: '48px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => !loading && (e.target.style.borderColor = '#007bff')}
-          onMouseLeave={(e) => !loading && (e.target.style.borderColor = '#e1e5e9')}
-        >
-          <span style={{ 
-            color: loading ? '#6c757d' : '#495057',
-            fontSize: '14px',
-            fontWeight: '500'
-          }}>
-            {loading ? '⏳ Загрузка участников...' : 
-             personnel.length === 0 ? '❌ Нет доступных участников' : 
-             `📋 Выберите из ${personnel.length} участников`}
-          </span>
-          <span style={{ 
-            fontSize: '12px',
-            color: '#6c757d',
-            transition: 'transform 0.3s ease',
-            transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
-          }}>
-            ▼
-          </span>
-        </div>
-        
-        {dropdownOpen && (
-          <div 
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              backgroundColor: 'white',
-              border: '2px solid #e1e5e9',
-              borderRadius: '8px',
-              maxHeight: '300px',
-              overflowY: 'auto',
-              zIndex: 1000,
-              boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-              marginTop: '4px'
-            }}
-          >
-            {loading ? (
-              <div style={{ 
-                padding: '20px', 
-                textAlign: 'center',
-                color: '#6c757d'
-              }}>
-                <div style={{ fontSize: '18px', marginBottom: '8px' }}>⏳</div>
-                Загрузка участников...
-              </div>
-            ) : personnel.length === 0 ? (
-              <div style={{ 
-                padding: '20px', 
-                textAlign: 'center', 
-                color: '#6c757d'
-              }}>
-                <div style={{ fontSize: '18px', marginBottom: '8px' }}>❌</div>
-                Участники не найдены
-              </div>
-            ) : (
-              personnel
-                .filter(person => {
-                  const isNotSelected = !participants.some(p => p.id === person.id);
-                  const matchesSearch = person.full_name.toLowerCase().includes(participantSearch.toLowerCase());
-                  return isNotSelected && matchesSearch;
-                })
-                .map(person => (
-                  <div
-                    key={person.id}
+                  <span style={{ fontWeight: '500' }}>{person.full_name}</span>
+                  <button
+                    type="button"
                     onClick={() => handleParticipantToggle(person)}
-                    style={{ 
-                      padding: '12px 16px',
+                    style={{
+                      background: 'rgba(255,255,255,0.2)',
+                      border: 'none',
+                      color: 'white',
                       cursor: 'pointer',
-                      borderBottom: '1px solid #f8f9fa',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = '#f8f9fa';
-                      e.target.style.paddingLeft = '20px';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'transparent';
-                      e.target.style.paddingLeft = '16px';
-                    }}
-                  >
-                    <div style={{
-                      width: '32px',
-                      height: '32px',
-                      backgroundColor: '#007bff',
+                      fontSize: '14px',
+                      padding: '0',
                       borderRadius: '50%',
+                      width: '18px',
+                      height: '18px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'white',
-                      fontSize: '14px',
-                      fontWeight: '600'
-                    }}>
-                      {person.full_name.charAt(0).toUpperCase()}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ 
-                        fontWeight: '500', 
-                        color: '#2c3e50',
-                        fontSize: '14px'
-                      }}>
-                        {person.full_name}
-                      </div>
-                      {person.work_phone && (
-                        <div style={{ 
-                          color: '#6c757d', 
-                          fontSize: '12px',
-                          marginTop: '2px'
-                        }}>
-                          📞 {person.work_phone}
-                        </div>
-                      )}
-                    </div>
-                    <div style={{
-                      color: '#28a745',
-                      fontSize: '16px',
-                      fontWeight: 'bold'
-                    }}>
-                      +
-                    </div>
-                  </div>
-                ))
-            )}
-            
-            {/* Показываем количество отфильтрованных результатов */}
-            {participantSearch && personnel.filter(person => 
-              !participants.some(p => p.id === person.id) && 
-              person.full_name.toLowerCase().includes(participantSearch.toLowerCase())
-            ).length === 0 && (
-              <div style={{ 
-                padding: '20px', 
-                textAlign: 'center', 
-                color: '#6c757d',
-                fontSize: '14px'
-              }}>
-                🔍 По запросу "{participantSearch}" ничего не найдено
-              </div>
-            )}
+                      transition: 'background-color 0.2s ease',
+                      lineHeight: '1',
+                      minWidth: '18px',
+                      minHeight: '18px'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Счетчик выбранных участников */}
+          {participants.length > 0 && (
+            <div style={{
+              position: 'absolute',
+              top: '8px',
+              right: '12px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              fontSize: '11px',
+              padding: '2px 6px',
+              borderRadius: '10px',
+              fontWeight: '600'
+            }}>
+              {participants.length}
+            </div>
+          )}
+        </div>
+        
+        {/* Поиск участников */}
+        <div style={{ marginBottom: '12px' }}>
+          <input
+            type="text"
+            placeholder="🔍 Поиск участников..."
+            value={participantSearch}
+            onChange={(e) => setParticipantSearch(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              border: '2px solid #e1e5e9',
+              borderRadius: '8px',
+              fontSize: '14px',
+              outline: 'none',
+              transition: 'border-color 0.3s ease',
+              boxSizing: 'border-box'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#007bff'}
+            onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
+          />
+        </div>
+        
+        {/* Выпадающий список участников */}
+        <div style={{ position: 'relative' }}>
+          <div 
+            onClick={() => {
+              if (!loading) {
+                setDropdownOpen(!dropdownOpen);
+              }
+            }}
+            style={{ 
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.6 : 1,
+              padding: '12px 16px',
+              border: '2px solid #e1e5e9',
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => !loading && (e.target.style.borderColor = '#007bff')}
+            onMouseLeave={(e) => !loading && (e.target.style.borderColor = '#e1e5e9')}
+          >
+            <span style={{ 
+              color: loading ? '#6c757d' : '#495057',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}>
+              {loading ? '⏳ Загрузка участников...' : 
+               uniquePersonnel.length === 0 ? '❌ Нет доступных участников' : 
+               `📋 Выберите из ${uniquePersonnel.length} участников`}
+            </span>
+            <span style={{ 
+              fontSize: '12px',
+              color: '#6c757d',
+              transition: 'transform 0.3s ease',
+              transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+            }}>
+              ▼
+            </span>
           </div>
-        )}
+          
+          {dropdownOpen && (
+            <div 
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                backgroundColor: 'white',
+                border: '2px solid #e1e5e9',
+                borderRadius: '8px',
+                maxHeight: '300px',
+                overflowY: 'auto',
+                zIndex: 1000,
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                marginTop: '4px'
+              }}
+            >
+              {loading ? (
+                <div style={{ 
+                  padding: '20px', 
+                  textAlign: 'center',
+                  color: '#6c757d'
+                }}>
+                  <div style={{ fontSize: '18px', marginBottom: '8px' }}>⏳</div>
+                  Загрузка участников...
+                </div>
+              ) : uniquePersonnel.length === 0 ? (
+                <div style={{ 
+                  padding: '20px', 
+                  textAlign: 'center', 
+                  color: '#6c757d'
+                }}>
+                  <div style={{ fontSize: '18px', marginBottom: '8px' }}>❌</div>
+                  Участники не найдены
+                </div>
+              ) : (
+                uniquePersonnel
+                  .filter(person => {
+                    const isNotSelected = !participants.some(p => p.id === person.id);
+                    const matchesSearch = person.full_name.toLowerCase().includes(participantSearch.toLowerCase());
+                    return isNotSelected && matchesSearch;
+                  })
+                  .map(person => (
+                    <div
+                      key={person.id}
+                      onClick={() => handleParticipantToggle(person)}
+                      style={{ 
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        borderBottom: '1px solid #f8f9fa',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = '#f8f9fa';
+                        e.target.style.paddingLeft = '20px';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                        e.target.style.paddingLeft = '16px';
+                      }}
+                    >
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        backgroundColor: '#007bff',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}>
+                        {person.full_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ 
+                          fontWeight: '500', 
+                          color: '#2c3e50',
+                          fontSize: '14px'
+                        }}>
+                          {person.full_name}
+                        </div>
+                        {person.work_phone && (
+                          <div style={{ 
+                            color: '#6c757d', 
+                            fontSize: '12px',
+                            marginTop: '2px'
+                          }}>
+                            📞 {person.work_phone}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{
+                        color: '#28a745',
+                        fontSize: '16px',
+                        fontWeight: 'bold'
+                      }}>
+                        +
+                      </div>
+                    </div>
+                  ))
+              )}
+              
+              {/* Показываем количество отфильтрованных результатов */}
+              {participantSearch && uniquePersonnel.filter(person => 
+                !participants.some(p => p.id === person.id) && 
+                person.full_name.toLowerCase().includes(participantSearch.toLowerCase())
+              ).length === 0 && (
+                <div style={{ 
+                  padding: '20px', 
+                  textAlign: 'center', 
+                  color: '#6c757d',
+                  fontSize: '14px'
+                }}>
+                  🔍 По запросу "{participantSearch}" ничего не найдено
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-      
-      {/* Статистика */}
-      <div style={{ 
-        marginTop: '12px',
-        padding: '8px 12px',
-        backgroundColor: '#e9ecef',
-        borderRadius: '6px',
-        fontSize: '12px',
-        color: '#6c757d',
-        display: 'flex',
-        justifyContent: 'space-between'
+    );
+  };
+
+  // Добавьте в компонент календаря
+  const [adminChanges, setAdminChanges] = useState<Array<{
+    type: 'created' | 'updated' | 'deleted';
+    event: LocalEvent;
+    timestamp: Date;
+  }>>([]);
+
+  // В useEffect для синхронизации
+  useEffect(() => {
+    const syncInterval = setInterval(async () => {
+      try {
+        const result = await LocalStorageService.syncWithConflictResolution();
+        
+        // Показываем уведомления об изменениях
+        if (result.conflicts > 0) {
+          showToast(`Обнаружено ${result.conflicts} конфликтов. Локальные изменения сохранены.`);
+        }
+        
+        // 1. Синхронизируем локальные изменения с API
+        const serverEvents = await CalendarService.getAllMeetings();
+        const localEvents = LocalStorageService.getEvents();
+        
+        // 2. Загружаем обновления с сервера
+        const updatedEvents = localEvents.map(localEvent => {
+          const serverEvent = serverEvents.find(e => e.id === localEvent.id);
+          if (serverEvent && serverEvent.lastModified > localEvent.lastModified) {
+            // Серверная версия новее - обновляем локально
+            return {
+              ...serverEvent,
+              syncStatus: 'synced' as const
+            };
+          }
+          return localEvent;
+        });
+        
+        // 3. Добавляем новые события с сервера
+        const newServerEvents = serverEvents.filter(serverEvent => 
+          !localEvents.some(localEvent => localEvent.id === serverEvent.id)
+        );
+        
+        const allEvents = [...updatedEvents, ...newServerEvents.map(e => ({
+          ...e,
+          syncStatus: 'synced' as const
+        }))];
+        
+        // 4. Сохраняем обновленные события
+        LocalStorageService.saveEvents(allEvents);
+        setEvents(allEvents);
+        
+        // Обновляем счетчик ожидающих синхронизации
+        const pendingSync = LocalStorageService.getPendingSync();
+        setPendingSyncCount(pendingSync.length);
+        
+      } catch (error) {
+        console.error('❌ Ошибка синхронизации:', error);
+      }
+    }, 30000); // Синхронизация каждые 30 секунд
+
+    return () => clearInterval(syncInterval);
+  }, []);
+
+  // useEffect для модального окна больше не нужен, так как участники загружаются при входе на страницу
+
+  // Компонент для показа изменений админа
+  const AdminChangesIndicator = () => {
+    if (adminChanges.length === 0) return null;
+
+    return (
+      <div style={{
+        position: 'fixed',
+        top: '80px',
+        right: '20px',
+        backgroundColor: '#17a2b8',
+        color: 'white',
+        padding: '8px 16px',
+        borderRadius: '8px',
+        fontSize: '14px',
+        zIndex: 1000,
+        maxWidth: '300px'
       }}>
-        <span>Выбрано: <strong>{participants.length}</strong></span>
-        <span>Доступно: <strong>{personnel.length}</strong></span>
+        <div>🔄 Изменения от администратора:</div>
+        {adminChanges.map((change, index) => (
+          <div key={index} style={{ fontSize: '12px', marginTop: '4px' }}>
+            {change.type === 'created' && '➕ Создано: '}
+            {change.type === 'updated' && '✏️ Обновлено: '}
+            {change.type === 'deleted' && '🗑️ Удалено: '}
+            {change.event.title}
+          </div>
+        ))}
+        <button 
+          onClick={() => setAdminChanges([])}
+          style={{
+            background: 'rgba(255,255,255,0.2)',
+            border: 'none',
+            color: 'white',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '11px',
+            marginTop: '8px'
+          }}
+        >
+          Закрыть
+        </button>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Layout active="calendar">
@@ -1108,6 +1233,9 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
             to { transform: translateY(0); opacity: 1; }
           }
         `}</style>
+
+        {/* Компонент для показа изменений админа */}
+        <AdminChangesIndicator />
       </div>
     </Layout>
   )
