@@ -1,42 +1,46 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { API_CONFIG, buildApiUrl, getApiHeaders } from '@/lib/config/api';
 
-const API_BASE_URL = 'https://dba33ae368da.ngrok-free.app';
-
-const DEFAULT_CAMPUSES = [
-  { id: 1, name: 'Технопарк', status: 'active' }
-];
-
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    console.log('Fetching campuses from:', `${API_BASE_URL}/auth/calendar/campuses/`);
+    console.log('=== FETCH CAMPUSES API CALLED ===');
     
-    const response = await fetch(`${API_BASE_URL}/auth/calendar/campuses/`, {
+    // Получаем cookies для авторизации
+    const authCookie = req.cookies.get('auth')?.value;
+    const backendSessionCookie = req.cookies.get('backend_session')?.value;
+    
+    console.log('🔐 Auth cookie exists:', !!authCookie);
+    console.log('🔐 Backend session cookie exists:', !!backendSessionCookie);
+    
+    // Подготавливаем заголовки с авторизацией
+    const headers = getApiHeaders({
+      ...(authCookie && { 'Authorization': `Token ${authCookie}` }),
+      ...(backendSessionCookie && { 'Cookie': `backend_session=${backendSessionCookie}` })
+    });
+    
+    const url = buildApiUrl(API_CONFIG.ENDPOINTS.CAMPUSES);
+    console.log('🔄 Fetching campuses from:', url);
+    
+    const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      },
+      headers,
       cache: 'no-store',
     });
 
-    console.log('Campuses API response status:', response.status);
+    console.log('📡 API Response status:', response.status);
 
-    if (!response.ok) {
-      console.warn('API корпусов недоступен, возвращаем дефолтные');
-      return NextResponse.json(DEFAULT_CAMPUSES);
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Campuses loaded successfully:', data.results?.length || 0);
+      return NextResponse.json(data.results || []);
+    } else {
+      const errorText = await response.text();
+      console.log('❌ API error, status:', response.status);
+      console.log('❌ API error response:', errorText);
+      return NextResponse.json([]);
     }
-
-    const data = await response.json();
-    console.log('Campuses data received:', data);
-    
-    // Обрабатываем ответ в формате {count, size, next, previous, results}
-    if (data.results && Array.isArray(data.results)) {
-      return NextResponse.json(data.results);
-    }
-    
-    return NextResponse.json(Array.isArray(data) ? data : DEFAULT_CAMPUSES);
   } catch (error) {
-    console.warn('Error fetching campuses:', error);
-    return NextResponse.json(DEFAULT_CAMPUSES);
+    console.error('❌ Error fetching campuses:', error);
+    return NextResponse.json([]);
   }
 }

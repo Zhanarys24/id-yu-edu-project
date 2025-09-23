@@ -17,24 +17,18 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/uploads/**',
       },
-      // ngrok-домены
+      // Продакшен домен
       {
         protocol: 'https',
-        hostname: 'dba33ae368da.ngrok-free.app',
+        hostname: 'id.yu.edu.kz',
         port: '',
         pathname: '/uploads/**',
       },
       {
         protocol: 'https',
-        hostname: 'dba33ae368da.ngrok-free.app',
+        hostname: 'id.yu.edu.kz',
         port: '',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'dba33ae368da.ngrok-free.app',
-        port: '',
-        pathname: '/uploads/**',
+        pathname: '/media/**',
       },
       // Handle malformed URLs with empty hostname (http:///uploads/...)
       {

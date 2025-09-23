@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const API_BASE_URL = process.env.API_BASE_URL || 'https://dba33ae368da.ngrok-free.app';
+import { API_CONFIG, buildApiUrl, getApiHeaders } from '@/lib/config/api';
 
 export async function PUT(req: NextRequest) {
   try {
     console.log('=== UPDATE MEETING API CALLED ===');
     
     const body = await req.json();
-    console.log('Request body received:', JSON.stringify(body, null, 2));
+    console.log('📋 Request body received:', JSON.stringify(body, null, 2));
     
-    // Получаем ID мероприятия из URL или body
+    // Получаем ID мероприятия из body
     const { id, ...meetingData } = body;
     
     if (!id) {
@@ -19,66 +18,58 @@ export async function PUT(req: NextRequest) {
       );
     }
     
-    // Получаем cookies для авторизации (точно так же, как в meetings/route.ts)
+    // Получаем cookies для авторизации
     const authCookie = req.cookies.get('auth')?.value;
     const backendSessionCookie = req.cookies.get('backend_session')?.value;
     
     console.log('🔐 Auth cookie exists:', !!authCookie);
     console.log('🔐 Backend session cookie exists:', !!backendSessionCookie);
     
-    // Подготавливаем заголовки (точно так же, как в meetings/route.ts)
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': 'true',
-    };
-    
-    // Добавляем авторизацию если есть токены (точно так же, как в meetings/route.ts)
-    if (authCookie) {
-      headers['Authorization'] = `Bearer ${authCookie}`;
-    }
-    
-    if (backendSessionCookie) {
-      headers['Cookie'] = `backend_session=${backendSessionCookie}`;
-    }
-    
-    // Используем правильный URL для Django API
-    const djangoUrl = `${API_BASE_URL}/auth/calendar/change/meeting/${id}/`;
-    console.log(' Отправляем запрос к Django:', djangoUrl);
-    console.log(' Заголовки:', headers);
-    console.log('📋 Данные:', meetingData);
-    
-    // Отправляем запрос к Django
-    const response = await fetch(djangoUrl, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(meetingData),
+    // Подготавливаем заголовки с авторизацией
+    const headers = getApiHeaders({
+      ...(authCookie && { 'Authorization': `Token ${authCookie}` }),
+      ...(backendSessionCookie && { 'Cookie': `backend_session=${backendSessionCookie}` })
     });
     
-    console.log('📡 Response status:', response.status);
-    console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+    const url = buildApiUrl(API_CONFIG.ENDPOINTS.UPDATE_MEETING);
+    console.log(' Updating meeting at:', url);
     
-    if (!response.ok) {
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ id, ...meetingData }),
+    });
+    
+    console.log('📡 API response status:', response.status);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Meeting updated successfully:', data);
+      return NextResponse.json(data);
+    } else {
       const errorText = await response.text();
-      console.log('❌ Error response:', errorText);
+      console.log('❌ API error, status:', response.status);
+      console.log('❌ API error response:', errorText);
+      
       return NextResponse.json(
         { 
-          error: 'Failed to update meeting',
+          error: 'External API error', 
+          status: response.status,
           details: errorText,
-          status: response.status
+          originalError: { message: errorText }
         },
         { status: response.status }
       );
     }
     
-    const result = await response.json();
-    console.log('✅ Meeting updated successfully:', result);
-    
-    return NextResponse.json(result);
-    
   } catch (error) {
     console.error('❌ Error in update meeting API:', error);
+    
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error', 
+        details: (error as Error).message
+      },
       { status: 500 }
     );
   }

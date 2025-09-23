@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'https://dba33ae368da.ngrok-free.app';
+const API_BASE_URL = process.env.API_BASE_URL || 'https://id.yu.edu.kz/api';
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
     // Подготавливаем заголовки
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': 'true',
     };
     
     // Добавляем авторизацию если есть токены
@@ -28,9 +27,9 @@ export async function GET(req: NextRequest) {
       headers['Cookie'] = `backend_session=${backendSessionCookie}`;
     }
     
-    console.log(' Fetching users from:', `${API_BASE_URL}/auth/users/`);
+    console.log(' Fetching users from:', `${API_BASE_URL}/auth/calendar/users/`);
     
-    const response = await fetch(`${API_BASE_URL}/auth/users/`, {
+    const response = await fetch(`${API_BASE_URL}/auth/calendar/users/`, {
       method: 'GET',
       headers,
       cache: 'no-store',

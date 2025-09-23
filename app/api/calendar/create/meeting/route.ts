@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const API_BASE_URL = 'https://dba33ae368da.ngrok-free.app';
+import { API_CONFIG, buildApiUrl, getApiHeaders } from '@/lib/config/api';
 
 export async function POST(req: NextRequest) {
   try {
     console.log('=== CREATE MEETING API CALLED ===');
     
     const body = await req.json();
-    console.log('Request body received:', JSON.stringify(body, null, 2));
+    console.log('📋 Request body received:', JSON.stringify(body, null, 2));
     
     // Валидация обязательных полей
     const requiredFields = ['title', 'date', 'time_start', 'time_end', 'campus', 'location'];
@@ -25,16 +24,14 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    // Получаем токены авторизации из cookies (как в profile API)
-    const token = req.cookies.get('auth')?.value;
-    const authMode = req.cookies.get('auth_mode')?.value;
-    const backendSession = req.cookies.get('backend_session')?.value;
+    // Получаем cookies для авторизации
+    const authCookie = req.cookies.get('auth')?.value;
+    const backendSessionCookie = req.cookies.get('backend_session')?.value;
     
-    console.log('Auth token present:', !!token);
-    console.log('Auth mode:', authMode);
-    console.log('Backend session present:', !!backendSession);
+    console.log('🔐 Auth cookie exists:', !!authCookie);
+    console.log('🔐 Backend session cookie exists:', !!backendSessionCookie);
     
-    if (!token && !backendSession) {
+    if (!authCookie && !backendSessionCookie) {
       console.error('❌ Нет токена авторизации');
       return NextResponse.json(
         { 
@@ -45,99 +42,46 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    // Подготавливаем заголовки для внешнего API (как в profile API)
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': 'true',
-      'Accept': 'application/json',
-    };
+    // Подготавливаем заголовки с авторизацией
+    const headers = getApiHeaders({
+      ...(authCookie && { 'Authorization': `Token ${authCookie}` }),
+      ...(backendSessionCookie && { 'Cookie': `backend_session=${backendSessionCookie}` })
+    });
     
-    // Добавляем Authorization header если есть токен
-    if (token) {
-      headers['Authorization'] = `${process.env.AUTH_TOKEN_SCHEME || 'Bearer'} ${token}`;
-      console.log('✅ Added Authorization header');
-    }
+    const url = buildApiUrl(API_CONFIG.ENDPOINTS.CREATE_MEETING);
+    console.log(' Creating meeting at:', url);
     
-    // Добавляем Cookie для backend session если используется cookie auth
-    if (authMode === 'cookie' && (backendSession || token)) {
-      headers['Cookie'] = `${process.env.AUTH_BACKEND_COOKIE_NAME || 'sessionid'}=${backendSession || token}`;
-      console.log('✅ Added Cookie header for backend session');
-    }
-    
-    console.log('Headers for external API:', Object.keys(headers));
-    
-    const externalUrl = `${API_BASE_URL}/auth/calendar/create/meeting/`;
-    console.log('Calling external API:', externalUrl);
-    
-    const response = await fetch(externalUrl, {
+    const response = await fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
     });
     
-    console.log('External API response status:', response.status);
-    console.log('External API response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('📡 API response status:', response.status);
     
-    if (!response.ok) {
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Meeting created successfully:', data);
+      return NextResponse.json(data);
+    } else {
       const errorText = await response.text();
-      console.error('External API error response:', errorText);
-      
-      // Пытаемся распарсить ошибку как JSON
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch {
-        errorData = { message: errorText };
-      }
+      console.log('❌ API error, status:', response.status);
+      console.log('❌ API error response:', errorText);
       
       return NextResponse.json(
         { 
           error: 'External API error', 
           status: response.status,
-          details: errorData.message || errorData.detail || errorText,
-          originalError: errorData
+          details: errorText,
+          originalError: { message: errorText }
         },
         { status: response.status }
       );
     }
     
-    const responseText = await response.text();
-    console.log('External API success response:', responseText);
-    
-    if (!responseText.trim()) {
-      console.warn('⚠️ Пустой ответ от внешнего API');
-      return NextResponse.json(
-        { 
-          error: 'Empty response', 
-          details: 'Внешний API вернул пустой ответ' 
-        },
-        { status: 500 }
-      );
-    }
-    
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('❌ Ошибка парсинга JSON ответа:', parseError);
-      return NextResponse.json(
-        { 
-          error: 'Invalid JSON response', 
-          details: 'Внешний API вернул невалидный JSON',
-          response: responseText.substring(0, 200)
-        },
-        { status: 500 }
-      );
-    }
-    
-    console.log('✅ Встреча создана через внешний API:', result);
-    
-    return NextResponse.json(result);
-    
   } catch (error) {
     console.error('❌ Error in create meeting API:', error);
     
-    // Возвращаем структурированную ошибку
     return NextResponse.json(
       { 
         error: 'Internal server error', 

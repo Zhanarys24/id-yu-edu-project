@@ -131,27 +131,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('ROLE_PERMISSIONS missing for role:', role);
       }
   
-      // Use data from login response first, then profile response
-      const firstName = resp.first_name || profile?.first_name || 'User';
-      const lastName = resp.last_name || profile?.last_name || '';
-      const fullName = lastName ? `${firstName} ${lastName}` : firstName;
-      const username = resp.username || profile?.username || email;
-      const avatar = resp.avatar || profile?.avatar || '/avatar.jpg';
+      // Use data from login response first, then profile response - только из API
+      const firstName = resp.first_name || profile?.first_name;
+      const lastName = resp.last_name || profile?.last_name;
+      const fullName = firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName;
+      const username = resp.username || profile?.username;
+      const avatar = resp.avatar || profile?.avatar;
+      const position = resp.position || profile?.position;
       
-      console.log('Avatar sources:', { 
-        respAvatar: resp.avatar, 
-        profileAvatar: profile?.avatar, 
-        finalAvatar: avatar 
+      console.log('Данные из API:', { 
+        firstName, lastName, fullName, username, avatar, position, role
       });
-  
+
       const newUser: User = {
         id: String(resp.id ?? profile?.id ?? 'unknown'),
         email: email,
-        name: fullName,
-        position: resp.position || profile?.position || 'User',
+        name: fullName || email, // Только если fullName пустой, используем email
+        position: position, // Только из API, без fallback
         role,
         permissions: rolePermissions,
-        avatar: avatar
+        avatar: avatar || '/avatar.jpg' // Только аватар может иметь fallback
       };
   
       console.log('Созданный пользователь:', newUser);

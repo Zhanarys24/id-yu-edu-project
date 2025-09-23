@@ -10,7 +10,7 @@ import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'
 import { EventClickArg } from '@fullcalendar/core'
 import { format, parseISO, isSameDay, addMinutes } from 'date-fns'
 import { ru, enUS } from 'date-fns/locale'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, Users } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
 import { CalendarService, CalendarEvent, CalendarUser, PersonnelSimple, ExternalParticipant } from '@/lib/services/calendarService'
@@ -379,7 +379,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     }
     
     // Безопасное получение точек для дней с событиями
-    const dots = [] // ← ПРОСТО ВОЗВРАЩАЕМ ПУСТОЙ МАССИВ
+    const dots: Array<{color: string}> = [] // ← ПРОСТО ВОЗВРАЩАЕМ ПУСТОЙ МАССИВ
     
     return { date, inMonth, dots }
   })
@@ -486,7 +486,8 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
           color: '#2c3e50',
           fontSize: '16px'
         }}>
-          👥 {t('calendarPage.form.participants')} *
+          <Users className="inline-block w-4 h-4 mr-2" />
+          {t('calendarPage.form.participants')} *
         </label>
         
         {/* Поле с выбранными участниками */}
@@ -529,12 +530,12 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                     transition: 'all 0.2s ease'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0056b3';
-                    e.currentTarget.style.transform = 'scale(1.05)';
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '#0056b3';
+                    (e.currentTarget as HTMLElement).style.transform = 'scale(1.05)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#007bff';
-                    e.currentTarget.style.transform = 'scale(1)';
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '#007bff';
+                    (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
                   }}
                 >
                   <span style={{ fontWeight: '500' }}>{person.full_name}</span>
@@ -559,8 +560,8 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                       minWidth: '18px',
                       minHeight: '18px'
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.3)'}
+                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.2)'}
                   >
                     ×
                   </button>
@@ -630,8 +631,8 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
               justifyContent: 'space-between',
               transition: 'all 0.3s ease'
             }}
-            onMouseEnter={(e) => !loading && (e.target.style.borderColor = '#007bff')}
-            onMouseLeave={(e) => !loading && (e.target.style.borderColor = '#e1e5e9')}
+            onMouseEnter={(e) => !loading && ((e.target as HTMLElement).style.borderColor = '#007bff')}
+            onMouseLeave={(e) => !loading && ((e.target as HTMLElement).style.borderColor = '#e1e5e9')}
           >
             <span style={{ 
               color: loading ? '#6c757d' : '#495057',
@@ -708,12 +709,12 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                         transition: 'all 0.2s ease'
                       }}
                       onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = '#f8f9fa';
-                        e.target.style.paddingLeft = '20px';
+                        (e.target as HTMLElement).style.backgroundColor = '#f8f9fa';
+                        (e.target as HTMLElement).style.paddingLeft = '20px';
                       }}
                       onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = 'transparent';
-                        e.target.style.paddingLeft = '16px';
+                        (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                        (e.target as HTMLElement).style.paddingLeft = '16px';
                       }}
                     >
                       <div style={{
@@ -803,7 +804,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
         const localEvents = LocalStorageService.getEvents();
         
         // 2. Загружаем обновления с сервера
-        const updatedEvents = localEvents.map(localEvent => {
+        const updatedEvents = localEvents.map((localEvent: any) => {
           const serverEvent = serverEvents.find(e => e.id === localEvent.id);
           if (serverEvent && serverEvent.lastModified > localEvent.lastModified) {
             // Серверная версия новее - обновляем локально
@@ -817,7 +818,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
         
         // 3. Добавляем новые события с сервера
         const newServerEvents = serverEvents.filter(serverEvent => 
-          !localEvents.some(localEvent => localEvent.id === serverEvent.id)
+          !localEvents.some((localEvent: any) => localEvent.id === serverEvent.id)
         );
         
         const allEvents = [...updatedEvents, ...newServerEvents.map(e => ({
@@ -830,8 +831,8 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
         setEvents(allEvents);
         
         // Обновляем счетчик ожидающих синхронизации
-        const pendingSync = LocalStorageService.getPendingSync();
-        setPendingSyncCount(pendingSync.length);
+        // const pendingSync = LocalStorageService.getPendingSync();
+        // setPendingSyncCount(pendingSync.length);
         
       } catch (error) {
         console.error('❌ Ошибка синхронизации:', error);
@@ -892,7 +893,10 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
     <Layout active="calendar">
       <div className="calendar-page">
         <aside className="calendar-left">
-          <h1 className="calendar-title">{t('calendarPage.title')}</h1>
+          <h1 className="calendar-title">
+            <Calendar className="inline-block w-6 h-6 mr-2" />
+            {t('calendarPage.title')}
+          </h1>
           <button 
             className="calendar-booking-btn" 
             onClick={() => {
@@ -911,7 +915,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                 className="month-btn"
                 disabled={loading}
               >
-                <ChevronLeft size={28} />
+                <ChevronLeft size={24} />
               </button>
               <span className="month-label">
                 {format(miniCalendarDate, 'LLLL yyyy', { locale: (lang.startsWith('en') ? enUS : ru) })}
@@ -921,7 +925,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                 className="month-btn"
                 disabled={loading}
               >
-                <ChevronRight size={28} />
+                <ChevronRight size={24} />
               </button>
             </div>
             
@@ -962,7 +966,10 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
           </div>
 
           <div className="nearest-events">
-            <h3>{t('calendarPage.nearestTitle')}</h3>
+            <h3>
+              <Clock className="inline-block w-4 h-4 mr-2" />
+              {t('calendarPage.nearestTitle')}
+            </h3>
             {loading ? (
               <p>{t('common.loading')}</p>
             ) : nearestEvents.length === 0 ? (
@@ -971,8 +978,12 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
               nearestEvents.map((event, idx) => (
                 <div key={event.id || idx} className="event-item">
                   <strong>{event.title}</strong><br />
-                  <span>{event.place}</span><br />
                   <span>
+                    <MapPin className="inline-block w-3 h-3 mr-1" />
+                    {event.place}
+                  </span><br />
+                  <span>
+                    <Clock className="inline-block w-3 h-3 mr-1" />
                     {format(parseISO(event.start), 'HH:mm')} - {format(parseISO(event.end), 'HH:mm')}
                   </span>
                 </div>
@@ -1024,7 +1035,10 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
           <div className="modal-overlay">
             <div className="modal">
               <div className="form-group">
-                <label>{t('calendarPage.form.title')} *</label>
+                <label>
+                  <Calendar className="inline-block w-4 h-4 mr-2" />
+                  {t('calendarPage.form.title')} *
+                </label>
                 <input
                   type="text"
                   placeholder="Введите название встречи"
@@ -1046,7 +1060,10 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                   />
                 </div>
                 <div className="form-group">
-                  <label>{t('calendarPage.form.startTime')}</label>
+                  <label>
+                    <Clock className="inline-block w-4 h-4 mr-2" />
+                    {t('calendarPage.form.startTime')}
+                  </label>
                   <input 
                     type="time" 
                     value={eventStart} 
@@ -1055,7 +1072,10 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                   />
                 </div>
                 <div className="form-group">
-                  <label>{t('calendarPage.form.endTime')}</label>
+                  <label>
+                    <Clock className="inline-block w-4 h-4 mr-2" />
+                    {t('calendarPage.form.endTime')}
+                  </label>
                   <input 
                     type="time" 
                     value={eventEnd} 
@@ -1101,7 +1121,10 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Место встречи *</label>
+                  <label>
+                    <MapPin className="inline-block w-4 h-4 mr-2" />
+                    Место встречи *
+                  </label>
                   <select 
                     value={eventLocation || ''}
                     onChange={(e) => {
@@ -1113,7 +1136,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                     <option value="">-- Выберите место встречи --</option>
                     {locations.map(location => 
                       <option key={location.id} value={location.id}>
-                        {location.name} {location.campus_name ? `(${location.campus_name})` : ''}
+                        {location.name}
                       </option>
                     )}
                   </select>

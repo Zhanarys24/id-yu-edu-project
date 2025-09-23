@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'https://dba33ae368da.ngrok-free.app';
+const API_BASE_URL = process.env.API_BASE_URL || 'https://id.yu.edu.kz/api';
 
 const DEFAULT_LOCATIONS = [
   { id: 1, name: 'Атриум', campus_id: 1 },
@@ -24,7 +24,6 @@ export async function GET(req: Request) {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
       },
       cache: 'no-store',
     });

@@ -1,42 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Временные данные из API (пока не работает авторизация)
-const TEMP_API_DATA = [
-  // ... все 14 приложений
-];
-
 export async function GET(req: NextRequest) {
   try {
+    console.log('=== FETCH EDUCATION APPLICATIONS API CALLED ===');
+    
+    // Получаем cookies для авторизации
+    const authCookie = req.cookies.get('auth')?.value;
+    const backendSessionCookie = req.cookies.get('backend_session')?.value;
+    
+    console.log('🔐 Auth cookie exists:', !!authCookie);
+    console.log('🔐 Backend session cookie exists:', !!backendSessionCookie);
+    
+    // Если пользователь не авторизован, возвращаем пустой результат
+    if (!authCookie && !backendSessionCookie) {
+      console.log('❌ User not authorized');
+      return NextResponse.json({
+        count: 0,
+        results: []
+      });
+    }
+    
+    // Подготавливаем заголовки
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'accept': 'application/json',
+    };
+    
+    // Добавляем авторизацию
+    if (authCookie) {
+      headers['Authorization'] = `Token ${authCookie}`;
+    }
+    if (backendSessionCookie) {
+      headers['Cookie'] = `backend_session=${backendSessionCookie}`;
+    }
+    
+    console.log('📤 Headers being sent:', headers);
+    
     const url = 'https://id.yu.edu.kz/api/v1/site_applications/';
+    console.log('🔄 Fetching applications from:', url);
     
-    console.log('Попытка запроса к API без авторизации...');
-    
-    const res = await fetch(url, {
+    const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       cache: 'no-store',
     });
 
-    console.log('API Response status:', res.status);
+    console.log('📡 API Response status:', response.status);
 
-    if (res.ok) {
-      const data = await res.json();
-      console.log('✅ API работает без авторизации:', data.results?.length || 0);
-      return NextResponse.json(data, { status: res.status });
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Applications loaded successfully:', data.results?.length || 0);
+      return NextResponse.json(data, { status: response.status });
     } else {
-      console.log('❌ API требует авторизацию, используем статические данные');
+      const errorText = await response.text();
+      console.log('❌ API error, status:', response.status);
+      console.log('❌ API error response:', errorText);
+      
       return NextResponse.json({
-        count: TEMP_API_DATA.length,
-        results: TEMP_API_DATA
+        count: 0,
+        results: []
       });
     }
-  } catch (e) {
-    console.error('API Error:', e);
+  } catch (error) {
+    console.error('❌ Error fetching applications:', error);
     return NextResponse.json({
-      count: TEMP_API_DATA.length,
-      results: TEMP_API_DATA
+      count: 0,
+      results: []
     });
   }
 }

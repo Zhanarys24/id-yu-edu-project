@@ -29,7 +29,7 @@ export default function Sidebar({ active }: { active?: string }) {
     const parts = (name || '').trim().split(/\s+/)
     const first = parts[0]?.[0] || ''
     const second = parts[1]?.[0] || ''
-    return (first + second).toUpperCase() || 'U'
+    return (first + second).toUpperCase() || ''
   }
 
   const getColorFromName = (name: string) => {
@@ -128,14 +128,21 @@ export default function Sidebar({ active }: { active?: string }) {
               ) : (
                 <div
                   className="mr-3 rounded-full w-[50px] h-[50px] grid place-items-center text-white text-sm font-semibold select-none"
-                  style={{ backgroundColor: getColorFromName(userName || 'User') }}
+                  style={{ backgroundColor: getColorFromName(userName || '') }}
                 >
-                  {getInitials(userName || 'U U')}
+                  {getInitials(userName || '')}
                 </div>
               )}
               <div>
                 <p className="font">{userName}</p>
-                <p className="text-sm text-gray-500">{userPosition || 'Преподаватель'}</p>
+                {userPosition && (
+                  <p className="text-sm text-gray-500">{userPosition}</p>
+                )}
+                {user?.role && (
+                  <p className="text-xs text-blue-600 font-medium">
+                    {user.role}
+                  </p>
+                )}
               </div>
             </Link>
 

@@ -60,16 +60,8 @@ export interface MeetingRoom {
   campus: number;
 }
 
-// Базовый URL для вашего API
-const EXTERNAL_API_BASE = 'https://dba33ae368da.ngrok-free.app';
-
-// Утилита для получения заголовков
-const getHeaders = (): HeadersInit => {
-  return {
-    'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true', // Для обхода предупреждения ngrok
-  };
-};
+// Импортируем конфигурацию API
+import { API_CONFIG, buildApiUrl, getApiHeaders } from '../config/api';
 
 export const CalendarService = {
   // Получить участников через наш API route (без CORS проблем)

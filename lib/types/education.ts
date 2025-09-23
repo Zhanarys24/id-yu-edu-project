@@ -53,3 +53,22 @@ export interface UserClickData {
   clickedAt: string; // Last click time for this user-card interaction
   clickCount: number; // Total clicks for this user-card interaction
 }
+
+// API Application types
+export interface ApiApplication {
+  id: number;
+  name: string;
+  description: string | null;
+  is_additional: boolean;
+  url: string;
+  image: string;
+  can_iframe: boolean;
+}
+
+export interface ApiApplicationsResponse {
+  count: number;
+  size: number;
+  next: string | null;
+  previous: string | null;
+  results: ApiApplication[];
+}

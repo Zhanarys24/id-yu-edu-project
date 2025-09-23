@@ -4,14 +4,13 @@ export async function GET(req: NextRequest) {
   try {
     const url = process.env.API_BASE_URL + '/api/users/me/';
     const token = req.cookies.get('auth')?.value;
-    const authMode = req.cookies.get('auth_mode')?.value; // 'cookie' means backend session cookie used
+    const authMode = req.cookies.get('auth_mode')?.value;
     const backendSession = req.cookies.get('backend_session')?.value;
 
     if (!token && !backendSession) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    // Build headers: send both Authorization (if token exists) and backend session cookie (if exists)
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
@@ -35,10 +34,10 @@ export async function GET(req: NextRequest) {
 
     const data: Record<string, unknown> = await res.json();
     
-    // Нормализуем аватар (как в login route)
+    // Нормализуем аватар
     const rawAvatar = data.image || data.avatar || data.profile_image || null;
     let avatar: string | null = null;
-    if (rawAvatar) {
+    if (rawAvatar && typeof rawAvatar === 'string') {
       if (rawAvatar.startsWith('http')) {
         avatar = rawAvatar;
       } else {
@@ -53,7 +52,9 @@ export async function GET(req: NextRequest) {
       first_name: data.first_name || null,
       last_name: data.last_name || null,
       avatar,
-      recovery_email: data.recovery_email || data.reserve_email || null
+      recovery_email: data.recovery_email || data.reserve_email || null,
+      position: data.position || data.job_title || data.title || null, // Должность из API
+      role: data.role || data.user_type || data.user_role || null // Роль из API
     };
     
     return NextResponse.json(filteredResponse, { status: res.status });

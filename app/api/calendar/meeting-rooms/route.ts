@@ -1,77 +1,69 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { API_CONFIG, buildApiUrl, getApiHeaders } from '@/lib/config/api';
 
-const API_BASE_URL = 'https://dba33ae368da.ngrok-free.app';
-
-const DEFAULT_MEETING_ROOMS = [
-  { 
-    id: 1, 
-    name: 'Кабинет номер 2', 
-    campus: 1, 
-    campus_name: 'Технопарк', 
-    color: '#07F', 
-    status: 'active' 
-  }
-];
-
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
+    console.log('=== FETCH MEETING ROOMS API CALLED ===');
+    
     const { searchParams } = new URL(req.url);
     const campusId = searchParams.get('campus');
     
-    const url = campusId 
-      ? `${API_BASE_URL}/auth/calendar/meeting-rooms/?campus=${campusId}`
-      : `${API_BASE_URL}/auth/calendar/meeting-rooms/`;
+    // Получаем cookies для авторизации
+    const authCookie = req.cookies.get('auth')?.value;
+    const backendSessionCookie = req.cookies.get('backend_session')?.value;
     
-    console.log('Fetching meeting rooms from:', url);
+    console.log('🔐 Auth cookie exists:', !!authCookie);
+    console.log('🔐 Backend session cookie exists:', !!backendSessionCookie);
+    console.log('🏢 Campus ID filter:', campusId);
+    
+    // Подготавливаем заголовки с авторизацией
+    const headers = getApiHeaders({
+      ...(authCookie && { 'Authorization': `Token ${authCookie}` }),
+      ...(backendSessionCookie && { 'Cookie': `backend_session=${backendSessionCookie}` })
+    });
+    
+    // Строим URL с фильтром по корпусу если указан
+    let url = buildApiUrl(API_CONFIG.ENDPOINTS.MEETING_ROOMS);
+    if (campusId) {
+      url += `?campus=${campusId}`;
+    }
+    
+    console.log('�� Fetching meeting rooms from:', url);
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      },
+      headers,
       cache: 'no-store',
     });
 
-    console.log('Meeting rooms API response status:', response.status);
+    console.log('📡 API Response status:', response.status);
 
-    if (!response.ok) {
-      console.warn('API мест встреч недоступен, возвращаем дефолтные');
-      const filteredRooms = campusId 
-        ? DEFAULT_MEETING_ROOMS.filter(room => room.campus === parseInt(campusId))
-        : DEFAULT_MEETING_ROOMS;
-      return NextResponse.json(filteredRooms);
-    }
-
-    const data = await response.json();
-    console.log('Meeting rooms data received:', data);
-    
-    // Обрабатываем ответ в формате {count, size, next, previous, results}
-    let rooms = [];
-    if (data.results && Array.isArray(data.results)) {
-      rooms = data.results;
-    } else if (Array.isArray(data)) {
-      rooms = data;
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Meeting rooms loaded successfully:', data.results?.length || 0);
+      
+      // Обрабатываем ответ в формате {count, size, next, previous, results}
+      let rooms = [];
+      if (data.results && Array.isArray(data.results)) {
+        rooms = data.results;
+      } else if (Array.isArray(data)) {
+        rooms = data;
+      }
+      
+      // Дополнительная фильтрация по корпусу если указан
+      if (campusId) {
+        rooms = rooms.filter(room => room.campus === parseInt(campusId));
+      }
+      
+      return NextResponse.json(rooms);
     } else {
-      rooms = DEFAULT_MEETING_ROOMS;
+      const errorText = await response.text();
+      console.log('❌ API error, status:', response.status);
+      console.log('❌ API error response:', errorText);
+      return NextResponse.json([]);
     }
-    
-    // Фильтруем по корпусу если указан
-    if (campusId) {
-      rooms = rooms.filter(room => room.campus === parseInt(campusId));
-    }
-    
-    return NextResponse.json(rooms);
   } catch (error) {
-    console.warn('Error fetching meeting rooms:', error);
-    const { searchParams } = new URL(req.url);
-    const campusId = searchParams.get('campus');
-    const filteredRooms = campusId 
-      ? DEFAULT_MEETING_ROOMS.filter(room => room.campus === parseInt(campusId))
-      : DEFAULT_MEETING_ROOMS;
-    return NextResponse.json(filteredRooms);
+    console.error('❌ Error fetching meeting rooms:', error);
+    return NextResponse.json([]);
   }
 }
-
-
-

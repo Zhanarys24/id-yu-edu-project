@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const API_BASE_URL = process.env.API_BASE_URL || 'https://dba33ae368da.ngrok-free.app';
+import { API_CONFIG, buildApiUrl, getApiHeaders } from '@/lib/config/api';
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,45 +12,41 @@ export async function GET(req: NextRequest) {
     console.log('🔐 Auth cookie exists:', !!authCookie);
     console.log('🔐 Backend session cookie exists:', !!backendSessionCookie);
     
-    // Подготавливаем заголовки
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': 'true',
-    };
+    // Подготавливаем заголовки с авторизацией
+    const headers = getApiHeaders({
+      ...(authCookie && { 'Authorization': `Token ${authCookie}` }), // ИСПРАВЛЕНО: Bearer → Token
+      ...(backendSessionCookie && { 'Cookie': `backend_session=${backendSessionCookie}` })
+    });
     
-    // Добавляем авторизацию если есть токены
-    if (authCookie) {
-      headers['Authorization'] = `Bearer ${authCookie}`;
-    }
+    const url = buildApiUrl(API_CONFIG.ENDPOINTS.MEETINGS);
+    console.log('🔄 Fetching meetings from:', url);
     
-    if (backendSessionCookie) {
-      headers['Cookie'] = `backend_session=${backendSessionCookie}`;
-    }
-    
-    console.log(' Fetching meetings from:', `${API_BASE_URL}/auth/calendar/all_meetings/`);
-    
-    const response = await fetch(`${API_BASE_URL}/auth/calendar/all_meetings/`, {
+    const response = await fetch(url, {
       method: 'GET',
       headers,
       cache: 'no-store',
     });
 
-    console.log(' Meetings API response status:', response.status);
+    console.log('📡 Meetings API response status:', response.status);
 
-    if (!response.ok) {
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Meetings loaded successfully:', data.results?.length || 0);
+      return NextResponse.json(data);
+    } else {
       const errorText = await response.text();
-      console.error('❌ Meetings API error:', errorText);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('❌ API error, status:', response.status);
+      console.log('❌ API error response:', errorText);
+      return NextResponse.json({
+        count: 0,
+        results: []
+      });
     }
-
-    const data = await response.json();
-    console.log('✅ Meetings data received:', data);
-    return NextResponse.json(data);
   } catch (error) {
     console.error('❌ Error fetching meetings:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch meetings', details: (error as Error).message },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      count: 0,
+      results: []
+    });
   }
 }

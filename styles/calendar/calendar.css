@@ -1,8 +1,9 @@
-/* calendar.css */
+/* Улучшенная адаптация календаря для всех устройств */
 
+/* Базовые стили */
 .calendar-page {
   display: flex;
-  height: 100%;
+  min-height: 100vh;
   flex-direction: row;
 }
 
@@ -10,7 +11,15 @@
   width: 300px;
   background: #ffffff;
   padding: 20px;
-  border-right: 1px solid #ccc;
+  border-right: 1px solid #e1e5e9;
+  overflow-y: auto;
+}
+
+.calendar-right {
+  flex: 1;
+  padding: 20px;
+  background: #ffffff;
+  overflow-y: auto;
 }
 .calendar-header {
   display: flex;
@@ -49,10 +58,11 @@
 
 
 /* Подсветка ячейки текущего дня */
-td.today-cell {
-  background-color: #eaf1ff;
-  border-radius: 1px;
-  box-shadow: inset 0 0 0 1px #2d60f0;
+.today-cell {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  color: white !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 
@@ -61,24 +71,48 @@ td.today-cell {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Заголовок календаря */
 .calendar-title {
-  font-size: 25px;
-  margin-bottom: 20px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+  text-align: left;
 }
 
 .calendar-booking-btn {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  background: #2d60f0;
+  padding: 12px 16px;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
+.calendar-booking-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.calendar-booking-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Мини-календарь */
 .calendar-datepicker {
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .calendar-datepicker table {
@@ -89,23 +123,34 @@ td.today-cell {
 }
 
 .calendar-datepicker th {
-  padding: 6px;
-  color: #666;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 8px 4px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .calendar-datepicker td {
-  padding: 6px;
-  border-radius: 6px;
-  transition: background 0.2s ease;
+  padding: 8px 4px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   cursor: pointer;
+  position: relative;
 }
+
 .calendar-datepicker td:hover {
-  background: #f0f4ff;
+  background: #f1f5f9;
+  transform: scale(1.05);
 }
+
 .day-cell {
   position: relative;
+  min-height: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .dots {
@@ -123,7 +168,43 @@ td.today-cell {
 }
 
 .faded {
-  color: #aaa;
+  color: #cbd5e1;
+}
+
+/* Ближайшие события */
+.nearest-events {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.nearest-events h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.event-item {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-left: 4px solid #3b82f6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.event-item strong {
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.event-item span {
+  color: #64748b;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
 }
 
 .calendar-day-btn {
@@ -151,68 +232,153 @@ td.today-cell {
   background: #ffffff; 
 }
 
+/* Заголовок календаря */
 .calendar-header-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e1e5e9;
 }
 
+.calendar-header-bar h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Модальное окно */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100;
+  z-index: 1000;
+  padding: 16px;
 }
 
 .modal {
   background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 450px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: modalSlideIn 0.3s ease-out;
 }
 
-.modal input,
-.modal select {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Форма */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
   font-size: 14px;
+  font-weight: 600;
+  color: #374151;
 }
 
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* Кнопки модального окна */
 .modal-actions {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e5e9;
 }
 
 .add-btn {
-  background: #2d60f0;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
   flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .cancel-btn {
-  background: #ccc;
-  color: #333;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
+  background: #f1f5f9;
+  color: #64748b;
+  border: 2px solid #e1e5e9;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
   flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
 }
 
 .modal-booked {
@@ -310,17 +476,22 @@ td.today-cell {
     font-size: 13px;
   }
 }
+/* Toggle switch */
 .toggle-container {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 10px 0;
+  justify-content: space-between;
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 2px solid #e1e5e9;
 }
 
 .toggle-switch {
   position: relative;
-  width: 50px;
-  height: 24px;
+  width: 56px;
+  height: 28px;
 }
 
 .toggle-switch input {
@@ -332,8 +503,8 @@ td.today-cell {
 .toggle-switch .slider {
   position: absolute;
   cursor: pointer;
-  background-color: #ccc;
-  border-radius: 24px;
+  background-color: #cbd5e1;
+  border-radius: 28px;
   top: 0;
   left: 0;
   right: 0;
@@ -344,21 +515,22 @@ td.today-cell {
 .toggle-switch .slider::before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
   background-color: white;
   border-radius: 50%;
   transition: 0.4s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-switch input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #3b82f6;
 }
 
 .toggle-switch input:checked + .slider::before {
-  transform: translateX(26px);
+  transform: translateX(28px);
 }
 .custom-dropdown {
   margin-bottom: 100px;
@@ -486,50 +658,43 @@ td.today-cell {
   margin-left: 20px;
   font-style: italic;
 }
-/* FullCalendar navigation buttons */
-.fc .fc-button.fc-prev-button,
-.fc .fc-button.fc-next-button {
-  background: none;
-  border: none;
-  color: #333;
-  font-size: 1.5rem;
-  padding: 0 0.5rem;
-  box-shadow: none;
-}
-
-.fc .fc-button.fc-prev-button:hover,
-.fc .fc-button.fc-next-button:hover {
-  background: none;
-  color: #1d4ed8;
-}
-
-/* Кнопка "Сегодня" */
-.fc .fc-button.fc-today-button {
-  background-color: #f0f4ff;
-  color: #1e40af;
-  border: none;
-  box-shadow: none;
+/* FullCalendar стили */
+.fc .fc-button {
+  background: #f1f5f9;
+  border: 2px solid #e1e5e9;
+  color: #64748b;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 8px 16px;
   transition: all 0.2s ease;
 }
 
-/* Активная Today (если выбрана НЕ сегодняшняя дата) */
-.fc .fc-button.fc-today-button.active-today {
-  background-color: #1d4ed8;
-  color: white;
+.fc .fc-button:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #374151;
 }
 
-/* Кнопки видов: Месяц, Неделя, День */
-.fc .fc-button-group .fc-button {
-  background-color: #f0f4ff;
-  color: #1e40af;
+.fc .fc-button.fc-button-active {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-color: #1d4ed8;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.fc .fc-event {
+  border-radius: 6px;
   border: none;
-  box-shadow: none;
+  padding: 4px 8px;
+  font-size: 12px;
   font-weight: 500;
-}
-
-.fc .fc-button-group .fc-button.fc-button-active {
-  background-color: #1d4ed8;
-  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 /* Базовые стили для всех устройств */
 .calendar-page {
@@ -541,7 +706,7 @@ td.today-cell {
   padding: 1rem;
 }
 
-/* Мобильные устройства (до 768px) */
+/* Адаптация для мобильных устройств */
 @media (max-width: 768px) {
   .calendar-page {
     flex-direction: column;
@@ -549,137 +714,166 @@ td.today-cell {
   
   .calendar-left {
     order: 2;
-    padding: 1rem 0.5rem;
+    width: 100%;
+    padding: 16px;
+    border-right: none;
+    border-bottom: 1px solid #e1e5e9;
   }
   
   .calendar-right {
     order: 1;
-    padding: 0.5rem;
+    padding: 16px;
   }
   
   .calendar-title {
     font-size: 1.5rem;
     text-align: center;
+    margin-bottom: 1rem;
   }
   
   .calendar-booking-btn {
-    width: 100%;
-    margin: 0.5rem 0;
-    padding: 0.8rem;
+    padding: 14px 20px;
+    font-size: 16px;
+    margin-bottom: 1rem;
   }
   
   .calendar-header-bar {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 12px;
   }
   
   .calendar-header-bar h2 {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
   }
   
   /* Адаптация FullCalendar для мобильных */
   .fc .fc-toolbar {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 12px;
   }
   
   .fc .fc-toolbar-title {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
+    order: 1;
+    text-align: center;
+  }
+  
+  .fc .fc-toolbar-chunk {
+    order: 2;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
   }
   
   .fc .fc-button {
-    padding: 0.3rem 0.5rem;
-    font-size: 0.8rem;
+    padding: 6px 12px;
+    font-size: 14px;
   }
   
   /* Мини-календарь для мобильных */
-  .calendar-datepicker table {
-    font-size: 0.8rem;
+  .calendar-datepicker {
+    padding: 12px;
   }
   
-  .calendar-datepicker th, 
+  .calendar-datepicker table {
+    font-size: 12px;
+  }
+  
+  .calendar-datepicker th,
   .calendar-datepicker td {
-    padding: 0.2rem;
+    padding: 6px 2px;
   }
   
   .day-cell {
-    min-height: 30px;
+    min-height: 28px;
   }
   
   /* Модальное окно для мобильных */
   .modal {
-    width: 95%;
-    max-height: 90vh;
-    overflow-y: auto;
+    width: 100%;
+    max-height: 95vh;
+    margin: 0;
+    border-radius: 16px 16px 0 0;
   }
   
   .form-row {
     flex-direction: column;
+    gap: 0;
   }
   
   .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .add-btn,
+  .cancel-btn {
     width: 100%;
-    margin-bottom: 0.5rem;
+    padding: 14px 20px;
+  }
+  
+  /* События в календаре */
+  .fc-event {
+    font-size: 10px;
+    padding: 2px 4px;
   }
 }
 
-/* Планшеты (768px - 1024px) */
+/* Планшеты */
 @media (min-width: 768px) and (max-width: 1024px) {
-  .calendar-page {
-    flex-direction: row;
-  }
-  
   .calendar-left {
-    width: 35%;
-    padding: 1rem;
+    width: 40%;
+    padding: 20px;
   }
   
   .calendar-right {
-    width: 65%;
-    padding: 1rem;
+    width: 60%;
+    padding: 20px;
   }
   
   .calendar-datepicker table {
-    font-size: 0.9rem;
+    font-size: 13px;
   }
   
-  /* Уменьшаем отступы в мини-календаре */
-  .calendar-datepicker th, 
+  .calendar-datepicker th,
   .calendar-datepicker td {
-    padding: 0.3rem;
+    padding: 6px 3px;
   }
   
-  /* Адаптация FullCalendar для планшетов */
   .fc .fc-toolbar {
     flex-wrap: wrap;
   }
   
   .fc .fc-toolbar-title {
-    font-size: 1.3rem;
+    font-size: 1.375rem;
     order: 1;
     width: 100%;
     text-align: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 12px;
   }
   
-  .fc-toolbar-chunk {
+  .fc .fc-toolbar-chunk {
     order: 2;
+    justify-content: center;
   }
 }
 
-/* Ноутбуки и десктопы (1024px и больше) */
+/* Десктопы */
 @media (min-width: 1024px) {
   .calendar-left {
-    width: 300px;
-    border-right: 1px solid #eee;
+    width: 320px;
+    border-right: 1px solid #e1e5e9;
   }
   
   .calendar-right {
     flex: 1;
   }
   
-  /* Оптимизация FullCalendar для больших экранов */
   .fc .fc-toolbar {
     flex-direction: row;
   }
@@ -740,20 +934,135 @@ td.today-cell {
   padding: 0.5rem;
 }
 
-/* Оптимизация для touch устройств */
-button, input, select {
-  min-height: 44px; /* Рекомендованный размер для touch */
-}
-
-/* Адаптация событий в календаре */
-.fc-event {
-  font-size: 0.8rem;
-  padding: 2px 4px;
-}
-
-@media (max-width: 768px) {
-  .fc-event {
-    font-size: 0.7rem;
-    padding: 1px 2px;
+/* Дополнительные улучшения для touch устройств */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  input,
+  select,
+  .calendar-datepicker td {
+    min-height: 44px;
   }
+  
+  .month-btn {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .toggle-switch {
+    width: 60px;
+    height: 32px;
+  }
+  
+  .toggle-switch .slider::before {
+    height: 24px;
+    width: 24px;
+  }
+  
+  .toggle-switch input:checked + .slider::before {
+    transform: translateX(28px);
+  }
+}
+
+/* Улучшения для выпадающего списка участников */
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.custom-dropdown .selected-list {
+  border: 2px solid #e1e5e9;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-dropdown .selected-list:hover {
+  border-color: #3b82f6;
+}
+
+.custom-dropdown .options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  z-index: 1000;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+}
+
+.custom-dropdown .options label {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.custom-dropdown .options label:hover {
+  background-color: #f8fafc;
+}
+
+.custom-dropdown .options label:last-child {
+  border-bottom: none;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-page {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Улучшения для скролла */
+.calendar-left,
+.calendar-right {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.calendar-left::-webkit-scrollbar,
+.calendar-right::-webkit-scrollbar {
+  width: 6px;
+}
+
+.calendar-left::-webkit-scrollbar-track,
+.calendar-right::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.calendar-left::-webkit-scrollbar-thumb,
+.calendar-right::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.calendar-left::-webkit-scrollbar-thumb:hover,
+.calendar-right::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
