@@ -17,7 +17,7 @@ import { exportPortfolioToWord } from '@/lib/utils/wordExport'
 import { publicationsService, PublicationByYear, PublicationStats } from '@/lib/services/publicationsService'
 
 function PortfolioContent() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('common')
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -106,7 +106,7 @@ function PortfolioContent() {
               variant="outline"
             >
               <FileDown size={16} />
-              Экспорт в Word
+              {t('portfolioPage.exportToWord')}
             </Button>
           </div>
         </div>
@@ -135,6 +135,7 @@ export default function PortfolioPage() {
 // ---- Секции ----
 
 function GeneralSection() {
+  const { t } = useTranslation('common')
   const { user } = useAuth()
   const [generalInfo, setGeneralInfo] = useState<GeneralInfo | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -251,54 +252,54 @@ function GeneralSection() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Общая информация</h2>
-        {!isEditing ? (
-          <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
-            <Edit3 size={16} />
-            {generalInfo ? 'Редактировать' : 'Создать'}
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <Button onClick={handleSave} className="flex items-center gap-2">
-              <Save size={16} />
-              Сохранить
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">{t('portfolioPage.general.title')}</h2>
+          {!isEditing ? (
+            <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
+              <Edit3 size={16} />
+              {generalInfo ? t('portfolioPage.general.buttons.edit') : t('portfolioPage.general.buttons.create')}
             </Button>
-            <Button variant="outline" onClick={() => setIsEditing(false)} className="flex items-center gap-2">
-              <X size={16} />
-              Отмена
-            </Button>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="flex gap-2">
+              <Button onClick={handleSave} className="flex items-center gap-2">
+                <Save size={16} />
+                {t('portfolioPage.general.buttons.save')}
+              </Button>
+              <Button variant="outline" onClick={() => setIsEditing(false)} className="flex items-center gap-2">
+                <X size={16} />
+                {t('portfolioPage.general.buttons.cancel')}
+              </Button>
+            </div>
+          )}
+        </div>
 
       {!isEditing && generalInfo ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-medium text-gray-900">{t('portfolioPage.general.fullName')}</h3>
+                <p className="text-gray-600">{generalInfo.fullName}</p>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">{t('portfolioPage.general.position')}</h3>
+                <p className="text-gray-600">{generalInfo.position}</p>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">{t('portfolioPage.general.department')}</h3>
+                <p className="text-gray-600">{generalInfo.department}</p>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">{t('portfolioPage.general.education')}</h3>
+                <p className="text-gray-600">{generalInfo.education}</p>
+              </div>
+            </div>
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium text-gray-900">ФИО</h3>
-              <p className="text-gray-600">{generalInfo.fullName}</p>
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900">Должность</h3>
-              <p className="text-gray-600">{generalInfo.position}</p>
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900">Кафедра</h3>
-              <p className="text-gray-600">{generalInfo.department}</p>
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900">Образование</h3>
-              <p className="text-gray-600">{generalInfo.education}</p>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-medium text-gray-900">Опыт работы</h3>
+              <h3 className="font-medium text-gray-900">{t('portfolioPage.general.experience')}</h3>
               <p className="text-gray-600">{generalInfo.experience}</p>
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">Навыки</h3>
+              <h3 className="font-medium text-gray-900">{t('portfolioPage.general.skills')}</h3>
               <div className="flex flex-wrap gap-2">
                 {generalInfo.skills.map((skill, index) => (
                   <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
@@ -308,7 +309,7 @@ function GeneralSection() {
               </div>
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">Языки</h3>
+              <h3 className="font-medium text-gray-900">{t('portfolioPage.general.languages')}</h3>
               <div className="flex flex-wrap gap-2">
                 {generalInfo.languages.map((lang, index) => (
                   <span key={index} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
@@ -318,7 +319,7 @@ function GeneralSection() {
               </div>
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">Контакты</h3>
+              <h3 className="font-medium text-gray-900">{t('portfolioPage.general.contactInfo')}</h3>
               <p className="text-gray-600">{generalInfo.contactInfo.email}</p>
               {generalInfo.contactInfo.phone && (
                 <p className="text-gray-600">{generalInfo.contactInfo.phone}</p>
@@ -330,45 +331,45 @@ function GeneralSection() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">ФИО</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.general.fullName')}</label>
               <Input
                 value={formData.fullName}
                 onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                placeholder="Введите полное имя"
+                placeholder={t('portfolioPage.general.placeholders.fullName')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Должность</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.general.position')}</label>
               <Input
                 value={formData.position}
                 onChange={(e) => setFormData(prev => ({ ...prev, position: e.target.value }))}
-                placeholder="Введите должность"
+                placeholder={t('portfolioPage.general.placeholders.position')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Кафедра</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.general.department')}</label>
               <Input
                 value={formData.department}
                 onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                placeholder="Введите название кафедры"
+                placeholder={t('portfolioPage.general.placeholders.department')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Образование</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.general.education')}</label>
               <Input
                 value={formData.education}
                 onChange={(e) => setFormData(prev => ({ ...prev, education: e.target.value }))}
-                placeholder="Введите образование"
+                placeholder={t('portfolioPage.general.placeholders.education')}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Опыт работы</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.general.experience')}</label>
             <textarea
               value={formData.experience}
               onChange={(e) => setFormData(prev => ({ ...prev, experience: e.target.value }))}
-              placeholder="Опишите ваш опыт работы"
+              placeholder={t('portfolioPage.general.placeholders.experience')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
             />
@@ -376,9 +377,10 @@ function GeneralSection() {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">Навыки</label>
+              <label className="block text-sm font-medium text-gray-700">{t('portfolioPage.general.skills')}</label>
               <Button type="button" onClick={addSkill} variant="outline" className="px-3 py-1 text-sm">
                 <Plus size={16} />
+                {t('portfolioPage.general.buttons.addSkill')}
               </Button>
             </div>
             <div className="space-y-2">
@@ -387,7 +389,7 @@ function GeneralSection() {
                   <Input
                     value={skill}
                     onChange={(e) => updateSkill(index, e.target.value)}
-                    placeholder="Введите навык"
+                    placeholder={t('portfolioPage.general.placeholders.skill')}
                   />
                   {formData.skills.length > 1 && (
                     <Button
@@ -406,9 +408,10 @@ function GeneralSection() {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">Языки</label>
+              <label className="block text-sm font-medium text-gray-700">{t('portfolioPage.general.languages')}</label>
               <Button type="button" onClick={addLanguage} variant="outline" className="px-3 py-1 text-sm">
                 <Plus size={16} />
+                {t('portfolioPage.general.buttons.addLanguage')}
               </Button>
             </div>
             <div className="space-y-2">
@@ -417,7 +420,7 @@ function GeneralSection() {
                   <Input
                     value={lang}
                     onChange={(e) => updateLanguage(index, e.target.value)}
-                    placeholder="Введите язык"
+                    placeholder={t('portfolioPage.general.placeholders.language')}
                   />
                   {formData.languages.length > 1 && (
                     <Button
@@ -436,37 +439,37 @@ function GeneralSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.general.email')}</label>
               <Input
                 value={formData.contactInfo.email}
                 onChange={(e) => setFormData(prev => ({ 
                   ...prev, 
                   contactInfo: { ...prev.contactInfo, email: e.target.value }
                 }))}
-                placeholder="Введите email"
+                placeholder={t('portfolioPage.general.placeholders.email')}
                 type="email"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.general.phone')}</label>
               <Input
                 value={formData.contactInfo.phone}
                 onChange={(e) => setFormData(prev => ({ 
                   ...prev, 
                   contactInfo: { ...prev.contactInfo, phone: e.target.value }
                 }))}
-                placeholder="Введите телефон"
+                placeholder={t('portfolioPage.general.placeholders.phone')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Адрес</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.general.address')}</label>
               <Input
                 value={formData.contactInfo.address}
                 onChange={(e) => setFormData(prev => ({ 
                   ...prev, 
                   contactInfo: { ...prev.contactInfo, address: e.target.value }
                 }))}
-                placeholder="Введите адрес"
+                placeholder={t('portfolioPage.general.placeholders.address')}
               />
             </div>
           </div>
@@ -477,6 +480,7 @@ function GeneralSection() {
 }
 
 function PublicationsSection() {
+  const { t } = useTranslation('common')
   const { user } = useAuth()
   const [publicationsByYear, setPublicationsByYear] = useState<PublicationByYear[]>([])
   const [stats, setStats] = useState<PublicationStats | null>(null)
@@ -533,13 +537,13 @@ function PublicationsSection() {
   return (
     <div className="space-y-6">
       {/* Заголовок и статистика */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Публикации и научная деятельность</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Научные публикации за последние 10 лет
-          </p>
-        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">{t('portfolioPage.publications.title')}</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              {t('portfolioPage.publications.description')}
+            </p>
+          </div>
         <div className="flex items-center gap-2">
           <Button
             onClick={loadPublications}
@@ -756,6 +760,7 @@ function PublicationsSection() {
 }
 
 function TeachingSection() {
+  const { t } = useTranslation('common')
   const { user } = useAuth()
   const [activities, setActivities] = useState<TeachingActivity[]>([])
   const [isAdding, setIsAdding] = useState(false)
@@ -840,67 +845,67 @@ function TeachingSection() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Преподавательская деятельность</h2>
-        {!isAdding && (
-          <Button onClick={() => setIsAdding(true)} className="flex items-center gap-2">
-            <Plus size={16} />
-            Добавить курс
-          </Button>
-        )}
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">{t('portfolioPage.teaching.title')}</h2>
+          {!isAdding && (
+            <Button onClick={() => setIsAdding(true)} className="flex items-center gap-2">
+              <Plus size={16} />
+              {t('portfolioPage.teaching.buttons.addCourse')}
+            </Button>
+          )}
       </div>
 
       {isAdding && (
         <div className="bg-gray-50 p-6 rounded-lg space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Название курса</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.teaching.courseName')}</label>
               <Input
                 value={formData.courseName}
                 onChange={(e) => setFormData(prev => ({ ...prev, courseName: e.target.value }))}
-                placeholder="Введите название курса"
+                placeholder={t('portfolioPage.teaching.placeholders.courseName')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Код курса</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.teaching.courseCode')}</label>
               <Input
                 value={formData.courseCode}
                 onChange={(e) => setFormData(prev => ({ ...prev, courseCode: e.target.value }))}
-                placeholder="CS101, MATH201"
+                placeholder={t('portfolioPage.teaching.placeholders.courseCode')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Семестр</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.teaching.semester')}</label>
               <Input
                 value={formData.semester}
                 onChange={(e) => setFormData(prev => ({ ...prev, semester: e.target.value }))}
-                placeholder="Осенний, Весенний, Летний"
+                placeholder={t('portfolioPage.teaching.placeholders.semester')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Год</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.teaching.year')}</label>
               <Input
                 value={formData.year}
                 onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
-                placeholder="2024"
+                placeholder={t('portfolioPage.teaching.placeholders.year')}
                 type="number"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Количество студентов</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.teaching.studentsCount')}</label>
               <Input
                 value={formData.studentsCount}
                 onChange={(e) => setFormData(prev => ({ ...prev, studentsCount: e.target.value }))}
-                placeholder="25"
+                placeholder={t('portfolioPage.teaching.placeholders.studentsCount')}
                 type="number"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Оценка курса</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.teaching.evaluation')}</label>
               <Input
                 value={formData.evaluation}
                 onChange={(e) => setFormData(prev => ({ ...prev, evaluation: e.target.value }))}
-                placeholder="4.5"
+                placeholder={t('portfolioPage.teaching.placeholders.evaluation')}
                 type="number"
                 step="0.1"
                 min="1"
@@ -910,11 +915,11 @@ function TeachingSection() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Описание курса</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.teaching.description')}</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Опишите содержание курса, методы преподавания, достижения"
+              placeholder={t('portfolioPage.teaching.placeholders.description')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
             />
@@ -923,11 +928,11 @@ function TeachingSection() {
           <div className="flex gap-2">
             <Button onClick={handleAdd} className="flex items-center gap-2">
               <Save size={16} />
-              Добавить
+              {t('portfolioPage.teaching.buttons.add')}
             </Button>
             <Button variant="outline" onClick={() => setIsAdding(false)} className="flex items-center gap-2">
               <X size={16} />
-              Отмена
+              {t('portfolioPage.teaching.buttons.cancel')}
             </Button>
           </div>
         </div>
@@ -939,36 +944,36 @@ function TeachingSection() {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900 mb-2">{activity.courseName}</h3>
-                {activity.courseCode && (
-                  <p className="text-sm text-gray-500 mb-2">Код: {activity.courseCode}</p>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium">Семестр:</span> {activity.semester}
-                  </div>
-                  <div>
-                    <span className="font-medium">Год:</span> {activity.year}
-                  </div>
-                  {activity.studentsCount && (
-                    <div>
-                      <span className="font-medium">Студентов:</span> {activity.studentsCount}
-                    </div>
+                  {activity.courseCode && (
+                    <p className="text-sm text-gray-500 mb-2">{t('portfolioPage.teaching.courseCode')}: {activity.courseCode}</p>
                   )}
-                  {activity.evaluation && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                     <div>
-                      <span className="font-medium">Оценка:</span> {activity.evaluation}/5
+                      <span className="font-medium">{t('portfolioPage.teaching.semester')}:</span> {activity.semester}
                     </div>
-                  )}
-                </div>
-                <div className="mt-3">
-                  <span className="font-medium text-gray-700">Описание:</span>
-                  <p className="text-gray-600 mt-1">{activity.description}</p>
-                </div>
+                    <div>
+                      <span className="font-medium">{t('portfolioPage.teaching.year')}:</span> {activity.year}
+                    </div>
+                    {activity.studentsCount && (
+                      <div>
+                        <span className="font-medium">{t('portfolioPage.teaching.studentsCount')}:</span> {activity.studentsCount}
+                      </div>
+                    )}
+                    {activity.evaluation && (
+                      <div>
+                        <span className="font-medium">{t('portfolioPage.teaching.evaluation')}:</span> {activity.evaluation}/5
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <span className="font-medium text-gray-700">{t('portfolioPage.teaching.description')}:</span>
+                    <p className="text-gray-600 mt-1">{activity.description}</p>
+                  </div>
 
                 {/* Отображение файлов */}
                 {activity.attachments && activity.attachments.length > 0 && (
                   <div className="mt-4">
-                    <span className="font-medium text-gray-700">Материалы курса:</span>
+                    <span className="font-medium text-gray-700">{t('portfolioPage.teaching.courseMaterials')}:</span>
                     <div className="mt-2 space-y-2">
                       {activity.attachments.map((file) => (
                         <div key={file.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
@@ -1027,11 +1032,11 @@ function TeachingSection() {
         ))}
         
         {activities.length === 0 && !isAdding && (
-          <div className="text-center text-gray-500 py-8">
-            <Briefcase size={48} className="mx-auto mb-4 text-gray-300" />
-            <p>У вас пока нет преподавательской деятельности</p>
-            <p className="text-sm">Добавьте свой первый курс</p>
-          </div>
+            <div className="text-center text-gray-500 py-8">
+              <Briefcase size={48} className="mx-auto mb-4 text-gray-300" />
+              <p>{t('portfolioPage.teaching.noTeachingActivities')}</p>
+              <p className="text-sm">{t('portfolioPage.teaching.addFirstCourse')}</p>
+            </div>
         )}
       </div>
     </div>
@@ -1039,6 +1044,7 @@ function TeachingSection() {
 }
 
 function AchievementsSection() {
+  const { t } = useTranslation('common')
   const { user } = useAuth()
   const [achievements, setAchievements] = useState<Achievement[]>([])
   const [isAdding, setIsAdding] = useState(false)
@@ -1113,11 +1119,11 @@ function AchievementsSection() {
 
   const getCategoryLabel = (category: string) => {
     const labels = {
-      certificate: 'Сертификат',
-      diploma: 'Диплом',
-      award: 'Награда',
-      test: 'Тест',
-      other: 'Другое'
+      certificate: t('portfolioPage.achievements.certificate'),
+      diploma: t('portfolioPage.achievements.diploma'),
+      award: t('portfolioPage.achievements.award'),
+      test: t('portfolioPage.achievements.test'),
+      other: t('portfolioPage.achievements.other')
     }
     return labels[category as keyof typeof labels] || category
   }
@@ -1139,82 +1145,82 @@ function AchievementsSection() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Достижения и награды</h2>
-        {!isAdding && (
-          <Button onClick={() => setIsAdding(true)} className="flex items-center gap-2">
-            <Plus size={16} />
-            Добавить достижение
-          </Button>
-        )}
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">{t('portfolioPage.achievements.title')}</h2>
+          {!isAdding && (
+            <Button onClick={() => setIsAdding(true)} className="flex items-center gap-2">
+              <Plus size={16} />
+              {t('portfolioPage.achievements.buttons.addAchievement')}
+            </Button>
+          )}
       </div>
 
       {isAdding && (
         <div className="bg-gray-50 p-6 rounded-lg space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Название достижения</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.achievements.achievementName')}</label>
               <Input
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="IELTS, SAT Subject Test, AP Calculus"
+                placeholder={t('portfolioPage.achievements.placeholders.achievementName')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Выдающая организация</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.achievements.issuer')}</label>
               <Input
                 value={formData.issuer}
                 onChange={(e) => setFormData(prev => ({ ...prev, issuer: e.target.value }))}
-                placeholder="Cambridge, College Board"
+                placeholder={t('portfolioPage.achievements.placeholders.issuer')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Дата получения</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.achievements.date')}</label>
               <Input
                 value={formData.date}
                 onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                placeholder="2024-01-15"
+                placeholder={t('portfolioPage.achievements.placeholders.date')}
                 type="date"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Категория</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.achievements.category')}</label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as 'certificate' | 'diploma' | 'award' | 'test' | 'other' }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="certificate">Сертификат</option>
-                <option value="diploma">Диплом</option>
-                <option value="award">Награда</option>
-                <option value="test">Тест</option>
-                <option value="other">Другое</option>
+                <option value="certificate">{t('portfolioPage.achievements.certificate')}</option>
+                <option value="diploma">{t('portfolioPage.achievements.diploma')}</option>
+                <option value="award">{t('portfolioPage.achievements.award')}</option>
+                <option value="test">{t('portfolioPage.achievements.test')}</option>
+                <option value="other">{t('portfolioPage.achievements.other')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Результат/Балл</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.achievements.score')}</label>
               <Input
                 value={formData.score}
                 onChange={(e) => setFormData(prev => ({ ...prev, score: e.target.value }))}
-                placeholder="7.5, 800, A+"
+                placeholder={t('portfolioPage.achievements.placeholders.score')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Срок действия</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.achievements.validityPeriod')}</label>
               <Input
                 value={formData.validityPeriod}
                 onChange={(e) => setFormData(prev => ({ ...prev, validityPeriod: e.target.value }))}
-                placeholder="2 года, бессрочно"
+                placeholder={t('portfolioPage.achievements.placeholders.validityPeriod')}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Описание</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.achievements.description')}</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Опишите достижение, его значимость, полученные навыки"
+              placeholder={t('portfolioPage.achievements.placeholders.description')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
             />
@@ -1223,11 +1229,11 @@ function AchievementsSection() {
           <div className="flex gap-2">
             <Button onClick={handleAdd} className="flex items-center gap-2">
               <Save size={16} />
-              Добавить
+              {t('portfolioPage.achievements.buttons.add')}
             </Button>
             <Button variant="outline" onClick={() => setIsAdding(false)} className="flex items-center gap-2">
               <X size={16} />
-              Отмена
+              {t('portfolioPage.achievements.buttons.cancel')}
             </Button>
           </div>
         </div>
@@ -1246,35 +1252,35 @@ function AchievementsSection() {
                     {getCategoryLabel(achievement.category)}
                   </span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium">Организация:</span> {achievement.issuer}
-                  </div>
-                  <div>
-                    <span className="font-medium">Дата:</span> {achievement.date}
-                  </div>
-                  {achievement.score && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                     <div>
-                      <span className="font-medium">Результат:</span> {achievement.score}
+                      <span className="font-medium">{t('portfolioPage.achievements.issuer')}:</span> {achievement.issuer}
+                    </div>
+                    <div>
+                      <span className="font-medium">{t('portfolioPage.achievements.date')}:</span> {achievement.date}
+                    </div>
+                    {achievement.score && (
+                      <div>
+                        <span className="font-medium">{t('portfolioPage.achievements.score')}:</span> {achievement.score}
+                      </div>
+                    )}
+                    {achievement.validityPeriod && (
+                      <div>
+                        <span className="font-medium">{t('portfolioPage.achievements.validityPeriod')}:</span> {achievement.validityPeriod}
+                      </div>
+                    )}
+                  </div>
+                  {achievement.description && (
+                    <div className="mt-3">
+                      <span className="font-medium text-gray-700">{t('portfolioPage.achievements.description')}:</span>
+                      <p className="text-gray-600 mt-1">{achievement.description}</p>
                     </div>
                   )}
-                  {achievement.validityPeriod && (
-                    <div>
-                      <span className="font-medium">Срок действия:</span> {achievement.validityPeriod}
-                    </div>
-                  )}
-                </div>
-                {achievement.description && (
-                  <div className="mt-3">
-                    <span className="font-medium text-gray-700">Описание:</span>
-                    <p className="text-gray-600 mt-1">{achievement.description}</p>
-                  </div>
-                )}
 
                 {/* Отображение файлов */}
                 {achievement.attachments && achievement.attachments.length > 0 && (
                   <div className="mt-4">
-                    <span className="font-medium text-gray-700">Документы:</span>
+                    <span className="font-medium text-gray-700">{t('portfolioPage.achievements.documents')}:</span>
                     <div className="mt-2 space-y-2">
                       {achievement.attachments.map((file) => (
                         <div key={file.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
@@ -1333,11 +1339,11 @@ function AchievementsSection() {
         ))}
         
         {achievements.length === 0 && !isAdding && (
-          <div className="text-center text-gray-500 py-8">
-            <Award size={48} className="mx-auto mb-4 text-gray-300" />
-            <p>У вас пока нет достижений</p>
-            <p className="text-sm">Добавьте свое первое достижение</p>
-          </div>
+            <div className="text-center text-gray-500 py-8">
+              <Award size={48} className="mx-auto mb-4 text-gray-300" />
+              <p>{t('portfolioPage.achievements.noAchievements')}</p>
+              <p className="text-sm">{t('portfolioPage.achievements.addFirstAchievement')}</p>
+            </div>
         )}
       </div>
     </div>
@@ -1345,6 +1351,7 @@ function AchievementsSection() {
 }
 
 function AdditionalSection() {
+  const { t } = useTranslation('common')
   const { user } = useAuth()
   const [activities, setActivities] = useState<AdditionalActivity[]>([])
   const [isAdding, setIsAdding] = useState(false)
@@ -1397,45 +1404,45 @@ function AdditionalSection() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Дополнительная деятельность</h2>
-        {!isAdding && (
-          <Button onClick={() => setIsAdding(true)} className="flex items-center gap-2">
-            <Plus size={16} />
-            Добавить деятельность
-          </Button>
-        )}
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">{t('portfolioPage.additional.title')}</h2>
+          {!isAdding && (
+            <Button onClick={() => setIsAdding(true)} className="flex items-center gap-2">
+              <Plus size={16} />
+              {t('portfolioPage.additional.buttons.addActivity')}
+            </Button>
+          )}
       </div>
 
       {isAdding && (
         <div className="bg-gray-50 p-6 rounded-lg space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Название деятельности</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.additional.activityTitle')}</label>
               <Input
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Волонтерство, конференция, проект"
+                placeholder={t('portfolioPage.additional.placeholders.activityTitle')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Организация</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.additional.organization')}</label>
               <Input
                 value={formData.organization}
                 onChange={(e) => setFormData(prev => ({ ...prev, organization: e.target.value }))}
-                placeholder="Название организации"
+                placeholder={t('portfolioPage.additional.placeholders.organization')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Роль/Позиция</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.additional.role')}</label>
               <Input
                 value={formData.role}
                 onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
-                placeholder="Участник, организатор, волонтер"
+                placeholder={t('portfolioPage.additional.placeholders.role')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Дата начала</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.additional.startDate')}</label>
               <Input
                 value={formData.startDate}
                 onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
@@ -1443,30 +1450,30 @@ function AdditionalSection() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Дата окончания</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.additional.endDate')}</label>
               <Input
                 value={formData.endDate}
                 onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                 type="date"
               />
-              <p className="text-xs text-gray-500 mt-1">Оставьте пустым, если деятельность продолжается</p>
+              <p className="text-xs text-gray-500 mt-1">{t('portfolioPage.additional.endDateDescription')}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Влияние/Результат</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.additional.impact')}</label>
               <Input
                 value={formData.impact}
                 onChange={(e) => setFormData(prev => ({ ...prev, impact: e.target.value }))}
-                placeholder="Краткое описание результата"
+                placeholder={t('portfolioPage.additional.placeholders.impact')}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Подробное описание</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('portfolioPage.additional.description')}</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Опишите вашу деятельность, обязанности, достижения"
+              placeholder={t('portfolioPage.additional.placeholders.description')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
             />
@@ -1475,11 +1482,11 @@ function AdditionalSection() {
           <div className="flex gap-2">
             <Button onClick={handleAdd} className="flex items-center gap-2">
               <Save size={16} />
-              Добавить
+              {t('portfolioPage.additional.buttons.add')}
             </Button>
             <Button variant="outline" onClick={() => setIsAdding(false)} className="flex items-center gap-2">
               <X size={16} />
-              Отмена
+              {t('portfolioPage.additional.buttons.cancel')}
             </Button>
           </div>
         </div>
@@ -1491,28 +1498,28 @@ function AdditionalSection() {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900 mb-2">{activity.title}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium">Организация:</span> {activity.organization}
-                  </div>
-                  <div>
-                    <span className="font-medium">Роль:</span> {activity.role}
-                  </div>
-                  <div>
-                    <span className="font-medium">Период:</span> {activity.startDate}
-                    {activity.endDate && ` - ${activity.endDate}`}
-                    {!activity.endDate && ' - настоящее время'}
-                  </div>
-                  {activity.impact && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                     <div>
-                      <span className="font-medium">Результат:</span> {activity.impact}
+                      <span className="font-medium">{t('portfolioPage.additional.organization')}:</span> {activity.organization}
                     </div>
-                  )}
-                </div>
-                <div className="mt-3">
-                  <span className="font-medium text-gray-700">Описание:</span>
-                  <p className="text-gray-600 mt-1">{activity.description}</p>
-                </div>
+                    <div>
+                      <span className="font-medium">{t('portfolioPage.additional.role')}:</span> {activity.role}
+                    </div>
+                    <div>
+                      <span className="font-medium">{t('portfolioPage.additional.period')}:</span> {activity.startDate}
+                      {activity.endDate && ` - ${activity.endDate}`}
+                      {!activity.endDate && ` - ${t('portfolioPage.additional.presentTime')}`}
+                    </div>
+                    {activity.impact && (
+                      <div>
+                        <span className="font-medium">{t('portfolioPage.additional.impact')}:</span> {activity.impact}
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <span className="font-medium text-gray-700">{t('portfolioPage.additional.description')}:</span>
+                    <p className="text-gray-600 mt-1">{activity.description}</p>
+                  </div>
               </div>
               <Button
                 onClick={() => handleDelete(activity.id)}
@@ -1526,11 +1533,11 @@ function AdditionalSection() {
         ))}
         
         {activities.length === 0 && !isAdding && (
-          <div className="text-center text-gray-500 py-8">
-            <Activity size={48} className="mx-auto mb-4 text-gray-300" />
-            <p>У вас пока нет дополнительной деятельности</p>
-            <p className="text-sm">Добавьте свою первую деятельность</p>
-          </div>
+            <div className="text-center text-gray-500 py-8">
+              <Activity size={48} className="mx-auto mb-4 text-gray-300" />
+              <p>{t('portfolioPage.additional.noActivities')}</p>
+              <p className="text-sm">{t('portfolioPage.additional.addFirstActivity')}</p>
+            </div>
         )}
       </div>
     </div>

@@ -1,304 +1,121 @@
 {
-  "common": {
-    "edit": "Edit",
-    "save": "Save",
-    "cancel": "Cancel",
-    "add": "Add",
-    "delete": "Delete",
-    "more": "More",
-    "noImage": "No image",
-    "chooseImage": "Choose image",
-    "title": "Title",
-    "description": "Description",
-    "shortDescription": "Short description",
-    "language": "Language",
-    "selectLanguage": "Select language"
-  },
-
   "admin": {
-    "title": "Admin Panel",
-    "welcome": "Welcome",
-    "selectSection": "Select a section to manage",
-    "role": "Role",
-    "superAdmin": "Super Administrator",
-    "adminNews": "News Admin",
-    "adminEvents": "Events Admin",
+    "adminPanel": "Admin Panel",
     "adminEducation": "Education Admin",
-    "adminEservices": "E-services Admin",
-    "adminYessenovai": "YessenovAI Admin",
-    "adminGamification": "YU-Gamification Admin",
+    "adminNews": "News Admin",
     "adminPortfolio": "Portfolio Admin",
-    "student": "Student",
-    "accessDenied": "Access Denied",
-    "noAccess": "You don't have permission to view this page",
-    "news": {
-      "title": "News Management",
-      "description": "Create, edit and manage news",
-      "addNews": "Add News",
-      "search": "Search news",
-      "filter": "Filter",
-      "category": "Category",
-      "status": "Status",
-      "allCategories": "All categories",
-      "noCategory": "No category",
-      "allStatuses": "All statuses",
-      "published": "Published",
-      "archived": "Archived",
-      "scheduled": "Scheduled",
-      "analytics": "Analytics",
-      "export": "Export",
-      "noNews": "No news found",
-      "noNewsDescription": "Try changing filters or add new news",
-      "views": "views",
-      "hasLink": "Has link",
-      "edit": "Edit",
-      "archive": "Archive",
-      "delete": "Delete",
-      "analytics": {
-        "totalNews": "Total News",
-        "published": "Published",
-        "scheduled": "Scheduled",
-        "archived": "Archived",
-        "totalViews": "Total Views",
-        "avgViews": "Average Views",
-        "topCategory": "Top Category",
-        "recentActivity": "Recent Activity"
-      }
-    },
-    "education": {
-      "title": "Education Management",
-      "description": "Manage educational cards and content",
-      "addCard": "Add Card",
-      "search": "Search cards",
-      "category": "Category",
-      "allCategories": "All categories",
-      "education": "Education",
-      "science": "Science",
-      "research": "Research",
-      "noCards": "No cards found",
-      "noCardsDescription": "Try changing filters or add a new card",
-      "analytics": "Analytics",
-      "export": "Export",
-      "edit": "Edit",
-      "delete": "Delete",
-      "clicks": "clicks",
-      "lastClick": "Last click"
-    },
-    "users": {
-      "title": "User Management",
-      "description": "Manage users and their roles",
-      "addUser": "Add User",
-      "search": "Search users",
-      "role": "Role",
-      "status": "Status",
-      "allRoles": "All roles",
-      "allStatuses": "All statuses",
-      "active": "Active",
-      "inactive": "Inactive",
-      "noUsers": "No users found",
-      "noUsersDescription": "Try changing filters or add a new user",
-      "edit": "Edit",
-      "delete": "Delete",
-      "resetPassword": "Reset Password",
-      "generatePassword": "Generate Password",
-      "showPassword": "Show Password",
-      "hidePassword": "Hide Password",
-      "email": "Email",
-      "name": "Name",
-      "position": "Position",
-      "lastLogin": "Last Login",
-      "createdAt": "Created At"
-    },
-    "portfolio": {
-      "title": "Portfolio Management",
-      "description": "Manage user portfolios",
-      "addItem": "Add Item",
-      "search": "Search items",
-      "category": "Category",
-      "allCategories": "All categories",
-      "general": "General Information",
-      "publications": "Publications",
-      "teaching": "Teaching",
-      "achievements": "Achievements",
-      "additional": "Additional",
-      "noItems": "No items found",
-      "noItemsDescription": "Try changing filters or add a new item",
-      "analytics": "Analytics",
-      "export": "Export",
-      "edit": "Edit",
-      "delete": "Delete",
-      "views": "views",
-      "files": "files"
-    }
+    "adminEvents": "Events Admin",
+    "adminEservices": "Services Admin",
+    "adminYessenovai": "Yessenov AI Admin",
+    "adminGamification": "Gamification Admin"
   },
 
-  "news": {
-    "pageTitle": "News",
-    "pageDescription": "Latest news and university events",
-    "viewAll": "View all news",
-    "featured": "Featured",
-    "breaking": "Breaking",
-    "categories": {
-      "rating": "Rating",
-      "international": "International cooperation",
-      "science": "Scientific cooperation",
-      "management": "Management",
-      "cooperation": "Cooperation",
-      "opening": "Opening",
-      "achievements": "Achievements",
-      "olympiad": "Olympiad"
-    },
-
-    "items": {
-      "1": {
-        "title": "QS World University Rankings 2026 Results",
-        "description": "Caspian State University of Technologies and Engineering named after Sh. Yessenov showed high results in the QS World University Rankings 2026."
-      },
-      "2": {
-        "title": "Azerbaijan and Kazakhstan: Strengthening ties in the Year of Constitution and Sovereignty",
-        "description": "The university implements joint projects to strengthen academic and cultural ties between Azerbaijan and Kazakhstan."
-      },
-      "3": {
-        "title": "Joint meeting of KINI and DKU representatives",
-        "description": "Issues of scientific cooperation between Caspian International University and University of Copenhagen Denmark were discussed."
-      },
-      "4": {
-        "title": "Anti-corruption management system",
-        "description": "A new anti-corruption management system has been implemented at the university, its effectiveness has been discussed."
-      },
-      "5": {
-        "title": "Meeting with COEST delegation",
-        "description": "Negotiations on future cooperation and joint projects took place between the university administration and the COEST delegation."
-      },
-      "6": {
-        "title": "Opening of Shynabay Akkenzheev auditorium",
-        "description": "The university solemnly opened a new auditorium named after the famous Kazakhstani scientist Shynabay Akkenzheev."
-      },
-      "7": {
-        "title": "Kazakhstani students won at the world competition!",
-        "description": "Students of Yessenov University won in an international technology competition, increasing the prestige of the university."
-      },
-      "8": {
-        "title": "XVII Republican subject olympiad",
-        "description": "In the second stage of the XVII Republican subject olympiad, held at the university, students demonstrated their knowledge."
-      }
-    }
+  "roles": {
+  "student": "Student",
+  "teacher": "Teacher",
+  "admin": "Administrator",
+  "super_admin": "Super administrator",
+  "anonymous": "Anonymous user",
+  "personnel": "Employee"
   },
 
   "login": {
-    "title": "Sign in to YU ID account",
-    "welcome": "Welcome to YU",
-    "subtitle": "All university services in one place",
+    "title": "Sign In",
+    "welcome": "Welcome to Yessenov University",
+    "subtitle": "Your educational portal for modern learning",
     "tabs": {
       "emailIin": "Gmail/IIN",
       "egovQr": "eGov QR",
-      "ecp": "EDS"
+      "ecp": "Digital Signature"
     },
-    "emailOrIinLabel": "Enter yu.edu.kz email or IIN",
-    "emailPlaceholder": "example@yu.edu.kz",
+    "emailOrIinLabel": "Email or IIN",
+    "emailPlaceholder": "Enter email or IIN",
     "passwordLabel": "Password",
-    "passwordPlaceholder": "•••••••••••••••••••••",
+    "passwordPlaceholder": "Enter password",
     "forgotPassword": "Forgot password?",
     "signInButton": "Sign In",
-    "egovStep1": "Open mobile application",
-    "egovStep2": "Click QR scanner in the top corner",
-    "egovStep3": "Point camera at screen",
-    "qrCodePlaceholder": "QR code",
-    "dataProcessingConsent": "By continuing to use the YU ID service, you consent to the collection, processing and storage of your personal data in the amount contained in the certificate (electronic digital signature) of the NCA, for the purposes of displaying electronic signature data.",
+    "anonymousLogin": "Sign in as guest",
+    "anonymousLoginDescription": "Sign in as guest to view public content without registration",
+    "egovStep1": "1. Open the app",
+    "egovStep2": "2. Sign in",
+    "egovStep3": "3. Scan QR code",
+    "qrCodePlaceholder": "QR code will appear here",
+    "dataProcessingConsent": "By clicking 'Sign In', you agree to the processing of personal data in accordance with the privacy policy",
     "selectCertificate": "Select certificate",
-    "certificateSelected": "Certificate successfully selected",
-    "dragOrClick": "Drag file or click to select",
-    "anonymousLogin": "Sign in anonymously to YU Otinish",
-    "anonymousLoginDescription": "Use anonymous login to leave an idea, rating or report a problem."
-  },
-  "aria": {
-    "languageSelect": "Language selection"
-  },
-  
-  "education": {
-    "sign_in": "Sign in"
+    "certificateSelected": "Certificate selected",
+    "dragOrClick": "Drag file or click to select"
   },
 
-  "yessenovai": {
-    "welcome": "Welcome to YessenovAI",
-    "description": "Your personal AI assistant for quick answers and support. Shall we start?",
-    "inputPlaceholder": "Enter a message...",
-    "attachFile": "Attach file",
-    "newChat": "New chat",
-    "newChatTitle": "New chat",
-    "activeChats": "Active chats",
-    "documentQuestions": "Questions about documents",
-    "popularQuestionsTitle": "Popular questions",
-    "version": "YessenovAI v1.0",
-    "sampleQuestion": "Where can I get a certificate of study?",
-    "sampleAnswer": "You can get a certificate of study at the dean's office of your faculty.",
-    "botResponses": [
-      "You can get the certificate at the dean's office from 9:00 to 17:00.",
-      "For this, you need to contact the academic department.",
-      "I can help you with this question. Do you need more information?",
-      "This document is available through the student’s personal account."
-    ],
-    "popularQuestions": [
-      "Where can I find the exam schedule?",
-      "Scholarship application",
-      "Campus locations",
-      "Debts on subjects",
-      "Class schedule"
-    ],
-    "cards": {
-      "freshmen": {
-        "title": "Help for freshmen",
-        "desc": "Where the campuses are, where to apply...",
-        "question": "Where are the university campuses located?"
-      },
-      "documents": {
-        "title": "Document processing",
-        "desc": "Certificates, applications...",
-        "question": "How to get a certificate of study?"
-      },
-      "academic": {
-        "title": "Academic questions",
-        "desc": "Debts, exams...",
-        "question": "How to find out the exam schedule?"
-      },
-      "content": {
-        "title": "Content generation",
-        "desc": "Diploma topics...",
-        "question": "Help me come up with a diploma topic"
-      }
-    }
+  "common": {
+    "logo": "Logo",
+    "avatar": "avatar",
+    "account": "ACCOUNT"
+  },
+
+  "menu": {
+    "news": "News",
+    "calendar": "Events",
+    "education": "Education",
+    "applications": "Applications",
+    "science": "Science",
+    "upbringing": "Upbringing",
+    "eservices": "E-services",
+    "yessenovai": "YessenovAI",
+    "YU-Gamification": "YU-Gamification"
+  },
+
+  "portfolio": {
+    "general": "General",
+    "publications": "Publications",
+    "teaching": "Teaching",
+    "achievements": "Achievements",
+    "additional": "Additional"
+  },
+  
+  "account": {
+    "settings": "Settings",
+    "logout": "Logout"
   },
 
   "settings": {
-    "title": "Profile Settings",
-    "subtitle": "Manage your personal data and preferences",
+    "title": "Account Settings",
+    "subtitle": "Manage your data and security settings",
     "sections": {
       "profile": "Profile",
       "security": "Security",
       "contacts": "Contacts",
-      "about": "About Me",
-      "reserveEmail": "Reserve email"
+      "about": "About",
+      "reserveEmail": "Reserve Email"
     },
     "avatar": {
-      "recommendations": "Photo recommendations:",
-      "square": "Use a square image (1:1)",
-      "minSize": "Minimum size: 400x400 pixels",
-      "formats": "Supported formats: JPG, PNG, GIF",
-      "maxSize": "Maximum file size: 5 MB",
+      "downloadInstruction": "Download Student Instruction",
+      "downloadEmployeeInstruction": "Download Employee Instruction",
+      "recommendations": "Upload Recommendations",
+      "formats": "Supported formats: JPG, PNG",
+      "maxSize": "Maximum size: 1 MB",
       "saving": "Saving...",
-      "save": "Save changes",
-      "downloadInstruction": "Download instruction"
+      "save": "Save",
+      "errorProcessing": "Failed to process image. Try another one.",
+      "errorResize": "Failed to resize image. Try another one.",
+      "errorSize": "Even after resizing, the size exceeds 1 MB. Choose another image.",
+      "errorUpload": "Error uploading avatar",
+      "successUpload": "Your image has been successfully changed",
+      "errorAuth": "User not authorized",
+      "successInstruction": "Instruction successfully downloaded",
+      "errorInstruction": "Error downloading instruction",
+      "successEmployeeInstruction": "Employee instruction successfully downloaded",
+      "errorEmployeeInstruction": "Error downloading employee instruction"
     },
     "password": {
-      "securityTitle": "Your account security",
-      "securityDesc": "Use a strong password of at least 8 characters with numbers and special symbols",
-      "current": "Current password",
+      "securityTitle": "Password Security",
+      "securityDesc": "Use a strong password to protect your account",
+      "current": "Current Password",
       "currentPlaceholder": "Enter current password",
-      "new": "New password",
+      "new": "New Password",
       "newPlaceholder": "Enter new password",
-      "confirm": "Confirm new password",
-      "confirmPlaceholder": "Repeat new password",
-      "change": "Change password"
+      "confirm": "Confirm Password",
+      "confirmPlaceholder": "Confirm new password",
+      "change": "Change Password"
     },
     "contacts": {
       "firstName": "First Name",
@@ -307,251 +124,380 @@
       "lastNamePlaceholder": "Enter last name",
       "phone": "Phone",
       "email": "Email",
-      "save": "Save contacts"
+      "birthDate": "Birth Date",
+      "dateFormat": "Format: YYYY-MM-DD",
+      "save": "Save"
     },
     "about": {
-      "title": "Tell us about yourself",
-      "placeholder": "Describe your interests, achievements, hobbies...",
+      "title": "About Me",
+      "placeholder": "Tell us about yourself, your interests and achievements...",
       "maxChars": "Maximum 500 characters",
-      "save": "Save description"
+      "save": "Save"
     },
-    "upload": {
-      "certificates": "certificates",
-      "courses": "course materials",
-      "uploadFiles": "Upload files",
-      "dragText": "Drag files here or click to select",
-      "choose": "Choose files",
-      "supportedFormats": "Supported formats: JPG, PNG, PDF (up to 10 MB each)",
-      "uploadedFiles": "Uploaded files",
-      "pdfFile": "PDF file",
-      "mb": "MB",
-      "save": "Save files"
+    "reserveEmail": {
+      "enterEmail": "Enter email",
+      "invalidEmail": "Invalid email",
+      "errorUpdate": "Failed to update reserve email",
+      "successUpdate": "Reserve email updated",
+      "errorService": "Service unavailable. Try again later.",
+      "description": "Specify a reserve email for account recovery",
+      "savedOnServer": "Saved on server",
+      "saving": "Saving...",
+      "add": "Add"
     }
   },
-  "profile": {
-    "teacher": "teacher"
-  },
-  "menu": {
-    "news": "News",
-    "calendar": "Events",
-    "education": "Education",
-    "science": "Science",
-    "upbringing": "Upbringing",
-    "eservices": "E-services",
-    "yessenovai": "YessenovAI",
-    "YU-Gamification": "YU-Gamification"
 
-  },
-  "portfolio": {
-    "general": "General information",
-    "publications": "Publications and research",
-    "teaching": "Teaching activities",
-    "achievements": "Achievements and awards",
-    "additional": "Additional activities",
-    "generalContent": "General information about the teacher",
-    "publicationsContent": "List of scientific publications and research work",
-    "teachingContent": "Information about teaching activities and courses",
-    "achievementsContent": "Achievements, awards, and competition results",
-    "additionalContent": "Additional professional activities and contributions"
-  },
-  "account": {
-    "settings": "Settings",
-    "logout": "Log out"
-  },
   "groups": {
-    "sections": "Sections",
-    "portfolio": "Portfolio",
-    "account": "Account"
+    "portfolio": "Portfolio"
   },
+
+  "applicationsPage": {
+    "title": "Applications",
+    "description": "Access to all applications",
+    "tabs": {
+      "all": "All Applications",
+      "education": "Education",
+      "science": "Science",
+      "upbringing": "Upbringing"
+    },
+    "messages": {
+      "loginRequired": "You need to be authorized to access applications",
+      "signIn": "Sign In",
+      "noApplications": "No applications found",
+      "noApplicationsInCategory": "No applications found in category \"{{category}}\""
+    },
+    "card": {
+      "goTo": "Go to",
+      "noDescription": "No description provided"
+    },
+    "applications": {
+      "platonus": {
+        "title": "Platonus",
+        "description": "System for automating the educational process"
+      },
+      "canvas": {
+        "title": "Canvas",
+        "description": "Online learning platform"
+      },
+      "googleMeet": {
+        "title": "Google Meet",
+        "description": "Video conferencing"
+      },
+      "bitrix24": {
+        "title": "Bitrix24",
+        "description": "Corporate portal"
+      },
+      "dspace": {
+        "title": "DSpace",
+        "description": "Institutional repository"
+      },
+      "gmail": {
+        "title": "GMail",
+        "description": "University corporate email"
+      },
+      "helpdesk": {
+        "title": "Help Desk",
+        "description": "Technical support"
+      },
+      "kpi": {
+        "title": "KPI",
+        "description": "Key performance indicators"
+      },
+      "lessons": {
+        "title": "Lessons",
+        "description": "Lesson management system"
+      },
+      "scienceJournal": {
+        "title": "Science Journal",
+        "description": "Scientific journal"
+      },
+      "service": {
+        "title": "Service",
+        "description": "Production problem solving"
+      },
+      "yessenovScienceJournal": {
+        "title": "Yessenov Science Journal",
+        "description": "Scientific journals catalog"
+      },
+      "studentClubs": {
+        "title": "Student Clubs",
+        "description": "Student organizations platform"
+      },
+      "adminPanel": {
+        "title": "Admin Panel",
+        "description": "Access to administrative section"
+      },
+      "dormitory": {
+        "title": "Dormitory",
+        "description": "Dormitory accommodation applications"
+      },
+      "ecp": {
+        "title": "EDS",
+        "description": "Remote digital signature acquisition"
+      }
+    }
+  },
+
   "aria": {
     "languageSelect": "Language selection"
   },
+
   "notifications": {
     "title": "Notifications",
+    "newCount": "{{count}} new",
     "empty": "No notifications",
     "clearAll": "Clear all",
     "viewMore": "View more",
     "compact": "Compact",
     "markAllRead": "Mark all as read",
-    "newCount": "{{count}} new",
-    "birthdayGreeting": "Happy Birthday! Yessenov University congratulates you and wishes you success! 🎉",
+    "birthdayGreeting": "Happy Birthday!  Yessenov University congratulates you and wishes you success in your studies and achieving all your goals! The university is proud of its students! 🎓✨",
     "samples": {
       "newsHackathon": "New post: Hackathon enrollment opened",
       "curatorMeeting": "Reminder: meeting with curator tomorrow at 10:00",
-      "eservicesStatus": "E-services: your certificate request was approved",
-      "portfolioAchievement": "Congrats! A new achievement entry was added",
-      "aiReply": "YessenovAI: your request has a new reply",
+      "eservicesStatus": "E-services: your document request has been approved",
+      "portfolioAchievement": "Congratulations! New achievement entry added",
+      "aiReply": "YessenovAI: received response to your request",
       "calendarRoom": "Calendar: room 3.215 booked for 16:00",
-      "settingsSecurity": "Security: it is recommended to update your password",
-      "newsGrant": "News: additional master's grants announced",
-      "clubEvent": "Clubs: open IT-club meetup today at 18:00",
-      "scienceCall": "Science: call for journal submissions is open"
-    },
-    "items": {
-      "1": "New message from Alexey",
-      "2": "Order status updated",
-      "3": "Reminder about tomorrow's meeting"
+      "settingsSecurity": "Security: recommended to update account password",
+      "newsGrant": "News: additional master's grants announced"
     }
   },
+
   "appMap": {
-    "button": "App map",
-    "title": "App map",
-    "subtitle": "Quick access to all sections",
+    "button": "App Map",
+    "title": "App Map",
+    "subtitle": "Quick navigation through all sections",
     "searchPlaceholder": "Search sections...",
     "nothingFound": "Nothing found",
-    "openPage": "Open map page"
+    "openPage": "Open page map"
   },
-  "education": {
-    "education": "Education",
-    "education_desc": "Access to courses and assignments",
-    "platonus_desc": "System for automating the educational process",
-    "lessons_desc": "Conducting video conferences using Google Meet",
-    "sign_in": "Sign in",
-    "canvas": "Canvas",
-    "platonus": "Platonus"
-  },
-  "news": {
-    "pageTitle": "News",
-    "pageDescription": "Latest news and events of the university",
-    "viewAll": "View all news",
-    "categories": {
-      "rating": "Rating",
-      "international": "International cooperation",
-      "science": "Scientific cooperation",
-      "management": "Management",
-      "cooperation": "Cooperation",
-      "opening": "Opening",
-      "achievements": "Achievements",
-      "olympiad": "Olympiad"
-    },
-    "items": {
-      "1": {
-        "title": "QS World University Rankings 2026 Results",
-        "description": "Caspian State University of Technologies and Engineering named after Sh. Yessenov showed high results in the QS World University Rankings 2026."
-      },
-      "2": {
-        "title": "Azerbaijan and Kazakhstan: Strengthening ties in the Year of Constitution and Sovereignty",
-        "description": "The university implements joint projects to strengthen academic and cultural ties between Azerbaijan and Kazakhstan."
-      },
-      "3": {
-        "title": "Joint meeting of KINI and DKU representatives",
-        "description": "Issues of scientific cooperation between Caspian International University and University of Copenhagen Denmark were discussed."
-      },
-      "4": {
-        "title": "Anti-corruption management system",
-        "description": "A new anti-corruption management system has been implemented at the university, its effectiveness has been discussed."
-      },
-      "5": {
-        "title": "Meeting with COEST delegation",
-        "description": "Negotiations on future cooperation and joint projects took place between the university administration and the COEST delegation."
-      },
-      "6": {
-        "title": "Opening of Shynabay Akkenzheev auditorium",
-        "description": "The university solemnly opened a new auditorium named after the famous Kazakhstani scientist Shynabay Akkenzheev."
-      },
-      "7": {
-        "title": "Kazakhstani students won at the world competition!",
-        "description": "Students of Yessenov University won in an international technology competition, increasing the prestige of the university."
-      },
-      "8": {
-        "title": "XVII Republican subject olympiad",
-        "description": "In the second stage of the XVII Republican subject olympiad, held at the university, students demonstrated their knowledge."
+  
+  "calendarPage": {
+    "title": "Meeting Calendar",
+    "book": "Book",
+    "nearestTitle": "Upcoming Events",
+    "noEventsToday": "No events today",
+    "headerTitle": "Calendar",
+    "eventsCount": "Events",
+    "weekdaysShort": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "fullCalendar": {
+      "buttonText": {
+        "today": "Today",
+        "month": "Month",
+        "week": "Week",
+        "day": "Day"
       }
     },
-    "readMore": "Read more",
-    "likes": "likes",
-    "commentPlaceholder": "Write a comment...",
-    "send": "Send",
-    "exampleComment1": "Great news!",
-    "exampleComment2": "Looking forward to details!",
-    "exampleComment3": "Nice to see the university's progress."
-  },
-  "eservices": {
-    "title": "E-services",
-    "subtitle": "Online services for requests, certificates and support",
-    "bitrix24": "Bitrix24",
-    "bitrixDesc": "Internal document management",
-    "helpdeskDesc": "Technical support",
-    "serviceDesc": "Production issue resolution",
-    "tabs": { "services": "Services", "history": "History" },
-    "sections": { "certificates": "Certificates", "applications": "Applications" },
-    "certs": {
-      "studyProof": { "title": "Study certificate", "desc": "Request a certificate of current study" },
-      "transcript": { "title": "Transcript", "desc": "Order an academic transcript" }
-    },
-    "apps": {
-      "academicLeave": { "title": "Academic leave", "desc": "Apply for academic leave" },
-      "grantTransfer": { "title": "Grant transfer", "desc": "Apply to transfer from tuition to grant" },
-      "expel": { "title": "Expulsion", "desc": "Apply for expulsion" }
-    },
-    "actions": { "applyCertificate": "Submit request", "applyApplication": "Submit application","login": "Sign in" },
-    "history": { "type": "Type" },
-    "status": { "approved": "Approved", "rejected": "Rejected", "pending": "Pending" }
-  },
-  "science": {
-    "title": "Science",
-    "subtitle": "Platforms for research, publications and projects",
-    "ojsDesc": "Scientific journal management",
-    "dspaceDesc": "Electronic archive of theses and research",
-    "ysjDesc": "Publication of university works"
-  },
-  "upbringing": {
-    "title": "Upbringing",
-    "subtitle": "Dormitory applications, sections, clubs",
-    "curatorship": { "title": "Curatorship", "desc": "applying for a dormitory" },
-    "events": { "title": "Upbringing events", "desc": "Registration for sports and creative sections" }
-  },
-  "calendar": {
-    "newEvent": "New event",
-    "titlePlaceholder": "Title",
-    "blue": "Blue",
-    "green": "Green",
-    "yellow": "Yellow",
-    "cancel": "Cancel",
-    "add": "Add"
-  },
-  "common": { "loading": "Loading..." },
-  "calendarPage": {
-    "title": "Events",
-    "book": "+ Book",
-    "weekdaysShort": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    "nearestTitle": "Upcoming events",
-    "noEventsToday": "No events today",
-    "headerTitle": "Events calendar",
-    "refresh": "Refresh events",
-    "eventsCount": "Events",
-    "errors": {
-      "titleRequired": "Enter event title",
-      "dateRequired": "Select a date",
-      "startTimeRequired": "Select start time",
-      "endTimeRequired": "Select end time",
-      "placeRequired": "Select a place",
-      "endAfterStart": "End time must be after start time",
-      "participantsRequired": "Add participants for an online meeting",
-      "linkRequired": "Add a link for the online meeting",
-      "slotBusy": "This time and place are already booked!"
-    },
-    "successCreated": "Event created successfully!",
-    "createError": "Error creating event",
-    "connectionError": "Connection error",
     "form": {
-      "title": "Event title",
-      "titlePlaceholder": "Enter event title",
-      "date": "Date",
-      "startTime": "Start time",
-      "endTime": "End time",
-      "color": "Color",
-      "colors": { "blue": "Blue", "green": "Green", "yellow": "Yellow", "red": "Red" },
-      "place": "Place",
-      "isOnline": "Online meeting",
-      "link": "Event link",
-      "linkPlaceholder": "Paste the meeting link",
-      "participants": "Participants",
-      "noParticipants": "No participants selected",
-      "noUsers": "No users yet",
-      "adding": "Adding...",
-      "add": "Add",
-      "cancel": "Cancel"
+      "title": "Add Meeting",
+      "eventTitle": "Event Title",
+      "eventDescription": "Event Description",
+      "startDate": "Start Time",
+      "endDate": "End Time",
+      "location": "Location",
+      "attendees": "Attendees",
+      "attendeesPlaceholder": "Enter attendees list",
+      "submit": "Add Meeting",
+      "titlePlaceholder": "Enter meeting title",
+      "campus": "Campus",
+      "selectCampus": "-- Select Campus --",
+      "selectLocation": "-- Select Meeting Location --"
+    },
+    "buttons": {
+      "close": "Close",
+      "submit": "Add"
+    },
+    "validation": {
+      "titleRequired": "Meeting title is required",
+      "titleTooLong": "Meeting title should not exceed 200 characters",
+      "dateRequired": "Meeting date is required",
+      "startTimeRequired": "Start time is required",
+      "endTimeRequired": "End time is required",
+      "locationRequired": "Meeting location is required",
+      "endTimeAfterStart": "End time must be after start time",
+      "pastDate": "Cannot create meetings in the past",
+      "onlineParticipantsRequired": "Online meetings require participants",
+      "onlineLinkRequired": "Online meetings require a link",
+      "invalidLink": "Please enter a valid link"
+    },
+    "messages": {
+      "meetingCreated": "Meeting created successfully!",
+      "timeSlotTaken": "Selected time slot is already taken at this location",
+      "timeAndPlaceTaken": "Selected time and location are already taken. Please choose another time or location.",
+      "validationError": "Data validation error. Please check the form fields.",
+      "authError": "Authorization error. Please sign in again.",
+      "permissionError": "Insufficient permissions to create meeting.",
+      "serverError": "Server error. Please try again later.",
+      "createError": "Error creating meeting: {{error}}",
+      "participantsLoadError": "Error loading participants: {{error}}",
+      "syncConflicts": "Found {{count}} conflicts. Local changes saved.",
+      "adminChanges": "🔄 Admin changes:",
+      "eventCreated": "➕ Created: ",
+      "eventUpdated": "✏️ Updated: ",
+      "eventDeleted": "🗑️ Deleted: ",
+      "unknownPlace": "Unknown location"
+    },
+    "debug": {
+      "totalLocations": "Total locations:",
+      "selectedLocation": "Selected location:",
+      "none": "none"
+    }
+  },
+
+  "portfolioPage": {
+    "exportToWord": "Export to Word",
+    "loading": "Loading...",
+    "general": {
+      "title": "General Information",
+      "fullName": "Full Name",
+      "position": "Position",
+      "department": "Department",
+      "education": "Education",
+      "experience": "Work Experience",
+      "skills": "Skills",
+      "languages": "Languages",
+      "contactInfo": "Contact Information",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "placeholders": {
+        "fullName": "Enter full name",
+        "position": "Enter position",
+        "department": "Enter department name",
+        "education": "Enter education",
+        "experience": "Describe your work experience",
+        "skill": "Enter skill",
+        "language": "Enter language",
+        "email": "Enter email",
+        "phone": "Enter phone",
+        "address": "Enter address"
+      },
+      "buttons": {
+        "edit": "Edit",
+        "create": "Create",
+        "save": "Save",
+        "cancel": "Cancel",
+        "addSkill": "Add Skill",
+        "addLanguage": "Add Language",
+        "remove": "Remove"
+      }
+    },
+    "publications": {
+      "title": "Publications and Scientific Activity",
+      "description": "Scientific publications for the last 10 years",
+      "noPublications": "No publications found",
+      "noPublicationsDescription": "No publications in {year}",
+      "totalPublications": "Total Publications",
+      "journals": "Journals",
+      "withDOI": "With DOI",
+      "thisYear": "This Year",
+      "yearsTitle": "Publications by Year",
+      "publicationsYear": "Publications for {year}",
+      "publicationsCount": "publications",
+      "activityChart": "Activity Chart",
+      "authors": "Authors",
+      "journal": "Journal",
+      "doi": "DOI",
+      "impactFactor": "Impact Factor",
+      "citations": "Citations",
+      "openPublication": "Open Publication",
+      "buttons": {
+        "update": "Update"
+      }
+    },
+    "teaching": {
+      "title": "Teaching Activity",
+      "courseName": "Course Name",
+      "courseCode": "Course Code",
+      "semester": "Semester",
+      "year": "Year",
+      "studentsCount": "Number of Students",
+      "evaluation": "Course Evaluation",
+      "description": "Course Description",
+      "courseMaterials": "Course Materials",
+      "noTeachingActivities": "You have no teaching activities yet",
+      "addFirstCourse": "Add your first course",
+      "placeholders": {
+        "courseName": "Enter course name",
+        "courseCode": "CS101, MATH201",
+        "semester": "Fall, Spring, Summer",
+        "year": "2024",
+        "studentsCount": "25",
+        "evaluation": "4.5",
+        "description": "Describe course content, teaching methods, achievements"
+      },
+      "buttons": {
+        "addCourse": "Add Course",
+        "add": "Add",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel"
+      }
+    },
+    "achievements": {
+      "title": "Achievements and Awards",
+      "achievementName": "Achievement Name",
+      "issuer": "Issuing Organization",
+      "date": "Date Received",
+      "category": "Category",
+      "score": "Result/Score",
+      "validityPeriod": "Validity Period",
+      "description": "Description",
+      "documents": "Documents",
+      "certificate": "Certificate",
+      "diploma": "Diploma",
+      "award": "Award",
+      "test": "Test",
+      "other": "Other",
+      "noAchievements": "You have no achievements yet",
+      "addFirstAchievement": "Add your first achievement",
+      "placeholders": {
+        "achievementName": "IELTS, SAT Subject Test, AP Calculus",
+        "issuer": "Cambridge, College Board",
+        "date": "2024-01-15",
+        "score": "7.5, 800, A+",
+        "validityPeriod": "2 years, permanent",
+        "description": "Describe the achievement, its significance, skills gained"
+      },
+      "buttons": {
+        "addAchievement": "Add Achievement",
+        "add": "Add",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel"
+      }
+    },
+    "additional": {
+      "title": "Additional Activities",
+      "activityTitle": "Activity Title",
+      "organization": "Organization",
+      "role": "Role/Position",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "period": "Period",
+      "impact": "Impact/Result",
+      "description": "Detailed Description",
+      "presentTime": "present",
+      "endDateDescription": "Leave empty if activity is ongoing",
+      "noActivities": "You have no additional activities yet",
+      "addFirstActivity": "Add your first activity",
+      "placeholders": {
+        "activityTitle": "Volunteering, conference, project",
+        "organization": "Organization name",
+        "role": "Participant, organizer, volunteer",
+        "impact": "Brief description of results",
+        "description": "Describe your activity, responsibilities, achievements"
+      },
+      "buttons": {
+        "addActivity": "Add Activity",
+        "add": "Add",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel"
+      }
     }
   }
 }

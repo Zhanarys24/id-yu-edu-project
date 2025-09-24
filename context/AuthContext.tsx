@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole, Permission, ROLE_PERMISSIONS } from '@/lib/types/auth';
+import { User, Permission } from '@/lib/types/auth';
 import { userService } from '@/lib/services/userService';
 import { AuthApi } from '@/lib/services/authApi';
 
@@ -10,7 +10,6 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   anonymousLogin: () => boolean;
   logout: () => void;
-  hasRole: (role: UserRole) => boolean;
   canAccess: (section: string, action: string) => boolean;
   getUserPermissions: () => Permission[];
   isAdmin: () => boolean;
@@ -32,31 +31,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
       setUser(parsedUser);
-      
-      // Обновляем данные пользователя из базы данных при загрузке
-      const updatedUser = userService.findUserByEmail(parsedUser.email);
-      if (updatedUser && (updatedUser.name !== parsedUser.name || updatedUser.position !== parsedUser.position)) {
-        const rolePermissions = ROLE_PERMISSIONS?.[updatedUser.role] || [];
-        
-        const refreshedUser: User = {
-          id: updatedUser.id,
-          email: updatedUser.email,
-          name: updatedUser.name,
-          position: updatedUser.position,
-          role: updatedUser.role,
-          permissions: rolePermissions,
-          avatar: parsedUser.avatar
-        };
-
-        setUser(refreshedUser);
-        localStorage.setItem('user', JSON.stringify(refreshedUser));
-        
-        // Also update individual localStorage items for AvatarContext
-        localStorage.setItem('user.name', refreshedUser.name);
-        if (refreshedUser.position) {
-          localStorage.setItem('user.position', refreshedUser.position);
-        }
-      }
     }
   }, []);
 
@@ -64,15 +38,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Проверяем, что мы на клиенте
     if (typeof window === 'undefined') return false;
     
-    const rolePermissions = ROLE_PERMISSIONS?.['anonymous'] || [];
-    
     const anonymousUser: User = {
       id: 'anonymous',
       email: 'anonymous@yu.edu.kz',
       name: 'Аноним',
       position: 'Гость',
       role: 'anonymous',
-      permissions: rolePermissions,
+      permissions: [
+        { section: 'news', actions: ['read'] },
+        { section: 'events', actions: ['read'] },
+        { section: 'calendar', actions: ['read'] },
+        { section: 'education', actions: ['read'] },
+        { section: 'science', actions: ['read'] },
+        { section: 'upbringing', actions: ['read'] },
+        { section: 'eservices', actions: ['read'] }
+      ],
       avatar: '/avatar.jpg'
     };
 
@@ -82,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Also update individual localStorage items for AvatarContext
     localStorage.setItem('user.name', anonymousUser.name);
     if (anonymousUser.position) {
-    localStorage.setItem('user.position', anonymousUser.position);
+      localStorage.setItem('user.position', anonymousUser.position);
     }
     
     return true;
@@ -105,31 +85,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('Profile load failed:', e);
       }
   
-      // Определяем роль: сначала из profile, потом из resp, потом по умолчанию
-      let role: UserRole = 'student';
+      // Роль и разрешения приходят из API
+      const role = profile?.role || resp.role || 'student';
+      const permissions = profile?.permissions || resp.permissions || [];
       
-      // Проверяем profile на наличие роли
-      if (profile?.role) {
-        role = profile.role as UserRole;
-        console.log('Роль из profile:', role);
-      } else if (resp.role) {
-        role = resp.role as UserRole;
-        console.log('Роль из resp:', role);
-      } else {
-        // Если роль не найдена, проверяем по email или другим полям
-        console.log('Роль не найдена в API ответе, используем логику определения роли');
-        
-        // Здесь можно добавить логику определения роли по email или другим полям
-        if (email === 'super@admin.com' || email === 'zhanarys') {
-          role = 'super_admin';
-          console.log('Установлена роль super_admin для:', email);
-        }
-      }
-      
-      const rolePermissions = ROLE_PERMISSIONS?.[role] || [];
-      if (!ROLE_PERMISSIONS || !ROLE_PERMISSIONS[role]) {
-        console.warn('ROLE_PERMISSIONS missing for role:', role);
-      }
+      console.log('Роль из API:', role);
+      console.log('Разрешения из API:', permissions);
   
       // Use data from login response first, then profile response - только из API
       const firstName = resp.first_name || profile?.first_name;
@@ -146,11 +107,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const newUser: User = {
         id: String(resp.id ?? profile?.id ?? 'unknown'),
         email: email,
-        name: fullName || email, // Только если fullName пустой, используем email
-        position: position, // Только из API, без fallback
+        name: fullName || email,
+        position: position,
         role,
-        permissions: rolePermissions,
-        avatar: avatar || '/avatar.jpg' // Только аватар может иметь fallback
+        permissions: permissions,
+        avatar: avatar || '/avatar.jpg'
       };
   
       console.log('Созданный пользователь:', newUser);
@@ -179,20 +140,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const getRoleDisplayName = (role: UserRole): string => {
-    switch (role) {
-      case 'admin_news': return 'Админ новостей';
-      case 'admin_events': return 'Админ мероприятий';
-      case 'admin_education': return 'Админ образования';
-      case 'admin_eservices': return 'Админ Е-услуг';
-      case 'admin_yessenovai': return 'Админ YessenovAI';
-      case 'admin_gamification': return 'Админ YU-Gamification';
-      case 'admin_portfolio': return 'Админ портфолио';
-      case 'super_admin': return 'Супер администратор';
-      default: return 'Студент';
-    }
-  };
-
   const logout = async () => {
     // Проверяем, что мы на клиенте
     if (typeof window === 'undefined') return;
@@ -214,8 +161,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore
     }
   };
-
-  const hasRole = (role: UserRole) => user?.role === role;
   
   const canAccess = (section: string, action: string): boolean => {
     if (!user) return false;
@@ -227,7 +172,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const getUserPermissions = () => user?.permissions || [];
 
   const isAdmin = () => {
-    return !!user && user.role !== 'student' && user.role !== 'anonymous';
+    if (!user) return false;
+    // Проверяем, есть ли у пользователя права администратора
+    return user.permissions.some(permission => 
+      permission.actions.includes('manage') || 
+      permission.actions.includes('delete')
+    ) || user.role.includes('admin') || user.role === 'super_admin';
   };
 
   const refreshUser = () => {
@@ -235,33 +185,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === 'undefined') return;
     
     if (user) {
-      // Получаем обновленные данные пользователя из базы данных
-      const updatedUser = userService.findUserByEmail(user.email);
-      if (updatedUser) {
-        const rolePermissions = ROLE_PERMISSIONS?.[updatedUser.role] || [];
-        
-        const refreshedUser: User = {
-          id: updatedUser.id,
-          email: updatedUser.email,
-          name: updatedUser.name,
-          position: updatedUser.position,
-          role: updatedUser.role,
-          permissions: rolePermissions,
-          avatar: user.avatar // Сохраняем текущий аватар
-        };
-
-        setUser(refreshedUser);
-        localStorage.setItem('user', JSON.stringify(refreshedUser));
-        
-        // Also update individual localStorage items for AvatarContext
-        localStorage.setItem('user.name', refreshedUser.name);
-        if (refreshedUser.position) {
-          localStorage.setItem('user.position', refreshedUser.position);
-        }
-        if (refreshedUser.avatar) {
-          localStorage.setItem('user.avatar', refreshedUser.avatar);
-        }
-      }
+      // Получаем обновленные данные пользователя из API
+      // Здесь можно добавить запрос к API для обновления данных пользователя
+      console.log('Refresh user data from API');
     }
   };
 
@@ -344,7 +270,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     anonymousLogin,
     logout,
-    hasRole,
     canAccess,
     getUserPermissions,
     isAdmin,

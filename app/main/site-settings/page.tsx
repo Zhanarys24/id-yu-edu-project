@@ -22,14 +22,14 @@ import { exportStudentInstructionToWord, exportEmployeeInstructionToWord } from 
 
 export default function SiteSettingsPage() {
   const { t } = useTranslation('common')
-  const [activeSection, setActiveSection] = useState('Аватар')
+  const [activeSection, setActiveSection] = useState('profile')
 
   const sections = [
-    { id: 'Аватар', icon: <User size={18} />, label: t('settings.sections.profile') },
-    { id: 'Смена пароля', icon: <Lock size={18} />, label: t('settings.sections.security') },
-    { id: 'Контакты', icon: <Phone size={18} />, label: t('settings.sections.contacts') },
-    { id: 'Обо мне', icon: <Info size={18} />, label: t('settings.sections.about') },
-    { id: 'Резервная почта', icon: <Mail size={18} />, label: t('settings.sections.reserveEmail') },
+    { id: 'profile', icon: <User size={18} />, label: t('settings.sections.profile') },
+    { id: 'security', icon: <Lock size={18} />, label: t('settings.sections.security') },
+    { id: 'contacts', icon: <Phone size={18} />, label: t('settings.sections.contacts') },
+    { id: 'about', icon: <Info size={18} />, label: t('settings.sections.about') },
+    { id: 'reserveEmail', icon: <Mail size={18} />, label: t('settings.sections.reserveEmail') },
   ]
 
   const activeData = sections.find(s => s.id === activeSection)
@@ -90,11 +90,11 @@ export default function SiteSettingsPage() {
 
               {/* Контент секции */}
               <div className="p-6">
-                {activeSection === 'Аватар' && <AvatarSection />}
-                {activeSection === 'Смена пароля' && <PasswordSection />}
-                {activeSection === 'Контакты' && <ContactSection />}
-                {activeSection === 'Обо мне' && <AboutSection />}
-                {activeSection === 'Резервная почта' && <ReserveEmailSection />}
+                {activeSection === 'profile' && <AvatarSection />}
+                {activeSection === 'security' && <PasswordSection />}
+                {activeSection === 'contacts' && <ContactSection />}
+                {activeSection === 'about' && <AboutSection />}
+                {activeSection === 'reserveEmail' && <ReserveEmailSection />}
               </div>
             </div>
           </div>
@@ -169,14 +169,14 @@ function AvatarSection() {
     // Разрешённые типы: JPG, PNG
     const allowedTypes = ['image/jpeg', 'image/png']
     if (!allowedTypes.includes(file.type)) {
-      setError('Поддерживаемые форматы: JPG, PNG')
+      setError(t('settings.avatar.formats'))
       return
     }
 
     // Максимальный размер файла — 1 МБ
     const maxSize = 1 * 1024 * 1024
     if (file.size > maxSize) {
-      setError('Максимальный размер файла: 1 МБ')
+      setError(t('settings.avatar.maxSize'))
       return
     }
 
@@ -211,7 +211,7 @@ function AvatarSection() {
             canvas.height = targetH
             const ctx = canvas.getContext('2d')
             if (!ctx) {
-              setError('Не удалось обработать изображение. Попробуйте другое.')
+              setError(t('settings.avatar.errorProcessing'))
               return
             }
             ctx.drawImage(img, 0, 0, targetW, targetH)
@@ -219,12 +219,12 @@ function AvatarSection() {
             const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
             const blob: Blob | null = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), mime, 0.9))
             if (!blob) {
-              setError('Не удалось уменьшить изображение. Попробуйте другое.')
+              setError(t('settings.avatar.errorResize'))
               return
             }
             // Проверим итоговый размер — всё ещё должен быть <= 1 МБ
             if (blob.size > maxSize) {
-              setError('Даже после уменьшения размер превышает 1 МБ. Выберите другое изображение.')
+              setError(t('settings.avatar.errorSize'))
               return
             }
             const resizedFile = new File([blob], file.name.replace(/\.(jpg|jpeg|png)$/i, '') + (mime === 'image/png' ? '.png' : '.jpg'), { type: mime })
@@ -232,7 +232,7 @@ function AvatarSection() {
             return
           } catch (err) {
             console.error('Image resize error:', err)
-            setError('Ошибка при обработке изображения. Попробуйте другое.')
+            setError(t('settings.avatar.errorProcessing'))
             return
           }
         }
@@ -257,12 +257,12 @@ function AvatarSection() {
     try {
       await uploadAvatarFile(newAvatar)
       setNewAvatar(null)
-      setSuccess('Ваше изображение успешно изменилось')
+      setSuccess(t('settings.avatar.successUpload'))
       // Авто-сокрытие флэша через 3 секунды
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       console.error('Avatar upload error:', err)
-      setError('Ошибка при загрузке аватарки')
+      setError(t('settings.avatar.errorUpload'))
     } finally {
       setIsLoading(false)
     }
@@ -270,7 +270,7 @@ function AvatarSection() {
 
   const handleDownloadInstruction = () => {
     if (!user) {
-      setError('Пользователь не авторизован')
+      setError(t('settings.avatar.errorAuth'))
       return
     }
 
@@ -280,17 +280,17 @@ function AvatarSection() {
 
     try {
       exportStudentInstructionToWord(userLogin, userPassword)
-      setSuccess('Инструкция успешно скачана')
+      setSuccess(t('settings.avatar.successInstruction'))
       setTimeout(() => setSuccess(''), 3000)
     } catch (error) {
       console.error('Ошибка при скачивании инструкции:', error)
-      setError('Ошибка при скачивании инструкции')
+      setError(t('settings.avatar.errorInstruction'))
     }
   }
 
   const handleDownloadEmployeeInstruction = async () => {
     if (!user) {
-      setError('Пользователь не авторизован')
+      setError(t('settings.avatar.errorAuth'))
       return
     }
 
@@ -300,11 +300,11 @@ function AvatarSection() {
 
     try {
       await exportEmployeeInstructionToWord(userLogin, userPassword)
-      setSuccess('Инструкция для сотрудников успешно скачана')
+      setSuccess(t('settings.avatar.successEmployeeInstruction'))
       setTimeout(() => setSuccess(''), 3000)
     } catch (error) {
       console.error('Ошибка при скачивании инструкции сотрудников:', error)
-      setError('Ошибка при скачивании инструкции сотрудников')
+      setError(t('settings.avatar.errorEmployeeInstruction'))
     }
   }
 
@@ -728,7 +728,7 @@ function ContactSection() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <Calendar size={16} className="inline mr-1" />
-            Дата рождения
+            {t('settings.contacts.birthDate')}
           </label>
           <Input 
             type="date" 
@@ -736,7 +736,7 @@ function ContactSection() {
             readOnly
             disabled
           />
-          <p className="text-xs text-gray-500 mt-1">Формат: ГГГГ-ММ-ДД</p>
+          <p className="text-xs text-gray-500 mt-1">{t('settings.contacts.dateFormat')}</p>
         </div>
       </div>
       
@@ -825,14 +825,14 @@ function ReserveEmailSection() {
 
   const saveReserveEmail = async () => {
     if (!reserveEmail) {
-      setMessage({ type: 'error', text: 'Введите почту' })
+      setMessage({ type: 'error', text: t('settings.reserveEmail.enterEmail') })
       return
     }
 
     // Client-side validation
     const { isValid, error } = validateEmail(String(reserveEmail))
     if (!isValid) {
-      setMessage({ type: 'error', text: error || 'Невалидный email' })
+      setMessage({ type: 'error', text: error || t('settings.reserveEmail.invalidEmail') })
       return
     }
     setIsSaving(true)
@@ -848,14 +848,14 @@ function ReserveEmailSection() {
       const text = await res.text().catch(() => '')
       const data = contentType.includes('application/json') && text ? JSON.parse(text) : null
       if (!res.ok) {
-        const msg = (data && (data.detail || data.message || data.error)) || text || 'Не удалось обновить резервную почту'
+        const msg = (data && (data.detail || data.message || data.error)) || text || t('settings.reserveEmail.errorUpdate')
         setMessage({ type: 'error', text: String(msg) })
         return
       }
       await loadFromProfile()
-      setMessage({ type: 'success', text: 'Резервная почта обновлена' })
+      setMessage({ type: 'success', text: t('settings.reserveEmail.successUpdate') })
     } catch (e) {
-      setMessage({ type: 'error', text: 'Сервис недоступен. Попробуйте позже.' })
+      setMessage({ type: 'error', text: t('settings.reserveEmail.errorService') })
     } finally {
       setIsSaving(false)
     }
@@ -874,9 +874,9 @@ function ReserveEmailSection() {
           placeholder="reserve@example.com"
           disabled={isLoading}
         />
-        <p className="text-xs text-gray-500 mt-1">Укажите резервную почту для восстановления доступа</p>
+        <p className="text-xs text-gray-500 mt-1">{t('settings.reserveEmail.description')}</p>
         {backendEmail && (
-          <p className="text-xs text-gray-500 mt-1">Сохранено на сервере: {backendEmail}</p>
+          <p className="text-xs text-gray-500 mt-1">{t('settings.reserveEmail.savedOnServer')}: {backendEmail}</p>
         )}
         {message && (
           <p className={`text-xs mt-2 ${message.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{message.text}</p>
@@ -885,7 +885,7 @@ function ReserveEmailSection() {
       <div className="flex justify-end">
         <Button onClick={saveReserveEmail} className="flex items-center gap-2" disabled={isSaving || isLoading || !reserveEmail}>
           <Save size={16} />
-          {isSaving ? 'Сохранение...' : backendEmail ? t('common.save') : 'Добавить'}
+          {isSaving ? t('settings.reserveEmail.saving') : backendEmail ? t('common.save') : t('settings.reserveEmail.add')}
         </Button>
       </div>
       {/* Flash toast */}

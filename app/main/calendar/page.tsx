@@ -592,7 +592,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
         <div style={{ marginBottom: '12px' }}>
           <input
             type="text"
-            placeholder="🔍 Поиск участников..."
+            placeholder={t('calendarPage.form.participantsSearch')}
             value={participantSearch}
             onChange={(e) => setParticipantSearch(e.target.value)}
             style={{
@@ -1006,20 +1006,26 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
-            timeZone="local" // ← ДОБАВЛЯЕМ ЭТУ СТРОКУ
+            timeZone="local"
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
               right: 'dayGridMonth,timeGridWeek,timeGridDay'
             }}
-            events={events.map(e => ({ ...e, id: String(e.id) }))} // id всегда строка
+            buttonText={{
+              today: t('calendarPage.fullCalendar.buttonText.today'),
+              month: t('calendarPage.fullCalendar.buttonText.month'),
+              week: t('calendarPage.fullCalendar.buttonText.week'),
+              day: t('calendarPage.fullCalendar.buttonText.day')
+            }}
+            events={events.map(e => ({ ...e, id: String(e.id) }))}
             eventDidMount={(info) => {
               console.log('Событие отображено:', info.event.title, info.event.start);
             }}
             dateClick={handleDateClick}
             locale={i18n.language === 'kz' ? 'kk' : i18n.language}
             height="auto"
-            loading={(isLoading) => setLoading(isLoading)} // функция вместо boolean
+            loading={(isLoading) => setLoading(isLoading)}
             eventDisplay="block"
             displayEventTime={true}
             eventTimeFormat={{
@@ -1041,7 +1047,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                 </label>
                 <input
                   type="text"
-                  placeholder="Введите название встречи"
+                  placeholder={t('calendarPage.form.titlePlaceholder')}
                   value={eventTitle}
                   onChange={(e) => setEventTitle(e.target.value)}
                   disabled={loading}
@@ -1100,7 +1106,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Корпус *</label>
+                  <label>{t('calendarPage.form.campus')} *</label>
                   <select 
                     value={eventCampus || ''}
                     onChange={(e) => {
@@ -1111,7 +1117,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                     }}
                     disabled={loading}
                   >
-                    <option value="">-- Выберите корпус --</option>
+                    <option value="">{t('calendarPage.form.selectCampus')}</option>
                     {campuses.map(campus => 
                       <option key={campus.id} value={campus.id}>{campus.name}</option>
                     )}
@@ -1123,7 +1129,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                 <div className="form-group">
                   <label>
                     <MapPin className="inline-block w-4 h-4 mr-2" />
-                    Место встречи *
+                    {t('calendarPage.form.location')} *
                   </label>
                   <select 
                     value={eventLocation || ''}
@@ -1133,7 +1139,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                     }}
                     disabled={loading}
                   >
-                    <option value="">-- Выберите место встречи --</option>
+                    <option value="">{t('calendarPage.form.selectLocation')}</option>
                     {locations.map(location => 
                       <option key={location.id} value={location.id}>
                         {location.name}
@@ -1142,16 +1148,16 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                   </select>
                   {/* Отладочная информация */}
                   <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                    <div>Всего мест: {locations.length}</div>
-                    <div>Выбрано место: {eventLocation || 'нет'}</div>
+                    <div>{t('calendarPage.debug.totalLocations')} {locations.length}</div>
+                    <div>{t('calendarPage.debug.selectedLocation')} {eventLocation || t('calendarPage.debug.none')}</div>
                   </div>
                 </div>
               </div>
 
               <div className="form-group">
-                <label>Описание встречи</label>
+                <label>{t('calendarPage.form.description')}</label>
                 <textarea
-                  placeholder="Введите описание встречи (необязательно)"
+                  placeholder={t('calendarPage.form.descriptionPlaceholder')}
                   value={eventDescription}
                   onChange={(e) => setEventDescription(e.target.value)}
                   disabled={loading}
@@ -1180,7 +1186,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                     <label>{t('calendarPage.form.link')} *</label>
                     <input
                       type="url"
-                      placeholder="https://meet.google.com/..."
+                      placeholder={t('calendarPage.form.linkPlaceholder')}
                       value={eventLink}
                       onChange={(e) => setEventLink(e.target.value)}
                       disabled={loading}
@@ -1202,7 +1208,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                     cursor: loading ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  {loading ? 'Создание...' : 'Создать встречу'}
+                  {loading ? t('calendarPage.buttons.creating') : t('calendarPage.buttons.createMeeting')}
                 </button>
                 <button 
                   className="cancel-btn" 
@@ -1213,7 +1219,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                     cursor: loading ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  Отмена
+                  {t('calendarPage.buttons.cancel')}
                 </button>
               </div>
             </div>

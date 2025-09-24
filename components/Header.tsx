@@ -8,8 +8,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { 
-  Bell, X, Monitor, Calendar, GraduationCap, BookOpen, 
-  Users, FileText, Settings, LogOut, BriefcaseBusiness,
+  Bell, X, Monitor, Calendar, GraduationCap, Coins,
+  FileText, Settings, LogOut, BriefcaseBusiness,
   FileUser, BookMarked, Briefcase, Trophy, Search, Star
 } from 'lucide-react'
 
@@ -120,22 +120,6 @@ export default function Header() {
             category: 'news',
             createdAt: new Date(now - 1 * 24 * 60 * 60_000).toISOString(),
           },
-          {
-            id: 'n9',
-            text: t('notifications.samples.clubEvent', 'Клубы: сегодня в 18:00 открытая встреча IT-клуба'),
-            read: true,
-            link: '/main/upbringing',
-            category: 'event',
-            createdAt: new Date(now - 2 * 24 * 60 * 60_000).toISOString(),
-          },
-          {
-            id: 'n10',
-            text: t('notifications.samples.scienceCall', 'Наука: приём заявок на публикации в журнале открыт'),
-            read: false,
-            link: '/main/science',
-            category: 'news',
-            createdAt: new Date(now - 3 * 24 * 60 * 60_000).toISOString(),
-          },
         ]
       }
 
@@ -231,19 +215,16 @@ export default function Header() {
     ? [
         { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
         { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
-        { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
-        { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
-        { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
+        { icon: <GraduationCap size={20} />, label: t('menu.applications'), href: '/main/applications' },
         { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
       ]
     : [
         { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
         { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
-        { icon: <GraduationCap size={20} />, label: t('menu.education'), href: '/main/education' },
-        { icon: <BookOpen size={20} />, label: t('menu.science'), href: '/main/science' },
-        { icon: <Users size={20} />, label: t('menu.upbringing'), href: '/main/upbringing' },
+        { icon: <GraduationCap size={20} />, label: t('menu.applications'), href: '/main/applications' },
         { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
         { label: t('menu.yessenovai'), href: '/main/yessenovbot' },
+        { icon: <Coins size={20} />, label: t('menu.YU-Gamification'), href: '/main/coming-soon/YU-Gamification' },
       ]
 
   const portfolioItems = user?.role === 'anonymous' 
@@ -299,7 +280,7 @@ export default function Header() {
       const slow = ['slow-2g', '2g'].includes(effectiveType)
       if (slow) return
 
-      const baseRoutes = ['/main/news','/main/calendar','/main/education','/main/science','/main/upbringing','/main/E-services','/main/site-settings']
+      const baseRoutes = ['/main/news','/main/calendar','/main/applications','/main/E-services','/main/site-settings']
       const authOnly = ['/main/yessenovbot','/portfolio','/YU-Gamification','/admin']
       const routes = user?.role === 'anonymous' ? baseRoutes : [...baseRoutes, ...authOnly]
 

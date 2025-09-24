@@ -6,24 +6,30 @@ import { useTranslation } from 'react-i18next'
 import '@/i18n'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  Monitor, Calendar, GraduationCap, BookOpen, Users, FileText,
+  Monitor, Calendar, GraduationCap, FileText,
   Bot, Settings, LogOut, BriefcaseBusiness, ChevronUp, ChevronDown, Coins,
   FileUser, BookMarked, Briefcase, Trophy, Shield
 } from 'lucide-react'
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useAvatar } from '@/context/AvatarContext'
 import { useAuth } from '@/context/AuthContext'
 import clsx from 'clsx'
+import { getTranslatedRole } from '@/lib/utils/roleTranslations'
 
-export default function Sidebar({ active }: { active?: string }) {
-  const { t } = useTranslation('common')
+export default function Sidebar({ active }: { active: string }) {
+  const { t, i18n } = useTranslation('common')
   const pathname = usePathname()
   const { avatar, userName, userPosition } = useAvatar()
   const { isAdmin, user, logout } = useAuth()
   const [portfolioOpen, setPortfolioOpen] = useState(false)
   const router = useRouter()
   const [imageOk, setImageOk] = useState(true)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const getInitials = (name: string) => {
     const parts = (name || '').trim().split(/\s+/)
@@ -70,39 +76,64 @@ export default function Sidebar({ active }: { active?: string }) {
     await logout()
   }
 
-  const menuItems = user?.role === 'anonymous' 
+  // Проверяем, является ли пользователь анонимным
+  const isAnonymous = !user || user.role === 'anonymous'
+
+  const menuItems = isAnonymous
     ? [
-        { icon: <Monitor size={20} />, label: 'Новости', href: '/main/news' },
-        { icon: <Calendar size={20} />, label: 'Календарь', href: '/main/calendar' },
-        { icon: <GraduationCap size={20} />, label: 'Образование', href: '/main/education' },
-        { icon: <BookOpen size={20} />, label: 'Наука', href: '/main/science' },
-        { icon: <Users size={20} />, label: 'Воспитание', href: '/main/upbringing' },
-        { icon: <FileText size={20} />, label: 'Электронные услуги', href: '/main/E-services' },
+        { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
+        { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
+        { icon: <GraduationCap size={20} />, label: t('menu.applications'), href: '/main/applications' },
+        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
       ]
     : [
-        { icon: <Monitor size={20} />, label: 'Новости', href: '/main/news' },
-        { icon: <Calendar size={20} />, label: 'Календарь', href: '/main/calendar' },
-        { icon: <GraduationCap size={20} />, label: 'Образование', href: '/main/education' },
-        { icon: <BookOpen size={20} />, label: 'Наука', href: '/main/science' },
-        { icon: <Users size={20} />, label: 'Воспитание', href: '/main/upbringing' },
-        { icon: <FileText size={20} />, label: 'Электронные услуги', href: '/main/E-services' },
-        { icon: <Bot size={20} />, label: 'YessenovAI', href: '/main/coming-soon/YessenovAI' },
-        { icon: <Coins size={20} />, label: 'YU-Геймификация', href: '/main/coming-soon/YU-Gamification' },
+        { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
+        { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
+        { icon: <GraduationCap size={20} />, label: t('menu.applications'), href: '/main/applications' },
+        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
+        { icon: <Bot size={20} />, label: t('menu.yessenovai'), href: '/main/coming-soon/YessenovAI' },
+        { icon: <Coins size={20} />, label: t('menu.YU-Gamification'), href: '/main/coming-soon/YU-Gamification' },
       ]
 
   const portfolioItems = [
-    { icon: <FileUser size={16} />, label: 'Общие данные', href: '/portfolio?tab=general' },
-    { icon: <BookMarked size={16} />, label: 'Публикации', href: '/portfolio?tab=publications' },
-    { icon: <GraduationCap size={16} />, label: 'Преподавательская деятельность', href: '/portfolio?tab=teaching' },
-    { icon: <Trophy size={16} />, label: 'Достижения', href: '/portfolio?tab=achievements' },
-    { icon: <Briefcase size={16} />, label: 'Дополнительно', href: '/portfolio?tab=additional' },
+    { icon: <FileUser size={16} />, label: t('portfolio.general'), href: '/portfolio?tab=general' },
+    { icon: <BookMarked size={16} />, label: t('portfolio.publications'), href: '/portfolio?tab=publications' },
+    { icon: <GraduationCap size={16} />, label: t('portfolio.teaching'), href: '/portfolio?tab=teaching' },
+    { icon: <Trophy size={16} />, label: t('portfolio.achievements'), href: '/portfolio?tab=achievements' },
+    { icon: <Briefcase size={16} />, label: t('portfolio.additional'), href: '/portfolio?tab=additional' },
   ]
 
-  const accountItems = user?.role === 'anonymous' 
+  const accountItems = isAnonymous
     ? []
     : [
-        { icon: <Settings size={20} />, label: 'Настройки', href: '/main/site-settings' },
+        { icon: <Settings size={20} />, label: t('account.settings'), href: '/main/site-settings' },
       ]
+
+  if (!isClient) {
+    return (
+      <aside className="hidden md:flex md:w-64 md:flex-col">
+        <div className="flex flex-col flex-grow pt-5 overflow-y-auto bg-white border-r border-gray-200">
+          <div className="flex flex-col flex-grow">
+            <div className="flex items-center flex-shrink-0 px-4">
+              <img
+                className="h-8 w-auto"
+                src="/yessenov_blue.png"
+                alt="Logo"
+              />
+            </div>
+            <div className="mt-5 flex-grow flex flex-col">
+              <nav className="flex-1 px-2 space-y-1">
+                {/* Loading state */}
+                <div className="text-sm space-y-2 mt-8">
+                  <p className="text-gray-500">Loading...</p>
+                </div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </aside>
+    )
+  }
 
   return (
     <>
@@ -111,7 +142,7 @@ export default function Sidebar({ active }: { active?: string }) {
         <div className="flex flex-col justify-between h-full">
           <div>
             <div className="flex items-center gap-2 mb-8">
-              <Image src="/yessenov_blue.png" alt="Лого" width={32} height={32} />
+              <Image src="/yessenov_blue.png" alt={t('common.logo')} width={32} height={32} />
               <h2 className="text-xl font-semibold text-blue-700">YESSENOV ID</h2>
             </div>
 
@@ -119,7 +150,7 @@ export default function Sidebar({ active }: { active?: string }) {
               {hasRealAvatar ? (
                 <Image
                   src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
-                  alt="аватар"
+                  alt={t('common.avatar')}
                   width={50}
                   height={50}
                   className="rounded-full object-cover mr-3"
@@ -140,7 +171,7 @@ export default function Sidebar({ active }: { active?: string }) {
                 )}
                 {user?.role && (
                   <p className="text-xs text-blue-600 font-medium">
-                    {user.role}
+                    {getTranslatedRole(user.role, t)}
                   </p>
                 )}
               </div>
@@ -151,7 +182,7 @@ export default function Sidebar({ active }: { active?: string }) {
                 <MenuItem key={item.label} {...item} active={pathname.startsWith(item.href)} />
               ))}
               
-              {/* Кнопка Админ под YU-Gamification */}
+              {/* Кнопка Админ - показываем только если пользователь имеет права администратора */}
               {isAdmin() && (
                 <Link
                   href="/admin"
@@ -163,17 +194,17 @@ export default function Sidebar({ active }: { active?: string }) {
                   )}
                 >
                   <Shield size={20} />
-                  <span>Админ панель</span>
+                  <span>{t('admin.adminPanel')}</span>
                 </Link>
               )}
             </nav>
           </div>
 
           <div className="text-sm space-y-2 mt-8">
-            <p className="text-gray-500">АККАУНТ</p>
+            <p className="text-gray-500">{t('common.account')}</p>
 
             {/* Портфолио - только для авторизованных пользователей */}
-            {user?.role !== 'anonymous' && (
+            {!isAnonymous && (
               <div className="relative">
               <button
                 onClick={() => setPortfolioOpen(!portfolioOpen)}
@@ -186,7 +217,7 @@ export default function Sidebar({ active }: { active?: string }) {
               >
                 <div className="flex items-center gap-2">
                   <BriefcaseBusiness size={20} />
-                  <span>Портфолио</span>
+                  <span>{t('groups.portfolio')}</span>
                 </div>
                 {portfolioOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
               </button>
@@ -223,7 +254,7 @@ export default function Sidebar({ active }: { active?: string }) {
               onClick={handleLogout}
               className="flex items-center gap-2 pl-3 pr-2 py-2 rounded w-full transition text-sm text-red-500 hover:bg-gray-100 font-medium"
             >
-              <LogOut size={20} /> Выйти
+              <LogOut size={20} /> {t('account.logout')}
             </button>
           </div>
         </div>
@@ -237,31 +268,15 @@ export default function Sidebar({ active }: { active?: string }) {
             className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/news') ? 'text-blue-600' : 'text-gray-500')}
           >
             <Monitor size={20} />
-            <span className="truncate">Новости</span>
+            <span className="truncate">{t('menu.news')}</span>
           </Link>
 
           <Link
-            href="/main/education"
-            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/education') ? 'text-blue-600' : 'text-gray-500')}
+            href="/main/applications"
+            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/applications') ? 'text-blue-600' : 'text-gray-500')}
           >
             <GraduationCap size={20} />
-            <span className="truncate">Образование</span>
-          </Link>
-
-          <Link
-            href="/main/science"
-            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/science') ? 'text-blue-600' : 'text-gray-500')}
-          >
-            <BookOpen size={20} />
-            <span className="truncate">Наука</span>
-          </Link>
-
-          <Link
-            href="/main/upbringing"
-            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/upbringing') ? 'text-blue-600' : 'text-gray-500')}
-          >
-            <Users size={20} />
-            <span className="truncate">Воспитание</span>
+            <span className="truncate">{t('menu.applications')}</span>
           </Link>
 
           <Link
@@ -269,9 +284,8 @@ export default function Sidebar({ active }: { active?: string }) {
             className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/yessenovbot') ? 'text-blue-600' : 'text-gray-500')}
           >
             <Bot size={20} />
-            <span className="truncate">Yessenov AI</span>
+            <span className="truncate">{t('menu.yessenovai')}</span>
           </Link>
-
 
         </div>
       </nav>
