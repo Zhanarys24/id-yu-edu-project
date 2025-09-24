@@ -4,7 +4,7 @@ import Header from './Header'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
 import Link from 'next/link'
-import { Newspaper, GraduationCap, Atom, Users, Bot, Calendar } from 'lucide-react'
+import { Newspaper, GraduationCap, Bot, Calendar } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
 export default function Layout({
@@ -40,15 +40,11 @@ export default function Layout({
         {user?.role === 'anonymous' ? (
           <>
             <NavItem href="/main/calendar" label={t('menu.calendar')} icon={<Calendar size={20} />} active={active === 'calendar'} />
-            <NavItem href="/main/education" label={t('menu.education')} icon={<GraduationCap size={20} />} active={active === 'education'} />
-            <NavItem href="/main/science" label={t('menu.science')} icon={<Atom size={20} />} active={active === 'science'} />
-            <NavItem href="/main/upbringing" label={t('menu.upbringing')} icon={<Users size={20} />} active={active === 'upbringing'} />
+            <NavItem href="/main/applications" label={t('menu.applications')} icon={<GraduationCap size={20} />} active={active === 'applications'} />
           </>
         ) : (
           <>
-            <NavItem href="/main/education" label={t('menu.education')} icon={<GraduationCap size={20} />} active={active === 'education'} />
-            <NavItem href="/main/science" label={t('menu.science')} icon={<Atom size={20} />} active={active === 'science'} />
-            <NavItem href="/main/upbringing" label={t('menu.upbringing')} icon={<Users size={20} />} active={active === 'upbringing'} />
+            <NavItem href="/main/applications" label={t('menu.applications')} icon={<GraduationCap size={20} />} active={active === 'applications'} />
             <NavItem href="/main/yessenovbot" label={t('menu.yessenovai')} icon={<Bot size={20} />} active={active === 'yessenovai'} />
           </>
         )}
