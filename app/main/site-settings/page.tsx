@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation'
 import { AuthApi } from '@/lib/services/authApi'
 import { validateEmail } from '@/lib/utils'
 import { exportStudentInstructionToWord, exportEmployeeInstructionToWord } from '@/lib/utils/wordExport'
+import { getTranslatedRole } from '@/lib/utils/roleTranslations'
 
 export default function SiteSettingsPage() {
   const { t } = useTranslation('common')
@@ -349,28 +350,32 @@ function AvatarSection() {
             <div className="flex items-center justify-center gap-2">
               <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
             </div>
-            <p className="text-gray-600">{userPosition || user?.position || 'Преподаватель'}</p>
+            <p className="text-gray-600">
+              {user?.role ? getTranslatedRole(user.role, t) : userPosition || user?.position || 'Пользователь'}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Кнопки инструкций */}
-      <div className="flex justify-center gap-4">
-        <Button 
-          onClick={handleDownloadInstruction}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
-        >
-          <FileText size={16} />
-          {t('settings.avatar.downloadInstruction')}
-        </Button>
-        
-        <Button 
-          onClick={handleDownloadEmployeeInstruction}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <FileText size={16} />
-          {t('settings.avatar.downloadEmployeeInstruction')}
-        </Button>
+      {/* Кнопки инструкций - показываем только одну в зависимости от роли */}
+      <div className="flex justify-center">
+        {user && String(user.role).toLowerCase().trim() === 'student' ? (
+          <Button 
+            onClick={handleDownloadInstruction}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+          >
+            <FileText size={16} />
+            {t('settings.avatar.downloadInstruction')}
+          </Button>
+        ) : (
+          <Button 
+            onClick={handleDownloadEmployeeInstruction}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <FileText size={16} />
+            {t('settings.avatar.downloadEmployeeInstruction')}
+          </Button>
+        )}
       </div>
 
       <div className="bg-gray-50 rounded-xl p-4">

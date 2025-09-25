@@ -8,7 +8,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   Monitor, Calendar, GraduationCap, FileText,
   Bot, Settings, LogOut, BriefcaseBusiness, ChevronUp, ChevronDown, Coins,
-  FileUser, BookMarked, Briefcase, Trophy, Shield
+  FileUser, BookMarked, Briefcase, Trophy, Shield, User, Layers
 } from 'lucide-react'
 import Image from 'next/image'
 import { useMemo, useState, useEffect } from 'react'
@@ -83,15 +83,14 @@ export default function Sidebar({ active }: { active: string }) {
     ? [
         { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
         { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
-        { icon: <GraduationCap size={20} />, label: t('menu.applications'), href: '/main/applications' },
+        { icon: <Layers size={20} />, label: t('menu.applications'), href: '/main/applications' },
         { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
       ]
     : [
         { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
         { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
-        { icon: <GraduationCap size={20} />, label: t('menu.applications'), href: '/main/applications' },
+        { icon: <Layers size={20} />, label: t('menu.applications'), href: '/main/applications' },
         { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
-        { icon: <Bot size={20} />, label: t('menu.yessenovai'), href: '/main/coming-soon/YessenovAI' },
         { icon: <Coins size={20} />, label: t('menu.YU-Gamification'), href: '/main/coming-soon/YU-Gamification' },
       ]
 
@@ -203,8 +202,8 @@ export default function Sidebar({ active }: { active: string }) {
           <div className="text-sm space-y-2 mt-8">
             <p className="text-gray-500">{t('common.account')}</p>
 
-            {/* Портфолио - только для авторизованных пользователей */}
-            {!isAnonymous && (
+            {/* Портфолио - ВРЕМЕННО СКРЫТО */}
+            {/* {!isAnonymous && (
               <div className="relative">
               <button
                 onClick={() => setPortfolioOpen(!portfolioOpen)}
@@ -244,7 +243,7 @@ export default function Sidebar({ active }: { active: string }) {
                 </div>
               )}
               </div>
-            )}
+            )} */}
 
             {accountItems.map((item) => (
               <MenuItem key={item.label} {...item} active={pathname.startsWith(item.href)} />
@@ -260,7 +259,7 @@ export default function Sidebar({ active }: { active: string }) {
         </div>
       </aside>
 
-      {/* Мобильная нижняя панель — показываем только важные пункты + "Ещё" */}
+      {/* Мобильная нижняя панель — показываем только важные пункты */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-50">
         <div className="flex justify-around items-center h-14">
           <Link
@@ -275,18 +274,25 @@ export default function Sidebar({ active }: { active: string }) {
             href="/main/applications"
             className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/applications') ? 'text-blue-600' : 'text-gray-500')}
           >
-            <GraduationCap size={20} />
+            <Layers size={20} />
             <span className="truncate">{t('menu.applications')}</span>
           </Link>
 
           <Link
-            href="/main/yessenovbot"
-            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/yessenovbot') ? 'text-blue-600' : 'text-gray-500')}
+            href="/main/calendar"
+            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/calendar') ? 'text-blue-600' : 'text-gray-500')}
           >
-            <Bot size={20} />
-            <span className="truncate">{t('menu.yessenovai')}</span>
+            <Calendar size={20} />
+            <span className="truncate">{t('menu.calendar')}</span>
           </Link>
 
+          <Link
+            href="/main/site-settings"
+            className={clsx('flex flex-col items-center text-xs', pathname.startsWith('/main/site-settings') ? 'text-blue-600' : 'text-gray-500')}
+          >
+            <User size={20} />
+            <span className="truncate">{t('menu.profile')}</span>
+          </Link>
         </div>
       </nav>
     </>

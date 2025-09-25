@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { useEffect, useState } from 'react'
 import '@/i18n'
+import '@/styles/applications/applications.css'
 
 // Типы для API приложений
 interface ApiApplication {
@@ -331,14 +332,18 @@ export default function EducationPage() {
   if (!user) {
     return (
       <Layout active={'education'}>
-        <h1 className="text-[22px] font-semibold text-gray-800 mb-3">{t('applicationsPage.title')}</h1>
-        <p className="text-[15px] text-gray-500 mb-5">{t('applicationsPage.description')}</p>
-        
-        <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">{t('applicationsPage.messages.loginRequired')}</p>
-          <a href="/login" className="text-blue-600 hover:underline">
-            {t('applicationsPage.messages.signIn')}
-          </a>
+        <div className="applications-page">
+          <div className="applications-header">
+            <h1 className="applications-title">{t('applicationsPage.title')}</h1>
+            <p className="applications-description">{t('applicationsPage.description')}</p>
+          </div>
+          
+          <div className="empty-state">
+            <p>{t('applicationsPage.messages.loginRequired')}</p>
+            <a href="/login" className="text-blue-600 hover:underline">
+              {t('applicationsPage.messages.signIn')}
+            </a>
+          </div>
         </div>
       </Layout>
     )
@@ -347,32 +352,36 @@ export default function EducationPage() {
   if (loading) {
     return (
       <Layout active={'education'}>
-        <h1 className="text-[22px] font-semibold text-gray-800 mb-3">{t('applicationsPage.title')}</h1>
-        <p className="text-[15px] text-gray-500 mb-5">{t('applicationsPage.description')}</p>
-        
-        {/* Скелетон табов */}
-        <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-          {[...Array(4)].map((_, index) => (
-            <div key={index} className="px-4 py-2 bg-gray-200 rounded-md animate-pulse w-24 h-8"></div>
-          ))}
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
-          {/* Скелетон загрузки */}
-          {[...Array(4)].map((_, index) => (
-            <div key={index} className="bg-white rounded-lg px-5 py-4 shadow-sm h-52 animate-pulse">
-              <div className="flex items-center gap-4 mb-2">
-                <div className="w-16 h-16 bg-gray-300 rounded-lg"></div>
-                <div className="w-32 h-5 bg-gray-300 rounded"></div>
+        <div className="applications-page">
+          <div className="applications-header">
+            <h1 className="applications-title">{t('applicationsPage.title')}</h1>
+            <p className="applications-description">{t('applicationsPage.description')}</p>
+          </div>
+          
+          {/* Скелетон табов */}
+          <div className="skeleton-tabs">
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="skeleton-tab"></div>
+            ))}
+          </div>
+          
+          <div className="skeleton-grid">
+            {/* Скелетон загрузки */}
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="skeleton-card">
+                <div className="skeleton-card-header">
+                  <div className="skeleton-image"></div>
+                  <div className="skeleton-title"></div>
+                </div>
+                <div className="skeleton-description">
+                  <div className="skeleton-line"></div>
+                  <div className="skeleton-line"></div>
+                </div>
+                <div className="skeleton-divider"></div>
+                <div className="skeleton-link"></div>
               </div>
-              <div className="space-y-2 mb-4">
-                <div className="w-full h-4 bg-gray-300 rounded"></div>
-                <div className="w-3/4 h-4 bg-gray-300 rounded"></div>
-              </div>
-              <div className="border-t border-gray-200 mb-2" />
-              <div className="w-20 h-4 bg-gray-300 rounded ml-auto"></div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </Layout>
     )
@@ -380,78 +389,66 @@ export default function EducationPage() {
 
   return (
     <Layout active={'education'}>
-      <h1 className="text-[22px] font-semibold text-gray-800 mb-3">{t('applicationsPage.title')}</h1>
-      <p className="text-[15px] text-gray-500 mb-5">{t('applicationsPage.description')}</p>
-
-      {/* Табы */}
-      <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        <button
-          onClick={() => setActiveTab('all')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            activeTab === 'all'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          {t('applicationsPage.tabs.all')}
-        </button>
-        <button
-          onClick={() => setActiveTab('education')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            activeTab === 'education'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          {t('applicationsPage.tabs.education')}
-        </button>
-        <button
-          onClick={() => setActiveTab('science')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            activeTab === 'science'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          {t('applicationsPage.tabs.science')}
-        </button>
-        <button
-          onClick={() => setActiveTab('upbringing')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            activeTab === 'upbringing'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          {t('applicationsPage.tabs.upbringing')}
-        </button>
-      </div>
-
-      {/* Адаптивная сетка */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
-        {filteredCards.map((card) => (
-          <EduCard
-            key={card.id}
-            image={card.image}
-            title={card.title}
-            description={card.description}
-            href={card.href}
-            ctaLabel={card.ctaLabel}
-            onClick={() => handleCardClick(card)}
-          />
-        ))}
-      </div>
-      
-      {filteredCards.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">
-            {activeTab === 'all' 
-              ? t('applicationsPage.messages.noApplications')
-              : t('applicationsPage.messages.noApplicationsInCategory', { category: getCategoryName(activeTab) })
-            }
-          </p>
+      <div className="applications-page">
+        <div className="applications-header">
+          <h1 className="applications-title">{t('applicationsPage.title')}</h1>
+          <p className="applications-description">{t('applicationsPage.description')}</p>
         </div>
-      )}
+
+        {/* Табы */}
+        <div className="applications-tabs">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
+          >
+            {t('applicationsPage.tabs.all')}
+          </button>
+          <button
+            onClick={() => setActiveTab('education')}
+            className={`tab-button ${activeTab === 'education' ? 'active' : ''}`}
+          >
+            {t('applicationsPage.tabs.education')}
+          </button>
+          <button
+            onClick={() => setActiveTab('science')}
+            className={`tab-button ${activeTab === 'science' ? 'active' : ''}`}
+          >
+            {t('applicationsPage.tabs.science')}
+          </button>
+          <button
+            onClick={() => setActiveTab('upbringing')}
+            className={`tab-button ${activeTab === 'upbringing' ? 'active' : ''}`}
+          >
+            {t('applicationsPage.tabs.upbringing')}
+          </button>
+        </div>
+
+        {/* Сетка карточек */}
+        <div className="applications-grid">
+          {filteredCards.map((card) => (
+            <EduCard
+              key={card.id}
+              image={card.image}
+              title={card.title}
+              description={card.description}
+              href={card.href}
+              ctaLabel={card.ctaLabel}
+              onClick={() => handleCardClick(card)}
+            />
+          ))}
+        </div>
+        
+        {filteredCards.length === 0 && !loading && (
+          <div className="empty-state">
+            <p>
+              {activeTab === 'all' 
+                ? t('applicationsPage.messages.noApplications')
+                : t('applicationsPage.messages.noApplicationsInCategory', { category: getCategoryName(activeTab) })
+              }
+            </p>
+          </div>
+        )}
+      </div>
     </Layout>
   )
 }
@@ -479,47 +476,41 @@ function EduCard({
 
   // Определяем размер шрифта в зависимости от длины описания
   const getDescriptionClass = (text: string) => {
-    if (text.length > 100) return 'text-xs text-gray-500 flex-1 mb-4';
-    if (text.length > 60) return 'text-sm text-gray-500 flex-1 mb-4';
-    return 'text-sm text-gray-500 flex-1 mb-4';
+    if (text.length > 100) return 'card-description text-xs';
+    if (text.length > 60) return 'card-description text-sm';
+    return 'card-description text-sm';
   };
 
   return (
-    <div
-      className="
-        bg-white rounded-lg px-5 py-4 shadow-sm flex flex-col justify-between h-52
-        w-full max-w-full sm:max-w-[300px] lg:max-w-[420px] xl:max-w-[350px]
-        overflow-hidden transition-transform hover:shadow-md
-      "
-    >
-      <div className="flex items-center gap-4 mb-2">
+    <div className="application-card">
+      <div className="card-header">
         <Image
           src={image}
           alt={title}
           width={65}
           height={65}
-          className="rounded-[10%] flex-shrink-0"
+          className="card-image"
           onError={(e) => {
             // Если изображение не загрузилось, используем дефолтное
             (e.target as HTMLImageElement).src = '/service.png';
           }}
         />
-        <p className="font-semibold text-[17px] leading-tight">{title}</p>
+        <p className="card-title">{title}</p>
       </div>
 
       <p className={getDescriptionClass(description)}>
         {truncateText(description)}
       </p>
 
-      <div className="border-t border-gray-200 mb-2" />
+      <div className="card-divider" />
 
-      <div className="text-right">
+      <div className="card-footer">
         <Link
           href={href}
           target="_blank"
           rel="noopener noreferrer"
           onClick={onClick}
-          className="text-sm text-blue-600 font-medium hover:underline whitespace-nowrap inline-flex items-center gap-1"
+          className="card-link"
         >
           {ctaLabel} <ChevronRight size={16} />
         </Link>

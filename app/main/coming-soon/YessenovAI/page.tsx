@@ -39,86 +39,88 @@ export default function YessenovAIComingSoonPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen flex items-center justify-center p-1">
-        <div className="max-w-6xl w-full">
-          {/* Заголовки - УМЕНЬШЕНЫ ОТСТУПЫ */}
-          <div className="text-center mb-4">
-            <h1 className="text-6xl font-bold text-gray-800 mt-5 mb-1">
+      <div className="coming-soon-page">
+        <div className="coming-soon-container">
+          {/* Заголовки */}
+          <div className="coming-soon-header">
+            <h1 className="coming-soon-title">
               YessenovAI
             </h1>
-            <h2 className="text-3xl font-semibold text-indigo-600 mb-1">
+            <h2 className="coming-soon-subtitle yessenovai">
               Скоро запуск!
             </h2>
-            <p className="text-xl text-gray-600 mb-1 max-w-2xl mx-auto">
+            <p className="coming-soon-description">
               Мы работаем над созданием интеллектуального помощника YessenovAI, 
               который поможет вам в решении различных задач и ответит на ваши вопросы.
             </p>
           </div>
 
-          {/* Контент и анимация на одном уровне */}
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-5">
-            {/* Анимированный персонаж */}
-            <div className="flex-shrink-0">
-              <div className="error404page">
-                <div className="newcharacter404">
-                  <div className="chair404"></div>
-                  <div className="leftshoe404"></div>
-                  <div className="rightshoe404"></div>
-                  <div className="legs404"></div>
-                  <div className="torso404">
-                    <div className="body404"></div>
-                    <div className="leftarm404"></div>
-                    <div className="rightarm404"></div>
-                    <div className="head404">
-                      <div className="eyes404"></div>
+          {/* Контент и анимация */}
+          <div className="coming-soon-content">
+            {/* Анимированный персонаж - скрыт на мобильных */}
+            <div className="coming-soon-animation mobile-hidden">
+              <div className="character-container">
+                <div className="character-animation">
+                  <div className="newcharacter404">
+                    <div className="chair404"></div>
+                    <div className="leftshoe404"></div>
+                    <div className="rightshoe404"></div>
+                    <div className="legs404"></div>
+                    <div className="torso404">
+                      <div className="body404"></div>
+                      <div className="leftarm404"></div>
+                      <div className="rightarm404"></div>
+                      <div className="head404">
+                        <div className="eyes404"></div>
+                      </div>
                     </div>
+                    <div className="laptop404"></div>
                   </div>
-                  <div className="laptop404"></div>
                 </div>
               </div>
             </div>
 
             {/* Описание функций */}
-            <div className="flex-1 max-w-lg">
-              <div className="bg-white rounded-xl p-8 shadow-lg">
-                <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+            <div className="coming-soon-features">
+              <div className="features-card">
+                <h3 className="features-title">
                   Что будет в YessenovAI?
                 </h3>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                <div className="features-list">
+                  <div className="feature-item">
+                    <div className="feature-icon yessenovai">
+                      <div className="feature-dot yessenovai"></div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800">Умные ответы</h4>
-                      <p className="text-gray-600 text-sm">Получайте точные и полезные ответы на ваши вопросы</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800">Помощь в учебе</h4>
-                      <p className="text-gray-600 text-sm">Ассистент поможет с учебными задачами и проектами</p>
+                    <div className="feature-content">
+                      <h4 className="feature-title">Умные ответы</h4>
+                      <p className="feature-description">Получайте точные и полезные ответы на ваши вопросы</p>
                     </div>
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                  <div className="feature-item">
+                    <div className="feature-icon yessenovai">
+                      <div className="feature-dot yessenovai"></div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800">24/7 доступность</h4>
-                      <p className="text-gray-600 text-sm">Получайте помощь в любое время дня и ночи</p>
+                    <div className="feature-content">
+                      <h4 className="feature-title">Помощь в учебе</h4>
+                      <p className="feature-description">Ассистент поможет с учебными задачами и проектами</p>
                     </div>
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                  <div className="feature-item">
+                    <div className="feature-icon yessenovai">
+                      <div className="feature-dot yessenovai"></div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800">Персонализация</h4>
-                      <p className="text-gray-600 text-sm">Адаптируется под ваши потребности и предпочтения</p>
+                    <div className="feature-content">
+                      <h4 className="feature-title">24/7 доступность</h4>
+                      <p className="feature-description">Получайте помощь в любое время дня и ночи</p>
+                    </div>
+                  </div>
+                  <div className="feature-item">
+                    <div className="feature-icon yessenovai">
+                      <div className="feature-dot yessenovai"></div>
+                    </div>
+                    <div className="feature-content">
+                      <h4 className="feature-title">Персонализация</h4>
+                      <p className="feature-description">Адаптируется под ваши потребности и предпочтения</p>
                     </div>
                   </div>
                 </div>
@@ -129,11 +131,258 @@ export default function YessenovAIComingSoonPage() {
 
         {/* CSS стили для анимации */}
         <style jsx>{`
-          .error404page {
+          .coming-soon-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+          }
+
+          .coming-soon-container {
+            max-width: 1200px;
+            width: 100%;
+          }
+
+          .coming-soon-header {
+            text-align: center;
+            margin-bottom: 16px;
+          }
+
+          .coming-soon-title {
+            font-size: 3.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-top: 20px;
+            margin-bottom: 4px;
+            line-height: 1;
+          }
+
+          .coming-soon-subtitle {
+            font-size: 1.875rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+          }
+
+          .coming-soon-subtitle.yessenovai {
+            color: #4f46e5;
+          }
+
+          .coming-soon-description {
+            font-size: 1.25rem;
+            color: #6b7280;
+            margin-bottom: 4px;
+            max-width: 32rem;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+          }
+
+          .coming-soon-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+          }
+
+          .coming-soon-animation {
+            flex-shrink: 0;
+          }
+
+          .character-container {
             width: 400px;
             height: 800px;
             position: relative;
             transform: scale(0.5);
+          }
+
+          .coming-soon-features {
+            flex: 1;
+            max-width: 32rem;
+          }
+
+          .features-card {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          }
+
+          .features-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 24px;
+          }
+
+          .features-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+          }
+
+          .feature-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 4px;
+          }
+
+          .feature-icon.yessenovai {
+            background-color: #eef2ff;
+          }
+
+          .feature-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+          }
+
+          .feature-dot.yessenovai {
+            background-color: #4f46e5;
+          }
+
+          .feature-content {
+            flex: 1;
+          }
+
+          .feature-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+          }
+
+          .feature-description {
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.4;
+          }
+
+          /* МОБИЛЬНАЯ АДАПТАЦИЯ */
+          @media (max-width: 768px) {
+            .coming-soon-page {
+              padding: 12px;
+            }
+
+            .coming-soon-title {
+              font-size: 2.5rem;
+              margin-top: 16px;
+              margin-bottom: 8px;
+            }
+
+            .coming-soon-subtitle {
+              font-size: 1.5rem;
+              margin-bottom: 8px;
+            }
+
+            .coming-soon-description {
+              font-size: 1rem;
+              margin-bottom: 8px;
+              line-height: 1.4;
+            }
+
+            .coming-soon-content {
+              gap: 16px;
+            }
+
+            /* Скрыть анимацию на мобильных */
+            .mobile-hidden {
+              display: none !important;
+            }
+
+            .features-card {
+              padding: 20px;
+              margin: 0 8px;
+            }
+
+            .features-title {
+              font-size: 1.25rem;
+              margin-bottom: 16px;
+            }
+
+            .features-list {
+              gap: 12px;
+            }
+
+            .feature-item {
+              gap: 8px;
+            }
+
+            .feature-icon {
+              width: 20px;
+              height: 20px;
+              margin-top: 2px;
+            }
+
+            .feature-dot {
+              width: 6px;
+              height: 6px;
+            }
+
+            .feature-title {
+              font-size: 0.9rem;
+            }
+
+            .feature-description {
+              font-size: 0.8rem;
+              line-height: 1.3;
+            }
+          }
+
+          /* Планшеты */
+          @media (min-width: 769px) and (max-width: 1024px) {
+            .coming-soon-content {
+              flex-direction: row;
+              align-items: flex-start;
+              gap: 24px;
+            }
+
+            .character-container {
+              transform: scale(0.4);
+            }
+
+            .features-card {
+              padding: 24px;
+            }
+          }
+
+          /* Большие экраны */
+          @media (min-width: 1025px) {
+            .coming-soon-content {
+              flex-direction: row;
+              align-items: center;
+              gap: 32px;
+            }
+
+            .character-container {
+              transform: scale(0.5);
+            }
+          }
+
+          /* Анимации персонажа */
+          .character-animation {
+            width: 400px;
+            height: 800px;
+            position: relative;
+          }
+
+          .character-animation .newcharacter404 {
+            width: 400px;
+            height: 800px;
+            left: 50%;
+            top: 20px;
+            margin-left: -200px;
           }
 
           .body404,

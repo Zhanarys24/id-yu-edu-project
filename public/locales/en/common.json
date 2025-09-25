@@ -61,7 +61,8 @@
     "upbringing": "Upbringing",
     "eservices": "E-services",
     "yessenovai": "YessenovAI",
-    "YU-Gamification": "YU-Gamification"
+    "YU-Gamification": "YU-Gamification",
+    "profile": "Profile"
   },
 
   "portfolio": {
@@ -289,6 +290,7 @@
       }
     },
     "form": {
+      "date": "Date",
       "title": "Add Meeting",
       "eventTitle": "Event Title",
       "eventDescription": "Event Description",
@@ -301,11 +303,30 @@
       "titlePlaceholder": "Enter meeting title",
       "campus": "Campus",
       "selectCampus": "-- Select Campus --",
-      "selectLocation": "-- Select Meeting Location --"
+      "selectLocation": "-- Select Meeting Location --",
+      "participants": "Participants",
+      "participantsSearch": "Search participants",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "color": "Color",
+      "colors": {
+        "blue": "Blue",
+        "green": "Green",
+        "yellow": "Yellow",
+        "red": "Red"
+      },
+      "description": "Description",
+      "descriptionPlaceholder": "Enter meeting description",
+      "isOnline": "Online Meeting",
+      "link": "Link",
+      "linkPlaceholder": "Enter link for online meeting"
     },
     "buttons": {
       "close": "Close",
-      "submit": "Add"
+      "submit": "Add",
+      "creating": "Creating...",
+      "createMeeting": "Create Meeting",
+      "cancel": "Cancel"
     },
     "validation": {
       "titleRequired": "Meeting title is required",
