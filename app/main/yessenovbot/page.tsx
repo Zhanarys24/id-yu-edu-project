@@ -16,11 +16,13 @@ import {
 } from '@heroicons/react/24/outline'
 import { Send, Bot, Loader2 } from 'lucide-react'
 
+// Обновляем тип Message
 type Message = {
   id: string
   text: string
   isUser: boolean
   timestamp: Date
+  showNavigationButtons?: boolean // Добавляем опциональное поле
 }
 
 type AITab = 'yessenovai' | 'jolserik'
@@ -148,13 +150,13 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
         'How can I get a scholarship?'
       ];
 
-
-  return (
+    
+    return (
     <Layout active={t('menu.yessenovai')}>
       {/* Вкладки AI */}
       <div className="bg-white border-b border-gray-200 mb-4">
         <div className="flex">
-          <button
+            <button
             onClick={() => setActiveTab('yessenovai')}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'yessenovai'
@@ -163,8 +165,8 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
             }`}
           >
             YessenovAI
-          </button>
-          <button
+            </button>
+            <button
             onClick={() => setActiveTab('jolserik')}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'jolserik'
@@ -173,14 +175,14 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
             }`}
           >
             Jolserik AI
-          </button>
-        </div>
+            </button>
+          </div>
       </div>
 
       {/* Контент в зависимости от активной вкладки */}
       {activeTab === 'yessenovai' ? (
         // Весь оригинальный код YessenovAI (не трогаем!)
-        <div className="flex h-[calc(100vh-120px)] relative overflow-hidden">
+    <div className="flex h-[calc(100vh-120px)] relative overflow-hidden">
           {/* Кнопка меню для мобильных */}
           <button
             onClick={toggleSidebar}
@@ -203,16 +205,16 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
 
           {/* Основной чат */}
           <div className="flex-1 bg-white p-3 sm:p-4 lg:p-6 rounded-none sm:rounded-xl shadow-none sm:shadow-sm flex flex-col overflow-hidden lg:mr-6">
-            {/* Область сообщений */}
+        {/* Область сообщений */}
             <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 mb-4 mt-12 lg:mt-0">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <div className="flex flex-col items-center justify-center h-full text-center px-4">
                   <div className="bg-blue-100 p-3 sm:p-4 rounded-full mb-4">
                     <Bot className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-                  </div>
+              </div>
                   <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
                     {t('yessenovai.welcome')}
-                  </h1>
+              </h1>
                   <p className="text-sm sm:text-base text-gray-500 mb-6 sm:mb-8 max-w-md">
                     {t('yessenovai.description')}
                   </p>
@@ -246,9 +248,9 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
                       color="bg-pink-100"
                       onClick={() => setInput(t('yessenovai.cards.content.question'))}
                     />
-                  </div>
-                </div>
-              ) : (
+              </div>
+            </div>
+          ) : (
                 <div className="space-y-3 sm:space-y-4">
                   {messages.map((message) => (
                     <div
@@ -257,7 +259,7 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
                     >
                       <div
                         className={`max-w-[85%] sm:max-w-[80%] rounded-lg px-3 sm:px-4 py-2 sm:py-3 ${
-                          message.isUser
+                    message.isUser 
                             ? 'bg-blue-600 text-white rounded-br-none'
                             : 'bg-gray-100 text-gray-800 rounded-bl-none'
                         }`}
@@ -266,34 +268,34 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
                         <p className="text-xs mt-1 opacity-70">
                           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
-                      </div>
-                    </div>
-                  ))}
+                  </div>
+                </div>
+              ))}
                   {isLoading && (
-                    <div className="flex justify-start">
+                <div className="flex justify-start">
                       <div className="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 sm:px-4 py-2 sm:py-3 max-w-[85%] sm:max-w-[80%]">
                         <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                      </div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
+                  </div>
                 </div>
               )}
+                  <div ref={messagesEndRef} />
             </div>
+          )}
+        </div>
 
-            {/* Форма ввода */}
+        {/* Форма ввода */}
             <div className="mt-auto pb-4 sm:pb-0">
-              <div className="relative">
-                <input
-                  type="text"
+          <div className="relative">
+            <input
+              type="text"
                   className="w-full border border-gray-300 rounded-full py-2 sm:py-3 px-3 sm:px-4 pr-10 sm:pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('yessenovai.inputPlaceholder')}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  maxLength={1000}
-                />
-                <button
+              onKeyDown={handleKeyDown}
+              maxLength={1000}
+            />
+            <button
                   onClick={handleSendMessage}
                   disabled={isLoading || !input.trim()}
                   className={`absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 ${
@@ -301,9 +303,9 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
                   }`}
                 >
                   <Send size={18} className="sm:w-5 sm:h-5" />
-                </button>
-              </div>
-
+            </button>
+          </div>
+          
               <div className="flex justify-between items-center mt-2 mb-2 sm:mb-[10px] text-xs text-gray-500 px-1">
                 <label className="flex items-center gap-1 cursor-pointer hover:text-blue-600">
                   <PaperClipIcon className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -325,7 +327,7 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
             transition-transform duration-300 ease-in-out
             z-40 lg:z-auto
           `}>
-            <button
+            <button 
               onClick={createNewChat}
               className="w-full bg-blue-600 text-white rounded py-2 sm:py-2 mb-4 hover:bg-blue-700 text-sm flex items-center justify-center gap-2"
             >
@@ -377,16 +379,16 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
                   </li>
                 ))}
               </ul>
-            </div>
+          </div>
 
             <div className="mt-auto pt-4 border-t border-gray-200">
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <div className="bg-blue-100 p-1 rounded-full">
                   <Bot className="w-4 h-4 text-blue-600" />
-                </div>
+        </div>
                 <span>{t('yessenovai.version')}</span>
-              </div>
-            </div>
+      </div>
+    </div>
           </div>
         </div>
       ) : (
@@ -437,13 +439,112 @@ function JolserikAIContent() {
   const [jolserikLoading, setJolserikLoading] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  // Все функции должны быть ВНУТРИ JolserikAIContent
-  const handleJolserikSend = async () => {
-    if (!jolserikInput.trim()) return
+  // Добавляем категории помощи
+  const helpCategories = [
+    {
+      id: 'navigation',
+      title: 'Навигация по кампусу',
+      desc: 'Где находятся аудитории, деканат, столовая...',
+      icon: '🗺️',
+      color: 'bg-blue-100',
+      questions: [
+        'Главный корпус',
+        'Технопарк', 
+        'Спорт комплекс',
+        'Общежитие 3',
+        'Общежитие 4',
+        'Центр обслуживания',
+        'Сцена',
+        'University Park'
+      ]
+    },
+    {
+      id: 'schedule',
+      title: 'Расписание занятий',
+      desc: 'Узнать расписание, изменения, экзамены...',
+      icon: '📅',
+      color: 'bg-green-100',
+      questions: [
+        'Мое расписание на сегодня',
+        'Что у меня завтра?',
+        'Когда следующая пара?',
+        'Расписание на неделю'
+      ]
+    },
+    {
+      id: 'documents',
+      title: 'Документы и заявки',
+      desc: 'Справки, заявления, документы...',
+      icon: '📄',
+      color: 'bg-yellow-100',
+      questions: [
+        'Как получить справку?',
+        'Справка об обучении',
+        'Академическая справка',
+        'Статус моих заявок'
+      ]
+    },
+    {
+      id: 'systems',
+      title: 'Учебные системы',
+      desc: 'Platonus, Canvas, электронная почта...',
+      icon: '💻',
+      color: 'bg-purple-100',
+      questions: [
+        'Проблемы с Platonus',
+        'Как войти в систему?',
+        'Восстановить пароль',
+        'Настройка email'
+      ]
+    },
+    {
+      id: 'adaptation',
+      title: 'Адаптация в вузе',
+      desc: 'Студенческая жизнь, клубы, мероприятия...',
+      icon: '🎓',
+      color: 'bg-pink-100',
+      questions: [
+        'Студенческие клубы',
+        'Как записаться в секции?',
+        'Университетские события',
+        'Общежитие - правила'
+      ]
+    },
+    {
+      id: 'urgent',
+      title: 'Срочная помощь',
+      desc: 'Контакты, экстренные ситуации...',
+      icon: '🆘',
+      color: 'bg-red-100',
+      questions: [
+        'Контакты деканата',
+        'IT-поддержка',
+        'Медпункт',
+        'Охрана университета'
+      ]
+    }
+  ];
+
+  // СНАЧАЛА объявляем кнопки навигации
+  const quickNavigationButtons = [
+    { text: '🏛️ Главный корпус', query: 'главный корпус' },
+    { text: '🏢 Технопарк', query: 'технопарк' },
+    { text: '🏋️ Спорт комплекс', query: 'спорт комплекс' },
+    { text: '🏠 Общежитие 3', query: 'общежитие 3' },
+    { text: '🏠 Общежитие 4', query: 'общежитие 4' },
+    { text: '🎯 Центр обслуживания', query: 'центр обслуживания' },
+    { text: '🎭 Сцена', query: 'сцена' },
+    { text: '🌳 University Park', query: 'university park' }
+  ];
+
+  // Функция отправки сообщения
+  const handleJolserikSend = async (messageText?: string) => {
+    const textToSend = messageText || jolserikInput.trim()
+    if (!textToSend) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: jolserikInput,
+      text: textToSend,
       isUser: true,
       timestamp: new Date()
     }
@@ -453,7 +554,7 @@ function JolserikAIContent() {
     setJolserikLoading(true)
 
     try {
-      const response = await generateJolserikResponse(jolserikInput)
+      const response = await generateJolserikResponse(textToSend)
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: response,
@@ -472,6 +573,14 @@ function JolserikAIContent() {
       setJolserikMessages(prev => [...prev, errorMessage])
     } finally {
       setJolserikLoading(false)
+    }
+  }
+
+  // Добавляем функцию handleKeyDown для Jolserik AI
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleJolserikSend() // Без параметра - берет из поля ввода
     }
   }
 
@@ -552,6 +661,12 @@ function JolserikAIContent() {
 📞 **Контакты для помощи:**
 • Деканат: +7 (7292) 40-01-01
 • IT-поддержка: +7 (7292) 40-01-05
+      text: textToSend,
+      isUser: true,
+      timestamp: new Date()
+    }
+
+    setJolserikMessages(prev => [...prev, userMessage])
 • Студенческий отдел: +7 (7292) 40-01-04
 
 💡 **Популярные вопросы:**
@@ -559,110 +674,124 @@ function JolserikAIContent() {
 • "Расписание на сегодня"
 • "Как получить справку?"
 
-🔄 Попробуйте переформулировать вопрос!`
+�� Попробуйте переформулировать вопрос!`
   }
 
   const handleCategorySelect = (category: any) => {
     setSelectedCategory(category.id)
-    const welcomeMessage = `${category.icon} **${category.title}**\n\nВыберите вопрос или задайте свой:\n\n${category.questions.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}`
     
-    const aiMessage: Message = {
-      id: Date.now().toString(),
-      text: welcomeMessage,
-      isUser: false,
-      timestamp: new Date()
+    // Специальная обработка для навигации
+    if (category.id === 'navigation') {
+      const welcomeMessage = `${category.icon} **${category.title}**\n\nВыберите место для навигации:`
+      
+      const aiMessage: Message = {
+        id: Date.now().toString(),
+        text: welcomeMessage,
+        isUser: false,
+        timestamp: new Date(),
+        showNavigationButtons: true // Добавляем флаг для показа кнопок
+      }
+      setJolserikMessages([aiMessage])
+    } else {
+      // Для остальных категорий - как было
+      const welcomeMessage = `${category.icon} **${category.title}**\n\nВыберите вопрос или задайте свой:\n\n${category.questions.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}`
+      
+      const aiMessage: Message = {
+        id: Date.now().toString(),
+        text: welcomeMessage,
+        isUser: false,
+        timestamp: new Date()
+      }
+      setJolserikMessages([aiMessage])
     }
-    setJolserikMessages([aiMessage])
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleJolserikSend()
-    }
+  // Функция для кнопок навигации
+  const handleQuickNavigation = (query: string) => {
+    handleJolserikSend(query)
   }
 
-  // Статические категории (без переводов пока)
-  const helpCategories = [
-    {
-      id: 'navigation',
-      title: 'Навигация по кампусу',
-      desc: 'Где находятся аудитории, деканат, столовая...',
-      icon: '🗺️',
-      color: 'bg-blue-100',
-      questions: [
-        'Где находится деканат?',
-        'Как найти аудиторию 205?',
-        'Где столовая в главном корпусе?',
-        'Расположение библиотеки'
-      ]
-    },
-    {
-      id: 'schedule',
-      title: 'Расписание занятий',
-      desc: 'Узнать расписание, изменения, экзамены...',
-      icon: '📅',
-      color: 'bg-green-100',
-      questions: [
-        'Когда у меня следующая пара?',
-        'Расписание на завтра',
-        'Когда экзамены?',
-        'Изменения в расписании'
-      ]
-    },
-    {
-      id: 'documents',
-      title: 'Документы и заявки',
-      desc: 'Справки, заявления, документы...',
-      icon: '📄',
-      color: 'bg-yellow-100',
-      questions: [
-        'Как получить справку об обучении?',
-        'Подать заявление на стипендию',
-        'Документы для общежития',
-        'Академический отпуск'
-      ]
-    },
-    {
-      id: 'systems',
-      title: 'Учебные системы',
-      desc: 'Platonus, Canvas, электронная почта...',
-      icon: '💻',
-      color: 'bg-purple-100',
-      questions: [
-        'Как войти в Platonus?',
-        'Проблемы с Canvas',
-        'Настройка email студента',
-        'Доступ к электронным ресурсам'
-      ]
-    },
-    {
-      id: 'adaptation',
-      title: 'Адаптация в вузе',
-      desc: 'Студенческая жизнь, клубы, мероприятия...',
-      icon: '🎓',
-      color: 'bg-pink-100',
-      questions: [
-        'Как записаться в студенческие клубы?',
-        'Предстоящие мероприятия',
-        'Студенческий совет',
-        'Спортивные секции'
-      ]
-    },
-    {
-      id: 'emergency',
-      title: 'Срочная помощь',
-      desc: 'Контакты, экстренные ситуации...',
-      icon: '🆘',
-      color: 'bg-red-100',
-      questions: [
-        'Контакты деканата',
-        'Техподдержка',
-        'Медпункт университета',
-        'Служба безопасности'
-      ]
-    }
-  ]
+  // И в JSX обновляем кнопки:
+  {/* Быстрые кнопки навигации */}
+  {selectedCategory === 'navigation' && (
+    <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+      <h4 className="text-sm font-medium text-gray-700 mb-3">🗺️ Быстрая навигация:</h4>
+      <div className="grid grid-cols-2 gap-2">
+        {quickNavigationButtons.map((button, index) => (
+          <button
+            key={index}
+            onClick={() => handleQuickNavigation(button.query)} // Сразу отправляем
+            className="text-left px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700"
+          >
+            {button.text}
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
+
+  // Добавляем функцию для обработки ссылок
+  function renderMessageWithLinks(text: string) {
+    // Regex для поиска URL
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
+    return text.split(urlRegex).map((part, index) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  }
+
+  // Добавляем специальные кнопки для навигации
+  function renderMessageWithButtons(text: string, messageId: string) {
+    const has2gisLink = text.includes('2gis.kz');
+    
+    return (
+      <div>
+        <div className="whitespace-pre-wrap mb-2">
+          {renderMessageWithLinks(text)}
+        </div>
+        {has2gisLink && (
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={() => {
+                const match = text.match(/(https:\/\/2gis\.kz[^\s]+)/);
+                if (match) {
+                  window.open(match[1], '_blank');
+                }
+              }}
+              className="bg-green-600 text-white px-3 py-1 rounded-md text-sm hover:bg-green-700 flex items-center gap-1"
+            >
+              🗺️ Открыть в 2ГИС
+            </button>
+            <button
+              onClick={() => {
+                const coordMatch = text.match(/(\d+\.\d+),\s*(\d+\.\d+)/);
+                if (coordMatch) {
+                  const [, lat, lng] = coordMatch;
+                  window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
+                }
+              }}
+              className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-700 flex items-center gap-1"
+            >
+              🌍 Google Maps
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-[calc(100vh-120px)] relative overflow-hidden">
@@ -699,21 +828,37 @@ function JolserikAIContent() {
           ) : (
             <div className="space-y-4">
               {jolserikMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-lg px-4 py-3 ${
-                      message.isUser
-                        ? 'bg-purple-600 text-white rounded-br-none'
-                        : 'bg-gray-100 text-gray-800 rounded-bl-none'
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap">{message.text}</p>
-                    <p className="text-xs mt-1 opacity-70">
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                <div key={message.id} className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] p-3 rounded-lg ${
+                    message.isUser 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    <div className="whitespace-pre-wrap text-sm">
+                      {renderMessageWithLinks(message.text)}
+                    </div>
+                    
+                    {/* Показываем кнопки навигации */}
+                    {message.showNavigationButtons && (
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        {quickNavigationButtons.map((button, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleQuickNavigation(button.query)} // Сразу отправляем
+                            className="text-left px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700"
+                          >
+                            {button.text}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="text-xs opacity-70 mt-1">
+                      {message.timestamp.toLocaleTimeString('ru-RU', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -741,13 +886,17 @@ function JolserikAIContent() {
               maxLength={1000}
             />
             <button
-              onClick={handleJolserikSend}
+              onClick={() => handleJolserikSend()} // Добавляем стрелочную функцию
               disabled={jolserikLoading || !jolserikInput.trim()}
               className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                 jolserikLoading || !jolserikInput.trim() ? 'text-gray-400' : 'text-purple-600 hover:text-purple-800'
-              }`}
+              } transition-colors`}
             >
-              <Send size={20} />
+              {jolserikLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
             </button>
           </div>
           
