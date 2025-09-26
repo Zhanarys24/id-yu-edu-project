@@ -49,7 +49,9 @@
   "common": {
     "account": "Аккаунт",
     "profile": "Профиль",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "logo": "Лого",
+    "avatar": "аватар"
   },
 
   "education": {
@@ -76,7 +78,8 @@
     "upbringing": "Воспитание",
     "eservices": "E-услуги",
     "yessenovai": "YessenovAI",
-    "YU-Gamification": "YU-Gamification"
+    "YU-Gamification": "YU-Gamification",
+    "profile": "Профиль"
   },
 
   "portfolio": {
@@ -207,11 +210,6 @@
     "openPage": "Открыть страницу карты"
   },
 
-  "common": {
-    "logo": "Лого",
-    "avatar": "аватар",
-    "account": "АККАУНТ"
-  },
 
   "applicationsPage": {
     "title": "Приложения",
@@ -317,23 +315,42 @@
       }
     },
     "form": {
-      "title": "Кездесу қосу",
-      "eventTitle": "Оқиғаның аты",
-      "eventDescription": "Оқиғаның сипаттамасы",
-      "startDate": "Басталу уақыты",
-      "endDate": "Аяқталу уақыты",
-      "location": "Орын",
-      "attendees": "Қатысушылар",
-      "attendeesPlaceholder": "Қатысушылар тізімін енгізіңіз",
-      "submit": "Кездесуді қосу",
+      "title": "Добавить встречу",
+      "eventTitle": "Название встречи",
+      "eventDescription": "Описание встречи",
+      "startDate": "Дата встречи",
+      "endDate": "Время окончания",
+      "location": "Место встречи",
+      "attendees": "Участники",
+      "attendeesPlaceholder": "Введите список участников",
+      "submit": "Добавить встречу",
       "titlePlaceholder": "Введите название встречи",
       "campus": "Корпус",
       "selectCampus": "-- Выберите корпус --",
-      "selectLocation": "-- Выберите место встречи --"
+      "selectLocation": "-- Выберите место встречи --",
+      "participants": "Участники",
+      "participantsSearch": "Поиск участников",
+      "startTime": "Время начала",
+      "endTime": "Время окончания",
+      "color": "Цвет",
+      "colors": {
+        "blue": "Синий",
+        "green": "Зеленый",
+        "yellow": "Желтый",
+        "red": "Красный"
+      },
+      "description": "Описание",
+      "descriptionPlaceholder": "Введите описание встречи",
+      "isOnline": "Онлайн встреча",
+      "link": "Ссылка",
+      "linkPlaceholder": "Введите ссылку для онлайн встречи"
     },
     "buttons": {
       "close": "Закрыть",
-      "submit": "Добавить"
+      "submit": "Добавить",
+      "creating": "Создание...",
+      "createMeeting": "Создать встречу",
+      "cancel": "Отмена"
     },
     "validation": {
       "titleRequired": "Название встречи обязательно",

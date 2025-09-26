@@ -993,15 +993,34 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
         </aside>
 
         <main className="calendar-right">
+          {/* Мобильный заголовок и кнопка бронирования - показываются только на мобильных */}
+          <div className="mobile-calendar-header">
+            <h2 className="mobile-calendar-title">
+              <Calendar className="inline-block w-6 h-6 mr-2" />
+              {t('calendarPage.title')}
+            </h2>
+            <button 
+              className="mobile-booking-btn" 
+              onClick={() => {
+                console.log('📅 Открываем модальное окно через мобильную кнопку');
+                setModalOpen(true);
+              }}
+              disabled={loading}
+            >
+              {loading ? t('common.loading') : t('calendarPage.book')}
+            </button>
+          </div>
+
+          {/* Десктопный заголовок - скрывается на мобильных */}
           <div className="calendar-header-bar">
             <h2>{t('calendarPage.headerTitle')}</h2>
             <div style={{ display: 'flex', gap: '10px' }}>
-
               <span style={{ fontSize: '14px', color: '#666', alignSelf: 'center' }}>
                 {t('calendarPage.eventsCount')}: {events.length}
               </span>
             </div>
           </div>
+          
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -1035,6 +1054,32 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
             }}
           />
 
+          {/* Мобильная версия ближайших событий - показывается только на мобильных */}
+          <div className="mobile-nearest-events">
+            <h3>
+              <Clock className="inline-block w-4 h-4 mr-2" />
+              {t('calendarPage.nearestTitle')}
+            </h3>
+            {loading ? (
+              <p>{t('common.loading')}</p>
+            ) : nearestEvents.length === 0 ? (
+              <p>{t('calendarPage.noEventsToday')}</p>
+            ) : (
+              nearestEvents.map((event, idx) => (
+                <div key={event.id || idx} className="event-item">
+                  <strong>{event.title}</strong><br />
+                  <span>
+                    <MapPin className="inline-block w-3 h-3 mr-1" />
+                    {event.place}
+                  </span><br />
+                  <span>
+                    <Clock className="inline-block w-3 h-3 mr-1" />
+                    {format(parseISO(event.start), 'HH:mm')} - {format(parseISO(event.end), 'HH:mm')}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         </main>
 
         {modalOpen && (

@@ -404,7 +404,7 @@ const generateWordHTML = (user: RegisteredUser, portfolioItems: PortfolioItem[])
           margin: 0;
           padding: 0;
           background-color: #ffffff;
-          text-align: justify;
+          text-align: left;
         }
 
         /* Заголовки */
@@ -751,7 +751,7 @@ const generateWordHTML = (user: RegisteredUser, portfolioItems: PortfolioItem[])
         .item-description {
           margin: 16pt 0;
           line-height: 1.6;
-          text-align: justify;
+          text-align: left;
           color: #333333;
         }
 
@@ -1438,7 +1438,7 @@ const generateStudentInstructionHTML = (userLogin: string, userPassword: string,
 
   // Определяем, показывать ли логотип
   const logoHtml = logoBase64 
-    ? `<img src="${logoBase64}" alt="Yessenov University Logo" class="logo-image" />`
+    ? `<img src="${logoBase64}" alt="Yessenov University Logo" class="logo-image" style="max-width: 100px; max-height: 60px;" />`
     : `<div class="logo-text">YU</div>`;
 
   return `
@@ -1460,342 +1460,137 @@ const generateStudentInstructionHTML = (userLogin: string, userPassword: string,
       <style>
         @page {
           size: A4;
-          margin: 1.27cm 1.27cm 1.27cm 1.27cm;
+          margin: 2cm 1.5cm 2cm 1.5cm;
           mso-header-margin: 1.27cm;
           mso-footer-margin: 1.27cm;
         }
         
         body {
-          font-family: 'Times New Roman', 'Times', serif;
-          font-size: 14pt;
-          line-height: 1.6;
-          color: #1a1a1a;
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 12pt;
+          line-height: 1.4;
+          color: #000000;
           margin: 0;
           padding: 0;
           background-color: #ffffff;
-          text-align: justify;
+          text-align: left;
         }
 
-        /* Заголовки */
-        h1, h2, h3, h4, h5 {
-          color: #2c5aa0;
-          font-weight: bold;
-          page-break-after: avoid;
-          margin-top: 24pt;
-          margin-bottom: 12pt;
-        }
-
-        h1 { 
-          font-size: 20pt;
+        .header {
           text-align: center;
-          text-transform: uppercase;
-          letter-spacing: 1.5pt;
-          border-bottom: 3pt solid #2c5aa0;
-          padding-bottom: 8pt;
           margin-bottom: 20pt;
-          box-shadow: 0 2pt 4pt rgba(44, 90, 160, 0.1);
         }
 
-        h2 { 
-          font-size: 16pt;
-          border-left: 5pt solid #2c5aa0;
-          padding-left: 15pt;
-          background: linear-gradient(90deg, #f8f9ff 0%, transparent 100%);
-          padding: 12pt 15pt;
-          margin: 20pt 0 16pt 0;
-          border-radius: 0 8pt 8pt 0;
-        }
-
-        h3 { 
-          font-size: 14pt;
-          color: #3366cc;
-          border-bottom: 1pt solid #e0e6ff;
-          padding-bottom: 6pt;
-          margin-bottom: 12pt;
-        }
-
-        /* Логотип университета */
-        .university-logo {
-          text-align: center;
-          margin: 40pt 0;
-          padding: 30pt;
-          background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
-          border: 2pt solid #e0e6ff;
-          border-radius: 12pt;
+        .logo-image {
+          max-width: 100px;
+          max-height: 60px;
+          margin-bottom: 10pt;
         }
 
         .logo-text {
-          font-size: 36pt;
+          font-size: 24pt;
           font-weight: bold;
           color: #2c5aa0;
-          margin-bottom: 16pt;
-          text-transform: uppercase;
-          letter-spacing: 3pt;
-          text-shadow: 2pt 2pt 4pt rgba(44, 90, 160, 0.1);
+          margin-bottom: 10pt;
         }
 
         .university-name {
-          font-size: 20pt;
-          color: #1a1a1a;
-          margin-bottom: 20pt;
-          font-weight: 500;
-          line-height: 1.4;
+          font-size: 14pt;
+          font-weight: bold;
+          margin-bottom: 10pt;
         }
 
-        /* Приветствие */
         .greeting {
           text-align: center;
-          font-size: 16pt;
+          font-size: 14pt;
           font-weight: bold;
-          color: #2c5aa0;
-          margin: 30pt 0;
-          padding: 20pt;
-          background-color: #f8f9ff;
-          border: 2pt solid #e0e6ff;
-          border-radius: 12pt;
-        }
-
-        /* Основной контент */
-        .main-content {
-          margin: 30pt 0;
-        }
-
-        .content-section {
-          margin-bottom: 25pt;
-          padding: 20pt;
-          background-color: #fafbfc;
-          border-left: 6pt solid #2c5aa0;
-          border-radius: 0 8pt 8pt 0;
-        }
-
-        .login-info {
-          background-color: #e8f4fd;
-          border: 2pt solid #b3d9ff;
-          padding: 20pt;
           margin: 20pt 0;
-          border-radius: 8pt;
+        }
+
+        .content {
+          font-size: 12pt;
+          margin-bottom: 15pt;
+        }
+
+        .login-section {
+          margin: 15pt 0;
         }
 
         .login-item {
-          margin: 10pt 0;
-          padding: 8pt;
-          background-color: #ffffff;
-          border: 1pt solid #d0d7de;
-          border-radius: 4pt;
-        }
-
-        .login-label {
-          font-weight: bold;
-          color: #2c5aa0;
-          margin-bottom: 4pt;
-        }
-
-        .login-value {
-          font-family: 'Courier New', monospace;
-          font-size: 12pt;
-          color: #1a1a1a;
-          background-color: #f8f9fa;
-          padding: 4pt 8pt;
-          border-radius: 4pt;
-          border: 1pt solid #e0e0e0;
+          margin: 5pt 0;
         }
 
         .important-note {
           background-color: #fff3cd;
-          border: 2pt solid #ffc107;
-          padding: 20pt;
-          margin: 20pt 0;
-          border-radius: 8pt;
-        }
-
-        .important-title {
-          font-weight: bold;
-          color: #856404;
-          font-size: 16pt;
-          margin-bottom: 10pt;
-        }
-
-        .important-text {
-          color: #856404;
-          font-size: 14pt;
+          border: 1pt solid #ffc107;
+          padding: 10pt;
+          margin: 15pt 0;
+          border-radius: 3pt;
         }
 
         .services-list {
-          margin: 20pt 0;
+          margin: 15pt 0;
         }
 
         .service-item {
-          margin: 15pt 0;
-          padding: 15pt;
-          background-color: #ffffff;
-          border: 1pt solid #e0e0e0;
-          border-left: 4pt solid #2c5aa0;
-          border-radius: 0 6pt 6pt 0;
+          margin: 5pt 0;
+          padding-left: 15pt;
         }
 
-        .service-name {
+        strong {
           font-weight: bold;
-          color: #2c5aa0;
-          font-size: 14pt;
-          margin-bottom: 8pt;
-        }
-
-        .service-description {
-          color: #4a5568;
-          font-size: 12pt;
         }
 
         .contact-info {
-          background-color: #f0f4f8;
-          border: 1pt solid #d0d7de;
-          padding: 20pt;
-          margin: 30pt 0;
-          border-radius: 8pt;
+          margin-top: 20pt;
           text-align: center;
-        }
-
-        .contact-title {
-          font-weight: bold;
-          color: #2c5aa0;
-          font-size: 16pt;
-          margin-bottom: 10pt;
-        }
-
-        .contact-text {
-          color: #4a5568;
-          font-size: 14pt;
-        }
-
-        /* Подвал документа */
-        .document-footer {
-          margin-top: 48pt;
-          padding-top: 16pt;
-          border-top: 2pt solid #2c5aa0;
-          text-align: center;
-          font-size: 10pt;
-          color: #666666;
-        }
-
-        .footer-university {
-          font-weight: bold;
-          color: #2c5aa0;
-          margin-bottom: 4pt;
-        }
-
-        .footer-date {
           font-style: italic;
-        }
-
-        /* Списки */
-        ul {
-          margin: 12pt 0;
-          padding-left: 20pt;
-        }
-
-        li {
-          margin: 6pt 0;
-          line-height: 1.5;
-        }
-
-        /* Выделение текста */
-        strong {
-          color: #1a1a1a;
-          font-weight: bold;
-        }
-
-        em {
-          font-style: italic;
-          color: #4a5568;
         }
       </style>
     </head>
     <body>
-      <!-- Логотип университета -->
-      <div class="university-logo">
+      <div class="header">
         ${logoHtml}
-        <div class="university-name">Университет имени Есенова</div>
+        <div class="university-name">YESSENOV UNIVERSITY</div>
       </div>
 
-      <!-- Приветствие -->
       <div class="greeting">
         Құрметті Студент!<br>
         Сізді YU студенті болуыңызбен шын жүректен құттықтаймыз!
       </div>
 
-      <!-- Основной контент -->
-      <div class="main-content">
-        <div class="content-section">
-          <p><strong>id.yu.edu.kz</strong> – сіздің негізгі порталыңыз. Осы сайт арқылы барлық сабақтарыңызға және оқу үдерісіне қатысты ақпараттарға қол жеткізе аласыз.</p>
+      <div class="content">
+        <strong>id.yu.edu.kz</strong> – сіздің негізгі порталыңыз. Осы сайт арқылы барлық сабақтарыңызға және оқу үдерісіне қатысты ақпараттарға қол жеткізе аласыз.
         </div>
 
-        <h2>Кіру деректері:</h2>
-        <div class="login-info">
-          <div class="login-item">
-            <div class="login-label">Логин:</div>
-            <div class="login-value">${userLogin}</div>
-          </div>
-          <div class="login-item">
-            <div class="login-label">Құпия сөз:</div>
-            <div class="login-value">${userPassword}</div>
-          </div>
-          <div class="login-item">
-            <div class="login-label">Түсініктеме:</div>
-            <div class="login-value">(бір реттік құпия сөз / студент өзі қояды)</div>
-          </div>
+      <div class="login-section">
+        <strong>Кіру деректері:</strong>
+        <div class="login-item"><strong>Логин:</strong> (логин енгізіледі)</div>
+        <div class="login-item"><strong>Құпия сөз:</strong> (бір реттік құпия сөз / студент өзі қояды)</div>
         </div>
 
         <div class="important-note">
-          <div class="important-title">Маңызды!</div>
-          <div class="important-text">
-            <strong>id.yu.edu.kz</strong> сайты ашылған бойда міндетті түрде қосымша өзіңіздің жеке поштаңызды тіркейсіз! Ол үшін: <strong>Главная страница → Настройки → Резервная почта (Добавить резервную почту)</strong>.
+        <strong>Маңызды!</strong> id.yu.edu.kz сайты ашылған бойда міндетті түрде қосымша өзіңіздің жеке поштаңызды тіркейсіз! Ол үшін: қосымша өзіңіздің жеке поштаңызды жеке коймыңыздан Главная страница → Настройки → Резервная почта (Добавить резервную почту).
           </div>
+
+      <div class="content">
+        <strong>Бұл не үшін қажет?</strong> Егерде құпия сөз (пароль) ұмытқан жағдайда, өзіңіздің жеке поштаңыз арқылы қайтадан жаңарта аласыз.
         </div>
 
-        <div class="content-section">
-          <p><strong>Бұл не үшін қажет?</strong> Егерде құпия сөз (пароль) ұмытқан жағдайда, өзіңіздің жеке поштаңыз арқылы қайтадан жаңарта аласыз.</p>
+      <div class="content">
+        <strong>Бұл портал сізге келесі мүмкіндіктерді ұсынады:</strong>
         </div>
 
-        <h2>Бұл портал сізге келесі мүмкіндіктерді ұсынады:</h2>
         <div class="services-list">
-          <div class="service-item">
-            <div class="service-name">• GMail</div>
-            <div class="service-description">– корпоративтік пошта;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Lessons</div>
-            <div class="service-description">– Google Meet арқылы онлайн сабақтарға қатысу.</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Platonus</div>
-            <div class="service-description">– оқу үдерісін автоматтандыру жүйесі (кесте, бағалар, қатысу, материалдар);</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Yessenov Science Journal</div>
-            <div class="service-description">– ғылымға жол ашатын мақалалар мен журналдар;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Общежитие</div>
-            <div class="service-description">– жатақханаға өтінім беру жүйесі.</div>
-          </div>
+        <div class="service-item">• <strong>GMail</strong> – корпоративтік пошта;</div>
+        <div class="service-item">• <strong>Lessons</strong> – Google Meet арқылы онлайн сабақтарға қатысу.</div>
+        <div class="service-item">• <strong>Platonus</strong> – оқу үдерісін автоматтандыру жүйесі (кесте, бағалар, қатысу, материалдар);</div>
+        <div class="service-item">• <strong>Yessenov Science Journal</strong> – ғылымға жол ашатын мақалалар мен журналдар;</div>
+        <div class="service-item">• <strong>Общежитие</strong> – жатақханаға өтінім беру жүйесі.</div>
         </div>
 
         <div class="contact-info">
-          <div class="contact-title">Көмек керек пе?</div>
-          <div class="contact-text">
             Егерде берілген ақпарат бойынша сізге бір пункт түсініксіз болған жағдайда, өзіңіздің жеке эдвайзеріңізге хабарласыңыз. Эдвайзерлеріңізді өзіңіздің деканатыңыздан білесіз.
-          </div>
-        </div>
-      </div>
-
-      <!-- Подвал документа -->
-      <div class="document-footer">
-        <div class="footer-university">Университет имени Есенова (YU)</div>
-        <div class="footer-date">Документ сформирован ${currentDate}</div>
-        <div style="margin-top: 12pt; font-size: 10pt; color: #4a5568;">
-          <strong>Система управления образованием</strong><br>
-          Автоматически сгенерированная инструкция<br>
-          Версия документа: 1.0 | Дата последнего обновления: ${currentDate}
-        </div>
       </div>
     </body>
     </html>
@@ -1849,7 +1644,7 @@ const generateEmployeeInstructionHTML = (userLogin: string, userPassword: string
 
   // Определяем, показывать ли логотип
   const logoHtml = logoBase64 
-    ? `<img src="${logoBase64}" alt="Yessenov University Logo" class="logo-image" />`
+    ? `<img src="${logoBase64}" alt="Yessenov University Logo" class="logo-image" style="max-width: 100px; max-height: 60px;" />`
     : `<div class="logo-text">YU</div>`;
 
   return `
@@ -1871,394 +1666,175 @@ const generateEmployeeInstructionHTML = (userLogin: string, userPassword: string
       <style>
         @page {
           size: A4;
-          margin: 1.27cm 1.27cm 1.27cm 1.27cm;
+          margin: 2cm 1.5cm 2cm 1.5cm;
           mso-header-margin: 1.27cm;
           mso-footer-margin: 1.27cm;
         }
         
         body {
-          font-family: 'Times New Roman', 'Times', serif;
-          font-size: 12pt;
-          line-height: 1.6;
-          color: #1a1a1a;
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 11pt;
+          line-height: 1.3;
+          color: #000000;
           margin: 0;
           padding: 0;
           background-color: #ffffff;
-          text-align: justify;
+          text-align: left;
         }
 
-        /* Заголовки */
-        h1, h2, h3, h4, h5 {
-          color: #2c5aa0;
-          font-weight: bold;
-          page-break-after: avoid;
-          margin-top: 24pt;
-          margin-bottom: 12pt;
-        }
-
-        h1 { 
-          font-size: 20pt;
+        .header {
           text-align: center;
-          text-transform: uppercase;
-          letter-spacing: 1.5pt;
-          border-bottom: 3pt solid #2c5aa0;
-          padding-bottom: 8pt;
-          margin-bottom: 20pt;
-          box-shadow: 0 2pt 4pt rgba(44, 90, 160, 0.1);
-        }
-
-        h2 { 
-          font-size: 16pt;
-          border-left: 5pt solid #2c5aa0;
-          padding-left: 15pt;
-          background: linear-gradient(90deg, #f8f9ff 0%, transparent 100%);
-          padding: 12pt 15pt;
-          margin: 20pt 0 16pt 0;
-          border-radius: 0 8pt 8pt 0;
-        }
-
-        h3 { 
-          font-size: 12pt;
-          color: #3366cc;
-          border-bottom: 1pt solid #e0e6ff;
-          padding-bottom: 6pt;
-          margin-bottom: 12pt;
-        }
-
-        /* Логотип университета */
-        .university-logo {
-          text-align: center;
-          margin: 40pt 0;
-          padding: 30pt;
-          background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
-          border: 2pt solid #e0e6ff;
-          border-radius: 12pt;
+          margin-bottom: 15pt;
         }
 
         .logo-image {
-          max-width: 200pt;
-          max-height: 120pt;
-          margin: 0 auto 20pt auto;
-          display: block;
-          object-fit: contain;
+          max-width: 100px;
+          max-height: 60px;
+          margin-bottom: 8pt;
         }
 
         .logo-text {
-          font-size: 36pt;
+          font-size: 24pt;
           font-weight: bold;
           color: #2c5aa0;
-          margin-bottom: 16pt;
-          text-transform: uppercase;
-          letter-spacing: 3pt;
-          text-shadow: 2pt 2pt 4pt rgba(44, 90, 160, 0.1);
+          margin-bottom: 8pt;
         }
 
         .university-name {
-          font-size: 20pt;
-          color: #1a1a1a;
-          margin-bottom: 20pt;
-          font-weight: 500;
-          line-height: 1.4;
+          font-size: 14pt;
+          font-weight: bold;
+          margin-bottom: 8pt;
         }
 
-        /* Приветствие */
         .greeting {
           text-align: center;
-          font-size: 16pt;
+          font-size: 12pt;
           font-weight: bold;
-          color: #2c5aa0;
-          margin: 30pt 0;
-          padding: 20pt;
-          background-color: #f8f9ff;
-          border: 2pt solid #e0e6ff;
-          border-radius: 12pt;
+          margin: 15pt 0;
         }
 
-        /* Основной контент */
-        .main-content {
-          margin: 30pt 0;
+        .content {
+          font-size: 11pt;
+          margin-bottom: 12pt;
         }
 
-        .content-section {
-          margin-bottom: 25pt;
-          padding: 20pt;
-          background-color: #fafbfc;
-          border-left: 6pt solid #2c5aa0;
-          border-radius: 0 8pt 8pt 0;
-        }
-
-        .login-info {
-          background-color: #e8f4fd;
-          border: 2pt solid #b3d9ff;
-          padding: 20pt;
-          margin: 20pt 0;
-          border-radius: 8pt;
+        .login-section {
+          margin: 12pt 0;
         }
 
         .login-item {
-          margin: 10pt 0;
-          padding: 8pt;
-          background-color: #ffffff;
-          border: 1pt solid #d0d7de;
-          border-radius: 4pt;
-        }
-
-        .login-label {
-          font-weight: bold;
-          color: #2c5aa0;
-          margin-bottom: 4pt;
-        }
-
-        .login-value {
-          font-family: 'Courier New', monospace;
-          font-size: 12pt;
-          color: #1a1a1a;
-          background-color: #f8f9fa;
-          padding: 4pt 8pt;
-          border-radius: 4pt;
-          border: 1pt solid #e0e0e0;
+          margin: 4pt 0;
         }
 
         .important-note {
           background-color: #fff3cd;
-          border: 2pt solid #ffc107;
-          padding: 20pt;
-          margin: 20pt 0;
-          border-radius: 8pt;
-        }
-
-        .important-title {
-          font-weight: bold;
-          color: #856404;
-          font-size: 16pt;
-          margin-bottom: 10pt;
-        }
-
-        .important-text {
-          color: #856404;
-          font-size: 12pt;
+          border: 1pt solid #ffc107;
+          padding: 8pt;
+          margin: 12pt 0;
+          border-radius: 3pt;
         }
 
         .services-list {
-          margin: 20pt 0;
+          margin: 12pt 0;
         }
 
         .service-item {
+          margin: 3pt 0;
+          padding-left: 15pt;
+        }
+
+        .contact-section {
           margin: 15pt 0;
-          padding: 15pt;
-          background-color: #ffffff;
-          border: 1pt solid #e0e0e0;
-          border-left: 4pt solid #2c5aa0;
-          border-radius: 0 6pt 6pt 0;
-        }
-
-        .service-name {
-          font-weight: bold;
-          color: #2c5aa0;
-          font-size: 12pt;
-          margin-bottom: 8pt;
-        }
-
-        .service-description {
-          color: #4a5568;
-          font-size: 12pt;
-        }
-
-        .contact-info {
-          background-color: #f0f4f8;
-          border: 1pt solid #d0d7de;
-          padding: 20pt;
-          margin: 30pt 0;
-          border-radius: 8pt;
-          text-align: center;
-        }
-
-        .contact-title {
-          font-weight: bold;
-          color: #2c5aa0;
-          font-size: 16pt;
-          margin-bottom: 10pt;
-        }
-
-        .contact-text {
-          color: #4a5568;
-          font-size: 12pt;
+          page-break-inside: avoid;
         }
 
         .contact-person {
-          background-color: #ffffff;
-          border: 1pt solid #e0e0e0;
-          padding: 15pt;
-          margin: 10pt 0;
-          border-radius: 6pt;
-          text-align: left;
+          margin: 8pt 0;
+          padding: 8pt;
+          border: 1pt solid #ddd;
+          border-radius: 3pt;
         }
 
         .contact-name {
           font-weight: bold;
-          color: #2c5aa0;
-          font-size: 12pt;
-          margin-bottom: 5pt;
+          margin-bottom: 3pt;
         }
 
         .contact-details {
-          color: #4a5568;
-          font-size: 11pt;
-          margin: 3pt 0;
-        }
-
-        /* Подвал документа */
-        .document-footer {
-          margin-top: 48pt;
-          padding-top: 16pt;
-          border-top: 2pt solid #2c5aa0;
-          text-align: center;
           font-size: 10pt;
-          color: #666666;
+          margin: 2pt 0;
         }
 
-        .footer-university {
-          font-weight: bold;
-          color: #2c5aa0;
-          margin-bottom: 4pt;
-        }
-
-        .footer-date {
-          font-style: italic;
-        }
-
-        /* Списки */
-        ul {
-          margin: 12pt 0;
-          padding-left: 20pt;
-        }
-
-        li {
-          margin: 6pt 0;
-          line-height: 1.5;
-        }
-
-        /* Выделение текста */
         strong {
-          color: #1a1a1a;
           font-weight: bold;
         }
 
-        em {
-          font-style: italic;
-          color: #4a5568;
+        .page-break {
+          page-break-before: always;
         }
       </style>
     </head>
     <body>
-      <!-- Логотип университета -->
-      <div class="university-logo">
+      <div class="header">
         ${logoHtml}
-        <div class="university-name">Университет имени Есенова</div>
+        <div class="university-name">YESSENOV UNIVERSITY</div>
       </div>
 
-      <!-- Приветствие -->
       <div class="greeting">
         Құрметті қызметкер және ПОҚ құрамы!<br>
         Yessenov University қош келдіңіз!
       </div>
 
-      <!-- Основной контент -->
-      <div class="main-content">
-        <div class="content-section">
-          <p><strong>id.yu.edu.kz</strong> – жалпы портал. Осы сайт арқылы сіз барлық сұрақтарыңызға қол жеткізе аласыз.</p>
+      <div class="content">
+        <strong>id.yu.edu.kz</strong> – жалпы портал. Осы сайт арқылы сіз барлық сұрақтарыңызға қол жеткізе аласыз.
         </div>
 
-        <h2>Кіру деректері:</h2>
-        <div class="login-info">
-          <div class="login-item">
-            <div class="login-label">Логин:</div>
-            <div class="login-value">${userLogin}</div>
-          </div>
-          <div class="login-item">
-            <div class="login-label">Құпия сөз:</div>
-            <div class="login-value">${userPassword}</div>
-          </div>
-          <div class="login-item">
-            <div class="login-label">Түсініктеме:</div>
-            <div class="login-value">(бір реттік құпия сөз / студент өзі қояды)</div>
-          </div>
+      <div class="login-section">
+        <strong>Кіру деректері:</strong>
+        <div class="login-item"><strong>Логин:</strong> (логин енгізіледі)</div>
+        <div class="login-item"><strong>Құпия сөз:</strong> (бір реттік құпия сөз / студент өзі қояды)</div>
         </div>
 
         <div class="important-note">
-          <div class="important-title">Маңызды!</div>
-          <div class="important-text">
-            <strong>id.yu.edu.kz</strong> сайты ашылған бойда сіздер міндетті түрде қосымша өзіңіздің жеке поштаңызды тіркейсіз! Ол үшін: <strong>Главная страница → Настройки → Резервная почта (Добавить резервную почту)</strong>.
+        <strong>Маңызды!</strong> id.yu.edu.kz сайты ашылған бойда сіздер міндетті түрде қосымша өзіңіздің жеке поштаңызды тіркейсіз! Ол үшін: Главная страница → Настройки → Резервная почта (Добавить резервную почту).
           </div>
+
+      <div class="content">
+        <strong>Бұл не үшін қажет?</strong> Егерде құпия сөз (пароль) ұмытқан жағдайда, өзіңіздің жеке поштаңыз арқылы қайтадан жаңарта аласыз.
         </div>
 
-        <div class="content-section">
-          <p><strong>Бұл не үшін қажет?</strong> Егерде құпия сөз (пароль) ұмытқан жағдайда, өзіңіздің жеке поштаңыз арқылы қайтадан жаңарта аласыз.</p>
+      <div class="content">
+        <strong>Бұл портал сізге келесі мүмкіндіктерді ұсынады:</strong>
         </div>
 
-        <h2>Бұл портал сізге келесі мүмкіндіктерді ұсынады:</h2>
         <div class="services-list">
-          <div class="service-item">
-            <div class="service-name">• Bitrix24</div>
-            <div class="service-description">– ішкі құжатайналым;</div>
+        <div class="service-item">• <strong>Bitrix24</strong> – ішкі құжатайналым;</div>
+        <div class="service-item">• <strong>GMail</strong> – университеттің корпоративтік поштасы;</div>
+        <div class="service-item">• <strong>KPI</strong> – тиімділік негізгі көрсеткіштері;</div>
+        <div class="service-item">• <strong>Platonus</strong> – оқу үдерісін автоматтандыру жүйесі;</div>
+        <div class="service-item">• <strong>Service</strong> – ішкі қызметтік жүйелерге қолжетімділік;</div>
+        <div class="service-item">• <strong>Lessons</strong> – онлайн сабақ өту порталы;</div>
+        <div class="service-item">• <strong>Science Journal</strong> – ғылыми журнал;</div>
+        <div class="service-item">• <strong>Yessenov Science Journal</strong> – ғылыми журнал каталогы;</div>
+        <div class="service-item">• <strong>DSpace</strong> – электронды кітапхана және деректер қоры;</div>
+        <div class="service-item">• <strong>YU Student Clubs</strong> – студенттерге арналған веб-сайт;</div>
+        <div class="service-item">• <strong>YU HelpDesk</strong> – техникалық өтініштер қабылдайтын сайт;</div>
+        <div class="service-item">• <strong>Админ панель</strong> – әкімшілік басқару құралы;</div>
+        <div class="service-item">• <strong>ЭЦП</strong> – құжаттарға электрондық цифрлық қолтаңба қоюға арналған жүйе.</div>
           </div>
-          <div class="service-item">
-            <div class="service-name">• GMail</div>
-            <div class="service-description">– университеттің корпоративтік поштасы;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• KPI</div>
-            <div class="service-description">– тиімділік негізгі көрсеткіштері;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Platonus</div>
-            <div class="service-description">– оқу үдерісін автоматтандыру жүйесі;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Service</div>
-            <div class="service-description">– ішкі қызметтік жүйелерге қолжетімділік;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Lessons</div>
-            <div class="service-description">– онлайн сабақ өту порталы;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Science Journal</div>
-            <div class="service-description">– ғылыми журнал;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Yessenov Science Journal</div>
-            <div class="service-description">– ғылыми журнал каталогы;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• DSpace</div>
-            <div class="service-description">– электронды кітапхана және деректер қоры;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• YU Student Clubs</div>
-            <div class="service-description">– студенттерге арналған веб-сайт;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• YU HelpDesk</div>
-            <div class="service-description">– техникалық өтініштер қабылдайтын сайт;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• Админ панель</div>
-            <div class="service-description">– әкімшілік басқару құралы;</div>
-          </div>
-          <div class="service-item">
-            <div class="service-name">• ЭЦП</div>
-            <div class="service-description">– құжаттарға электрондық цифрлық қолтаңба қоюға арналған жүйе.</div>
-          </div>
+
+      <div class="content">
+        <strong>YU ғимаратына кіретін карта</strong> А0503 кабинетінде беріледі.
         </div>
 
-        <div class="content-section">
-          <p><strong>YU ғимаратына кіретін карта</strong> А0503 кабинетінде беріледі.</p>
+      <div class="page-break"></div>
+
+      <div class="content">
+        <strong>Техникалық қолдау:</strong>
         </div>
 
-        <h2>Техникалық қолдау:</h2>
-        <div class="contact-info">
-          <div class="contact-title">Platonus жүйесі бойынша нұсқаулықты</div>
+      <div class="contact-section">
+        <div class="content"><strong>Platonus жүйесі бойынша нұсқаулықты</strong></div>
           <div class="contact-person">
             <div class="contact-name">Каламова Гаухар</div>
             <div class="contact-details">Білім беру ресурстарды дамыту орталығының маманы</div>
@@ -2267,8 +1843,8 @@ const generateEmployeeInstructionHTML = (userLogin: string, userPassword: string
           </div>
         </div>
 
-        <div class="contact-info">
-          <div class="contact-title">Lessons порталына (онлайн сабақ жүргізетін болсаңыз)</div>
+      <div class="contact-section">
+        <div class="content"><strong>Lessons порталына (онлайн сабақ жүргізетін болсаңыз)</strong></div>
           <div class="contact-person">
             <div class="contact-name">Шаманова Венера</div>
             <div class="contact-details">Ақпараттық технологиялар басқармасы маманы</div>
@@ -2277,8 +1853,8 @@ const generateEmployeeInstructionHTML = (userLogin: string, userPassword: string
           </div>
         </div>
 
-        <div class="contact-info">
-          <div class="contact-title">Science Journal, Yessenov Science Journal бойынша ақпаратты</div>
+      <div class="contact-section">
+        <div class="content"><strong>Science Journal, Yessenov Science Journal бойынша ақпаратты</strong></div>
           <div class="contact-person">
             <div class="contact-name">Койшина Акмарал</div>
             <div class="contact-details">Ғылыми басқарма маманы</div>
@@ -2287,8 +1863,8 @@ const generateEmployeeInstructionHTML = (userLogin: string, userPassword: string
           </div>
         </div>
 
-        <div class="contact-info">
-          <div class="contact-title">YU Student Clubs веб сайты бойынша (эдвайзер болсаңыз)</div>
+      <div class="contact-section">
+        <div class="content"><strong>YU Student Clubs веб сайты бойынша (эдвайзер болсаңыз)</strong></div>
           <div class="contact-person">
             <div class="contact-name">Мадиев Арслан</div>
             <div class="contact-details">Әлеуметтік қолдау көрсету және жастарды дамыту басқармасы маманы</div>
@@ -2297,26 +1873,14 @@ const generateEmployeeInstructionHTML = (userLogin: string, userPassword: string
           </div>
         </div>
 
-        <div class="contact-info">
-          <div class="contact-title">Жалпы техникалық қолдау</div>
-          <div class="contact-text">
+      <div class="contact-section">
+        <div class="content"><strong>Жалпы техникалық қолдау</strong></div>
+        <div class="content">
             Егерде берілген ақпарат бойынша түсініксіз болған жағдайда Ақпараттық технологиялар басқармасы маманына жүгінесіз
           </div>
           <div class="contact-details">
             <strong>Телефон:</strong> +7 9272 788 788, қосымша 255<br>
             <strong>Email:</strong> itd@yu.edu.kz
-          </div>
-        </div>
-      </div>
-
-      <!-- Подвал документа -->
-      <div class="document-footer">
-        <div class="footer-university">Университет имени Есенова (YU)</div>
-        <div class="footer-date">Документ сформирован ${currentDate}</div>
-        <div style="margin-top: 12pt; font-size: 10pt; color: #4a5568;">
-          <strong>Система управления образованием</strong><br>
-          Автоматически сгенерированная инструкция для сотрудников<br>
-          Версия документа: 1.0 | Дата последнего обновления: ${currentDate}
         </div>
       </div>
     </body>

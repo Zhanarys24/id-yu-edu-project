@@ -47,7 +47,9 @@
     "common": {
       "account": "Аккаунт",
       "profile": "Профиль",
-      "logout": "Шығу"
+      "logout": "Шығу",
+      "logo": "Логотип",
+      "avatar": "аватар"
     },
     
   "education": {
@@ -74,7 +76,8 @@
     "upbringing": "Тәрбие",
     "eservices": "E-қызметтер",
     "yessenovai": "YessenovAI",
-    "YU-Gamification": "YU-Gamification"
+    "YU-Gamification": "YU-Gamification",
+    "profile": "Профиль"
   },
 
   "portfolio": {
@@ -205,11 +208,6 @@
     "openPage": "Бет картасын ашу"
   },
 
-  "common": {
-    "logo": "Логотип",
-    "avatar": "аватар",
-    "account": "АККАУНТ"
-  },
 
   "applicationsPage": {
     "title": "Қосымшалар",
@@ -315,6 +313,7 @@
       }
     },
     "form": {
+      "date": "Күні",
       "title": "Кездесу қосу",
       "eventTitle": "Оқиғаның аты",
       "eventDescription": "Оқиғаның сипаттамасы",
@@ -327,11 +326,30 @@
       "titlePlaceholder": "Кездесу атауын енгізіңіз",
       "campus": "Корпус",
       "selectCampus": "-- Корпусты таңдаңыз --",
-      "selectLocation": "-- Кездесу орынын таңдаңыз --"
+      "selectLocation": "-- Кездесу орынын таңдаңыз --",
+      "participants": "Қатысушылар",
+      "participantsSearch": "Қатысушыларды іздеу",
+      "startTime": "Басталу уақыты",
+      "endTime": "Аяқталу уақыты",
+      "color": "Түс",
+      "colors": {
+        "blue": "Көк",
+        "green": "Жасыл",
+        "yellow": "Сары",
+        "red": "Қызыл"
+      },
+      "description": "Сипаттама",
+      "descriptionPlaceholder": "Кездесу сипаттамасын енгізіңіз",
+      "isOnline": "Онлайн кездесу",
+      "link": "Сілтеме",
+      "linkPlaceholder": "Онлайн кездесу сілтемесін енгізіңіз"
     },
     "buttons": {
       "close": "Жабу",
-      "submit": "Қосу"
+      "submit": "Қосу",
+      "creating": "Жасалуда...",
+      "createMeeting": "Кездесу жасау",
+      "cancel": "Болдырмау"
     },
     "validation": {
       "titleRequired": "Кездесу атауы қажет",

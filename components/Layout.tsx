@@ -4,7 +4,7 @@ import Header from './Header'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
 import Link from 'next/link'
-import { Newspaper, GraduationCap, Bot, Calendar } from 'lucide-react'
+import { Newspaper, GraduationCap, Calendar, User } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
 export default function Layout({
@@ -37,17 +37,9 @@ export default function Layout({
       {/* Нижняя панель — на мобильных и горизонтальных мобильных */}
       <div className="mobile-bottom-nav fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around py-2 z-50">
         <NavItem href="/main/news" label={t('menu.news')} icon={<Newspaper size={20} />} active={active === 'news'} />
-        {user?.role === 'anonymous' ? (
-          <>
-            <NavItem href="/main/calendar" label={t('menu.calendar')} icon={<Calendar size={20} />} active={active === 'calendar'} />
-            <NavItem href="/main/applications" label={t('menu.applications')} icon={<GraduationCap size={20} />} active={active === 'applications'} />
-          </>
-        ) : (
-          <>
-            <NavItem href="/main/applications" label={t('menu.applications')} icon={<GraduationCap size={20} />} active={active === 'applications'} />
-            <NavItem href="/main/yessenovbot" label={t('menu.yessenovai')} icon={<Bot size={20} />} active={active === 'yessenovai'} />
-          </>
-        )}
+        <NavItem href="/main/applications" label={t('menu.applications')} icon={<GraduationCap size={20} />} active={active === 'applications'} />
+        <NavItem href="/main/calendar" label={t('menu.calendar')} icon={<Calendar size={20} />} active={active === 'calendar'} />
+        <NavItem href="/main/site-settings" label={t('menu.profile')} icon={<User size={20} />} active={active === 'profile'} />
       </div>
 
       <style jsx>{`
