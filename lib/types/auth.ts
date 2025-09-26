@@ -3,6 +3,16 @@ export type Permission = {
   actions: ('read' | 'write' | 'delete' | 'manage')[];
 };
 
+export type UserRole = 
+  | 'super_admin'
+  | 'admin_news'
+  | 'admin_portfolio'
+  | 'admin_events'
+  | 'admin_jolserik'
+  | 'student'
+  | 'teacher'
+  | 'anonymous';
+
 export type User = {
   id: string;
   email: string;

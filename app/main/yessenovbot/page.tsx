@@ -28,12 +28,12 @@ type Message = {
 type AITab = 'yessenovai' | 'jolserik'
 
 interface HelpCategory {
-  id: string
-  title: string
-  desc: string
-  icon: string
-  color: string
-  questions: string[]
+  id: string;
+  title: string;
+  desc: string;
+  icon: string;
+  color: string;
+  questions?: string[];
 }
 
 // Добавляем интерфейсы в начало файла
@@ -41,6 +41,20 @@ interface KnowledgeItem {
   keywords: string[]
   answer: string
   category: string
+}
+
+// Add interface for schedule class near the other interfaces
+interface ScheduleClass {
+  time: string;
+  subject: string;
+  teacher: string;
+  room: string;
+}
+
+// Add interface for category
+interface CategoryWithDetails extends HelpCategory {
+  desc: string;
+  color: string;
 }
 
 export default function YessenovBotPage() {
@@ -183,17 +197,7 @@ const popularQuestions = Array.isArray(popularQuestionsRaw)
       {activeTab === 'yessenovai' ? (
         // Весь оригинальный код YessenovAI (не трогаем!)
     <div className="flex h-[calc(100vh-120px)] relative overflow-hidden">
-          {/* Кнопка меню для мобильных */}
-          <button
-            onClick={toggleSidebar}
-            className="lg:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white p-2 rounded-lg shadow-lg hover:bg-blue-700"
-          >
-            {isSidebarOpen ? (
-              <XMarkIcon className="w-6 h-6" />
-            ) : (
-              <Bars3Icon className="w-6 h-6" />
-            )}
-          </button>
+
 
           {/* Overlay для мобильных */}
           {isSidebarOpen && (
@@ -677,7 +681,7 @@ function JolserikAIContent() {
 �� Попробуйте переформулировать вопрос!`
   }
 
-  const handleCategorySelect = (category: any) => {
+  const handleCategorySelect = (category: HelpCategory) => {
     setSelectedCategory(category.id)
     
     // Специальная обработка для навигации
@@ -694,7 +698,7 @@ function JolserikAIContent() {
       setJolserikMessages([aiMessage])
     } else {
       // Для остальных категорий - как было
-      const welcomeMessage = `${category.icon} **${category.title}**\n\nВыберите вопрос или задайте свой:\n\n${category.questions.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}`
+      const welcomeMessage = `${category.icon} **${category.title}**\n\nВыберите вопрос или задайте свой:\n\n${category.questions?.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n') || ''}`
       
       const aiMessage: Message = {
         id: Date.now().toString(),
@@ -943,7 +947,7 @@ function findMultilingualResponse(input: string, language: 'ru' | 'kz' | 'en'): 
   return null
 }
 
-function formatScheduleResponse(classes: any[], language: 'ru' | 'kz' | 'en'): string {
+function formatScheduleResponse(classes: ScheduleClass[], language: 'ru' | 'kz' | 'en'): string {
   const schedule = classes
     .map(cls => `${cls.time} - ${cls.subject} (${cls.teacher}, ${cls.room})`)
     .join('\n')
@@ -955,9 +959,7 @@ function formatScheduleResponse(classes: any[], language: 'ru' | 'kz' | 'en'): s
   }
 
   return headers[language]
-}
-
-function getMultilingualFallback(language: 'ru' | 'kz' | 'en'): string {
+}function getMultilingualFallback(language: 'ru' | 'kz' | 'en'): string {
   const fallbacks = {
     ru: `👋 Привет! Я Jolserik AI - твой помощник для адаптации в университете.\n\nЗадайте любой вопрос!`,
     kz: `👋 Сәлем! Мен Jolserik AI - университетте бейімделуге көмекшімін.\n\nКез келген сұрақ қойыңыз!`,
@@ -965,3 +967,4 @@ function getMultilingualFallback(language: 'ru' | 'kz' | 'en'): string {
   }
   return fallbacks[language]
 }
+

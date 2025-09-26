@@ -80,7 +80,7 @@ const ApplicationsApi = {
     }
   },
 
-  convertToEducationCard: (app: ApiApplication, order: number, t: any): EducationCard => {
+  convertToEducationCard: (app: ApiApplication, order: number, t: (key: string) => string): EducationCard => {
     // Определяем категорию на основе названия приложения
     let category: TabType = 'education';
     
@@ -128,7 +128,7 @@ const ApplicationsApi = {
 };
 
 // Функция для получения переведенного названия и описания приложения
-const getTranslatedApplication = (app: ApiApplication, t: any, i18n: any) => {
+const getTranslatedApplication = (app: ApiApplication, t: (key: string) => string, i18n: { language: string }) => {
   console.log('🔍 Translating app:', app.name, 'Language:', i18n?.language)
   
   // Список известных приложений с их переводами
@@ -177,8 +177,8 @@ const getTranslatedApplication = (app: ApiApplication, t: any, i18n: any) => {
     const titleKey = `applicationsPage.applications.${translationKey.titleKey}.title`
     const descriptionKey = `applicationsPage.applications.${translationKey.descriptionKey}.description`
     
-    const translatedTitle = t(titleKey, { defaultValue: app.name })
-    const translatedDescription = t(descriptionKey, { defaultValue: app.description || t('applicationsPage.card.noDescription') })
+    const translatedTitle = t(titleKey) || app.name
+    const translatedDescription = t(descriptionKey) || app.description || t('applicationsPage.card.noDescription')
     
     console.log('✅ Translation found:', {
       original: app.name,

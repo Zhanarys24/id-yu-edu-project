@@ -1,6 +1,7 @@
 // layout
 import Sidebar from './Sidebar'
 import Header from './Header'
+import BirthdayNotification from './BirthdayNotification'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
 import Link from 'next/link'
@@ -20,7 +21,7 @@ export default function Layout({
     <div className="flex h-screen overflow-hidden bg-gray-100">
       {/* Сайдбар — только на больших экранах */}
       <div className="hidden lg:block">
-        <Sidebar active={active} />
+        <Sidebar active={active || ''} />
       </div>
 
       {/* Контент */}
@@ -41,6 +42,9 @@ export default function Layout({
         <NavItem href="/main/calendar" label={t('menu.calendar')} icon={<Calendar size={20} />} active={active === 'calendar'} />
         <NavItem href="/main/site-settings" label={t('menu.profile')} icon={<User size={20} />} active={active === 'profile'} />
       </div>
+
+      {/* Уведомление о дне рождения */}
+      <BirthdayNotification />
 
       <style jsx>{`
         .mobile-bottom-nav {

@@ -6,66 +6,94 @@ import '@/i18n'
 import NewsCard from '@/components/news/NewsCard'
 import { Calendar, ExternalLink } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { newsService } from '@/lib/services/newsService'
-import { NewsItem } from '@/lib/types/news'
-import { formatDate } from '@/lib/utils/dateUtils'
+import { yuNewsService } from '@/lib/services/yuNewsService'
+
+interface NewsCardItem {
+  id: number
+  title: string
+  date: string
+  image: string
+  link?: string
+}
 
 export default function NewsPage() {
   const { t, i18n } = useTranslation('common')
-  const [newsData, setNewsData] = useState<NewsItem[]>([])
+  const [newsData, setNewsData] = useState<NewsCardItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadNews()
   }, [])
 
-  const loadNews = () => {
+  const loadNews = async () => {
     try {
-      // Получаем только опубликованные новости
-      const publishedNews = newsService.getPublishedNews()
-      setNewsData(publishedNews)
-    } catch (error) {
-      console.error('Error loading news:', error)
+      setLoading(true)
+      setError(null)
+      const yuNews = await yuNewsService.getLatestNews()
+      
+      // Преобразуем YU новости в простой формат для NewsCard
+      const convertedNews: NewsCardItem[] = yuNews.map((yuNewsItem, index) => ({
+        id: index + 1, // Простой числовой ID
+        title: yuNewsItem.title,
+        date: yuNewsItem.date,
+        image: yuNewsItem.image,
+        link: yuNewsItem.link
+      }))
+      
+      setNewsData(convertedNews)
+    } catch (err) {
+      console.error('Error loading news:', err)
+      setError('Ошибка загрузки новостей')
     } finally {
       setLoading(false)
     }
   }
 
-  // Преобразуем данные NewsItem в формат, ожидаемый NewsCard
-  const transformedNewsData = newsData.map(news => ({
-    id: parseInt(news.id),
-    title: news.title,
-    description: news.description,
-    date: formatDate(news.publishedAt || news.createdAt),
-    category: news.category?.name || 'Без категории',
-    image: news.image,
-    link: news.link
-  }))
-
   return (
     <Layout active="news">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-2">{t('news.pageTitle')}</h1>
-        <p className="text-gray-500">{t('news.pageDescription')}</p>
+        <h1 className="text-2xl font-semibold text-gray-800 mb-2">
+          {t('news.title')}
+        </h1>
+        <p className="text-gray-500">
+          {t('news.description')}
+        </p>
       </div>
 
-      {loading ? (
+      {loading && (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Загрузка новостей...</span>
+          <span className="ml-2 text-gray-600">{t('news.loading')}</span>
         </div>
-      ) : transformedNewsData.length === 0 ? (
+      )}
+
+      {error && (
+        <div className="text-center py-12">
+          <div className="text-red-600 mb-4">{error}</div>
+          <button
+            onClick={loadNews}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            {t('news.retry')}
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && newsData.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-500">
             <Calendar className="w-12 h-12 mx-auto mb-4" />
-            <p className="text-lg font-medium">Новости не найдены</p>
-            <p className="text-sm">Пока нет опубликованных новостей</p>
+            <p className="text-lg font-medium">{t('news.notFound')}</p>
+            <p className="text-sm">{t('news.retry')}</p>
           </div>
         </div>
-      ) : (
+      )}
+
+      {!loading && !error && newsData.length > 0 && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {transformedNewsData.map((news) => (
+            {newsData.map((news) => (
               <NewsCard key={news.id} news={news} />
             ))}
           </div>
@@ -85,4 +113,4 @@ export default function NewsPage() {
       )}
     </Layout>
   )
-}
+} 

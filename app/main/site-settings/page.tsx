@@ -19,7 +19,13 @@ import { useRouter } from 'next/navigation'
 import { AuthApi } from '@/lib/services/authApi'
 import { validateEmail } from '@/lib/utils'
 import { exportStudentInstructionToWord, exportEmployeeInstructionToWord } from '@/lib/utils/wordExport'
-import { getTranslatedRole } from '@/lib/utils/roleTranslations'
+
+interface ProfileData {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  birth_date?: string;
+}
 
 export default function SiteSettingsPage() {
   const { t } = useTranslation('common')
@@ -116,6 +122,10 @@ function AvatarSection() {
   const [error, setError] = useState<string>('')
   const [imageOk, setImageOk] = useState(true)
   const [success, setSuccess] = useState<string>('')
+
+  // Определяем роль пользователя
+  const isEmployee = user?.role === 'personnel' || user?.role?.includes('personnel') || user?.role?.includes('admin')
+  const isStudent = user?.role === 'student' || user?.role?.includes('student')
 
   const isValidAvatar = (src: string | null | undefined) => {
     if (!src) return false
@@ -350,16 +360,22 @@ function AvatarSection() {
             <div className="flex items-center justify-center gap-2">
               <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
             </div>
-            <p className="text-gray-600">
-              {user?.role ? getTranslatedRole(user.role, t) : userPosition || user?.position || 'Пользователь'}
-            </p>
+            <p className="text-gray-600">{userPosition || user?.position || 'Преподаватель'}</p>
           </div>
         </div>
       </div>
 
-      {/* Кнопки инструкций - показываем только одну в зависимости от роли */}
+      {/* Кнопка инструкции - показываем только одну в зависимости от роли */}
       <div className="flex justify-center">
-        {user && String(user.role).toLowerCase().trim() === 'student' ? (
+        {isEmployee ? (
+          <Button 
+            onClick={handleDownloadEmployeeInstruction}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <FileText size={16} />
+            {t('settings.avatar.downloadEmployeeInstruction')}
+          </Button>
+        ) : isStudent ? (
           <Button 
             onClick={handleDownloadInstruction}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
@@ -368,13 +384,24 @@ function AvatarSection() {
             {t('settings.avatar.downloadInstruction')}
           </Button>
         ) : (
-          <Button 
-            onClick={handleDownloadEmployeeInstruction}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <FileText size={16} />
-            {t('settings.avatar.downloadEmployeeInstruction')}
-          </Button>
+          // Fallback для неизвестных ролей - показываем обе инструкции
+          <div className="flex gap-4">
+            <Button 
+              onClick={handleDownloadInstruction}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+            >
+              <FileText size={16} />
+              {t('settings.avatar.downloadInstruction')}
+            </Button>
+            
+            <Button 
+              onClick={handleDownloadEmployeeInstruction}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <FileText size={16} />
+              {t('settings.avatar.downloadEmployeeInstruction')}
+            </Button>
+          </div>
         )}
       </div>
 
@@ -662,25 +689,62 @@ function ContactSection() {
   const { userName, userPosition } = useAvatar()
   const { user } = useAuth()
   const [dob, setDob] = useState<string>('')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState<string>('')
+  const [firstName, setFirstName] = useState<string>('')
+  const [lastName, setLastName] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const saved = localStorage.getItem('user.birthDate')
-    if (saved) setDob(saved)
-    
-    // Parse name from userName (format: "FirstName LastName")
-    const nameParts = userName.split(' ')
-    setFirstName(nameParts[0] || '')
-    setLastName(nameParts.slice(1).join(' ') || '')
-    
-    // Set email from user context
-    setEmail(user?.email || '')
+    const loadUserData = async () => {
+      try {
+        setIsLoading(true)
+        
+        // Получаем данные из API
+        const profileData = await AuthApi.profile() as ProfileData
+        
+        // Устанавливаем данные из API
+        if (profileData) {
+          setFirstName(profileData.first_name || '')
+          setLastName(profileData.last_name || '')
+          setEmail(user?.email || '')
+          setPhone(profileData.phone || '')
+          setDob(profileData.birth_date || '')
+        } else {
+          // Fallback к данным из контекста
+          const nameParts = userName.split(' ')
+          setFirstName(nameParts[0] || '')
+          setLastName(nameParts.slice(1).join(' ') || '')
+          setEmail(user?.email || '')
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке данных профиля:', error)
+        // Fallback к данным из контекста
+        const nameParts = userName.split(' ')
+        setFirstName(nameParts[0] || '')
+        setLastName(nameParts.slice(1).join(' ') || '')
+        setEmail(user?.email || '')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadUserData()
   }, [userName, user])
 
   const saveContacts = () => {
     // Contacts are read-only now; nothing to save here
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Загрузка данных...</span>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -715,7 +779,12 @@ function ContactSection() {
             <Phone size={16} className="inline mr-1" />
             {t('settings.contacts.phone')}
           </label>
-          <Input placeholder="+7 (___) ___-__-__" readOnly disabled />
+          <Input 
+            value={phone}
+            readOnly
+            disabled
+            placeholder="+7 (___) ___-__-__" 
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -741,7 +810,6 @@ function ContactSection() {
             readOnly
             disabled
           />
-          <p className="text-xs text-gray-500 mt-1">{t('settings.contacts.dateFormat')}</p>
         </div>
       </div>
       

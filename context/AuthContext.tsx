@@ -144,7 +144,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Проверяем, что мы на клиенте
     if (typeof window === 'undefined') return;
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      // Используем AuthApi.logout() который вызывает внешний API
+      await AuthApi.logout();
     } catch {
       // ignore
     }

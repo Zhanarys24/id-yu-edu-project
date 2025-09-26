@@ -84,14 +84,13 @@ export default function Sidebar({ active }: { active: string }) {
         { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
         { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
         { icon: <Layers size={20} />, label: t('menu.applications'), href: '/main/applications' },
-        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
       ]
     : [
         { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
         { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
         { icon: <Layers size={20} />, label: t('menu.applications'), href: '/main/applications' },
-        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
         { icon: <Coins size={20} />, label: t('menu.YU-Gamification'), href: '/main/coming-soon/YU-Gamification' },
+        { icon: <Bot size={20} />, label: t('menu.yessenovai'), href: '/main/coming-soon/YessenovAI' },
       ]
 
   const portfolioItems = [
@@ -147,17 +146,19 @@ export default function Sidebar({ active }: { active: string }) {
 
             <Link href="/main/site-settings" className="flex items-center mb-6 cursor-pointer">
               {hasRealAvatar ? (
-                <Image
-                  src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
-                  alt={t('common.avatar')}
-                  width={50}
-                  height={50}
-                  className="rounded-full object-cover mr-3"
-                  onError={() => setImageOk(false)}
-                />
+                <div className="mr-3 w-[50px] h-[50px] rounded-full overflow-hidden flex-shrink-0">
+                  <Image
+                    src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
+                    alt={t('common.avatar')}
+                    width={50}
+                    height={50}
+                    className="w-full h-full object-cover"
+                    onError={() => setImageOk(false)}
+                  />
+                </div>
               ) : (
                 <div
-                  className="mr-3 rounded-full w-[50px] h-[50px] grid place-items-center text-white text-sm font-semibold select-none"
+                  className="mr-3 rounded-full w-[50px] h-[50px] grid place-items-center text-white text-sm font-semibold select-none flex-shrink-0"
                   style={{ backgroundColor: getColorFromName(userName || '') }}
                 >
                   {getInitials(userName || '')}
@@ -182,20 +183,7 @@ export default function Sidebar({ active }: { active: string }) {
               ))}
               
               {/* Кнопка Админ - показываем только если пользователь имеет права администратора */}
-              {isAdmin() && (
-                <Link
-                  href="/admin"
-                  className={clsx(
-                    'flex items-center gap-2 pl-3 pr-2 py-2 rounded transition text-sm font-medium',
-                    pathname.startsWith('/admin')
-                      ? 'bg-red-50 text-red-600'
-                      : 'text-gray-500 hover:bg-gray-100'
-                  )}
-                >
-                  <Shield size={20} />
-                  <span>{t('admin.adminPanel')}</span>
-                </Link>
-              )}
+
             </nav>
           </div>
 

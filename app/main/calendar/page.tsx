@@ -277,11 +277,11 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
       date: newEvent.start,  // YYYY-MM-DD
       time_start: eventStart,  // HH:MM
       time_end: eventEnd,      // HH:MM
-      campus: eventCampus,     // ID корпуса
-      location: eventLocation, // ID места
-      guests: participants.map(p => p.id), // Массив ID участников
-      description: eventDescription.trim() || null,
-      link: isOnline ? eventLink.trim() : null,
+      campus: eventCampus ? String(eventCampus) : '', // Преобразуем number в string
+      location: eventLocation ? String(eventLocation) : '', // Преобразуем number в string
+      participants: participants.map(p => p.full_name), // Массив имен участников
+      description: eventDescription.trim() || undefined,
+      link: isOnline ? eventLink.trim() : undefined,
       color: eventColor
     }
 
@@ -771,7 +771,7 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
                   color: '#6c757d',
                   fontSize: '14px'
                 }}>
-                  🔍 По запросу "{participantSearch}" ничего не найдено
+                  �� По запросу &quot;{participantSearch}&quot; ничего не найдено
                 </div>
               )}
             </div>
@@ -795,8 +795,8 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
         const result = await LocalStorageService.syncWithConflictResolution();
         
         // Показываем уведомления об изменениях
-        if (result.conflicts > 0) {
-          showToast(`Обнаружено ${result.conflicts} конфликтов. Локальные изменения сохранены.`);
+        if (result.conflicts.length > 0) {
+          showToast(`Обнаружено ${result.conflicts.length} конфликтов. Локальные изменения сохранены.`);
         }
         
         // 1. Синхронизируем локальные изменения с API
@@ -804,27 +804,41 @@ const weekdaysShort: string[] = Array.isArray(weekValue)
         const localEvents = LocalStorageService.getEvents();
         
         // 2. Загружаем обновления с сервера
-        const updatedEvents = localEvents.map((localEvent: any) => {
+        const updatedEvents = localEvents.map((localEvent: LocalEvent) => {
           const serverEvent = serverEvents.find(e => e.id === localEvent.id);
-          if (serverEvent && serverEvent.lastModified > localEvent.lastModified) {
-            // Серверная версия новее - обновляем локально
-            return {
-              ...serverEvent,
-              syncStatus: 'synced' as const
-            };
+          if (serverEvent && serverEvent.updated_at && localEvent.lastModified) {
+            // Сравниваем даты обновления
+            const serverDate = new Date(serverEvent.updated_at);
+            const localDate = new Date(localEvent.lastModified);
+            
+            if (serverDate > localDate) {
+              // Серверная версия новее - обновляем локально
+              return {
+                ...localEvent,
+                ...CalendarService.transformMeetingToEvent(serverEvent),
+                syncStatus: 'synced' as const
+              };
+            }
           }
           return localEvent;
         });
         
         // 3. Добавляем новые события с сервера
         const newServerEvents = serverEvents.filter(serverEvent => 
-          !localEvents.some((localEvent: any) => localEvent.id === serverEvent.id)
+          !localEvents.some((localEvent: LocalEvent) => localEvent.id === serverEvent.id)
         );
         
-        const allEvents = [...updatedEvents, ...newServerEvents.map(e => ({
-          ...e,
-          syncStatus: 'synced' as const
-        }))];
+        const allEvents = [
+          ...updatedEvents,
+          ...newServerEvents.map(serverEvent => {
+            const transformedEvent = CalendarService.transformMeetingToEvent(serverEvent);
+            return {
+              ...transformedEvent,
+              syncStatus: 'synced' as const,
+              lastModified: serverEvent.updated_at || new Date().toISOString()
+            } as LocalEvent;
+          })
+        ];
         
         // 4. Сохраняем обновленные события
         LocalStorageService.saveEvents(allEvents);

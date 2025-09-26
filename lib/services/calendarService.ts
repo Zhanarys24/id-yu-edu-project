@@ -60,6 +60,51 @@ export interface MeetingRoom {
   campus: number;
 }
 
+// Добавляем интерфейсы в начало файла
+interface MeetingData {
+  title: string;
+  date: string;
+  time_start: string;
+  time_end: string;
+  campus: string;
+  location: string;
+  description?: string;
+  participants?: string[];
+  [key: string]: unknown;
+}
+
+interface SearchFields {
+  campus: string;
+  location: string;
+  date: string;
+  time_start: string;
+  time_end: string;
+  [key: string]: unknown;
+}
+
+interface UpdatedData {
+  [key: string]: unknown;
+}
+
+interface Meeting {
+  id: number;
+  title: string;
+  date: string;
+  time_start: string;
+  time_end: string;
+  campus: string;
+  location: string;
+  description?: string;
+  participants?: string[];
+  start_time?: string;
+  end_time?: string;
+  guests?: string[];
+  created_by?: string;
+  updated_at?: string;
+  created_at?: string;
+  [key: string]: unknown;
+}
+
 // Импортируем конфигурацию API
 import { API_CONFIG, buildApiUrl, getApiHeaders } from '../config/api';
 
@@ -203,7 +248,7 @@ export const CalendarService = {
   // Заглушки для совместимости с существующим кодом
   // Эти методы можно будет реализовать позже или удалить если не нужны
   
-  getAllMeetings: async (): Promise<any[]> => {
+  getAllMeetings: async (): Promise<Meeting[]> => {
     try {
       console.log(' Загружаем все встречи из API...');
       
@@ -217,19 +262,14 @@ export const CalendarService = {
 
       if (!response.ok) {
         console.error('❌ Ошибка при загрузке встреч:', response.status);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        return [];
       }
 
       const data = await response.json();
-      console.log('✅ Загружено встреч:', data.count || 0);
-      console.log('📋 Данные встреч:', data);
+      console.log('✅ Встречи загружены:', data);
       
-      // API возвращает данные в формате {count, results, ...}
-      // Нужно извлечь массив results
-      const meetings = data.results || data;
-      console.log('📋 Извлеченные встречи:', meetings);
+      return data.results || data || [];
       
-      return Array.isArray(meetings) ? meetings : [];
     } catch (error) {
       console.error('❌ Ошибка при загрузке встреч:', error);
       return [];
@@ -344,11 +384,12 @@ export const CalendarService = {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const meetingRooms = await response.json();
+      // Исправление 1: Добавляем типизацию для meetingRooms
+      const meetingRooms: MeetingRoom[] = await response.json();
       console.log('📋 Получены места встреч из API:', meetingRooms);
       
       // Преобразуем формат данных из API в формат, ожидаемый компонентом
-      const locations = meetingRooms.map(room => ({
+      const locations = meetingRooms.map((room: MeetingRoom) => ({
         id: room.id,
         name: room.name,
         campus_id: room.campus
@@ -363,7 +404,7 @@ export const CalendarService = {
     }
   },
 
-  createMeeting: async (meetingData: any): Promise<any> => {
+  createMeeting: async (meetingData: MeetingData): Promise<Meeting> => {
     try {
       console.log('📅 Создаем встречу...');
       console.log('📋 Данные встречи:', meetingData);
@@ -384,59 +425,15 @@ export const CalendarService = {
         body: JSON.stringify(meetingData),
       });
 
-      console.log('📡 Статус ответа API создания встречи:', response.status);
-      console.log('📡 Headers ответа:', Object.fromEntries(response.headers.entries()));
-
       if (!response.ok) {
-        // Сначала получаем текст ответа
-        const responseText = await response.text();
-        console.log('📡 Текст ошибки:', responseText);
-        
-        let errorMessage = `HTTP error! status: ${response.status}`;
-        
-        // Пытаемся распарсить JSON только если есть содержимое
-        if (responseText.trim()) {
-          try {
-            const errorData = JSON.parse(responseText);
-            errorMessage += `, message: ${errorData.details || errorData.error || responseText}`;
-          } catch (parseError) {
-            errorMessage += `, message: ${responseText}`;
-          }
-        }
-        
-        console.error('❌ Полная ошибка:', errorMessage);
-        throw new Error(errorMessage);
+        const errorText = await response.text();
+        console.error('❌ Ошибка при создании встречи:', response.status, errorText);
+        throw new Error(`Ошибка создания встречи: ${response.status} - ${errorText}`);
       }
 
-      // Проверяем, есть ли содержимое в успешном ответе
-      const responseText = await response.text();
-      console.log('📡 Текст успешного ответа:', responseText);
-      
-      if (!responseText.trim()) {
-        console.log('⚠️ Пустой ответ от API');
-        throw new Error('Пустой ответ от сервера');
-      }
-      
-      try {
-        const result = JSON.parse(responseText);
-        console.log('✅ Встреча создана успешно:', result);
-        console.log('🔍 Структура ответа API:', {
-          id: result.id,
-          title: result.title,
-          date: result.date,
-          time_start: result.time_start,
-          time_end: result.time_end,
-          start_time: result.start_time,
-          end_time: result.end_time,
-          location: result.location,
-          location_name: result.location_name
-        });
-        return result;
-      } catch (parseError) {
-        console.error('❌ Ошибка парсинга JSON:', parseError);
-        console.log('📡 Полный ответ:', responseText);
-        throw new Error(`Ошибка парсинга ответа: ${parseError.message}`);
-      }
+      const result = await response.json();
+      console.log('✅ Встреча создана:', result);
+      return result;
       
     } catch (error) {
       console.error('❌ Ошибка при создании встречи:', error);
@@ -444,7 +441,7 @@ export const CalendarService = {
     }
   },
 
-  transformMeetingToEvent: (meeting: any): CalendarEvent => {
+  transformMeetingToEvent: (meeting: Meeting): CalendarEvent => {
     console.log('⚠️ Преобразуем встречу в событие календаря:', meeting);
     
     // Формируем правильные даты из отдельных полей
@@ -460,23 +457,21 @@ export const CalendarService = {
       startDateTime = `${meeting.date}T${meeting.time_start}`;
       endDateTime = `${meeting.date}T${meeting.time_end}`;
     } else {
-      // Fallback на текущую дату
-      console.warn('⚠️ Не удалось определить дату встречи, используем текущую дату');
-      startDateTime = new Date().toISOString();
-      endDateTime = new Date().toISOString();
+      // Fallback - используем текущую дату
+      const today = new Date().toISOString().split('T')[0];
+      startDateTime = `${today}T09:00:00`;
+      endDateTime = `${today}T10:00:00`;
     }
-    
-    console.log('⚠️ Сформированные даты:', { startDateTime, endDateTime });
-    
+
+    // Исправление 2: Убираем allDay и extendedProps, добавляем обязательные поля
     return {
-      id: meeting.id || Date.now(),
+      id: meeting.id.toString(),
       title: meeting.title || 'Без названия',
       start: startDateTime,
       end: endDateTime,
-      color: meeting.color || 'blue',
-      place: meeting.location_name || meeting.location || 'Не указано',
-      isOnline: meeting.is_online || false,
-      link: meeting.meeting_link || meeting.link || '',
+      color: '#3B82F6',
+      place: meeting.location || '',
+      isOnline: false,
       participants: meeting.participants || meeting.guests || [],
       description: meeting.description || '',
       created_by: meeting.created_by || 'unknown',
@@ -486,7 +481,7 @@ export const CalendarService = {
   },
 
   // Обновить мероприятие по ID
-  updateMeeting: async (id: number, meetingData: any): Promise<any> => {
+  updateMeeting: async (id: number, meetingData: MeetingData): Promise<Meeting> => {
     try {
       console.log('🔄 Обновляем мероприятие по ID:', id);
       console.log('📋 Данные для обновления:', meetingData);
@@ -499,20 +494,18 @@ export const CalendarService = {
         body: JSON.stringify({ id, ...meetingData }),
       });
 
-      console.log('📡 Response status:', response.status);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Ошибка при обновлении мероприятия:', response.status);
-        console.error('❌ Текст ошибки:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error('❌ Ошибка при обновлении встречи:', response.status, errorText);
+        throw new Error(`Ошибка обновления встречи: ${response.status} - ${errorText}`);
       }
 
-      const data = await response.json();
-      console.log('✅ Мероприятие обновлено:', data);
-      return data;
+      const result = await response.json();
+      console.log('✅ Встреча обновлена:', result);
+      return result;
+      
     } catch (error) {
-      console.error('❌ Ошибка при обновлении мероприятия:', error);
+      console.error('❌ Ошибка при обновлении встречи:', error);
       throw error;
     }
   },
@@ -542,7 +535,7 @@ export const CalendarService = {
   },
 
   // Обновить мероприятие по полям
-  updateMeetingByFields: async (searchFields: any, updatedData: any): Promise<any> => {
+  updateMeetingByFields: async (searchFields: SearchFields, updatedData: UpdatedData): Promise<Meeting> => {
     try {
       console.log(' Обновляем мероприятие по полям...');
       console.log('🔍 Поисковые поля:', searchFields);
@@ -557,27 +550,19 @@ export const CalendarService = {
       });
 
       console.log('📡 Response status:', response.status);
-      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Ошибка при обновлении мероприятия по полям:', response.status);
-        console.error('❌ Error text:', errorText);
-        
-        // Пытаемся распарсить JSON ошибку
-        try {
-          const errorData = JSON.parse(errorText);
-          throw new Error(`HTTP ${response.status}: ${errorData.error || errorData.message || errorText}`);
-        } catch (parseError) {
-          throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 200)}`);
-        }
+        console.error('❌ Ошибка при обновлении встречи по полям:', response.status, errorText);
+        throw new Error(`Ошибка обновления встречи: ${response.status} - ${errorText}`);
       }
 
-      const data = await response.json();
-      console.log('✅ Мероприятие обновлено по полям:', data);
-      return data;
+      const result = await response.json();
+      console.log('✅ Встреча обновлена по полям:', result);
+      return result;
+      
     } catch (error) {
-      console.error('❌ Ошибка при обновлении мероприятия по полям:', error);
+      console.error('❌ Ошибка при обновлении встречи по полям:', error);
       throw error;
     }
   },

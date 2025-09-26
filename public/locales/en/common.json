@@ -34,7 +34,7 @@
     "passwordPlaceholder": "Enter password",
     "forgotPassword": "Forgot password?",
     "signInButton": "Sign In",
-    "anonymousLogin": "Sign in as guest",
+    "anonymousLogin": "Enter anonymously to YU Otinish",
     "anonymousLoginDescription": "Sign in as guest to view public content without registration",
     "egovStep1": "1. Open the app",
     "egovStep2": "2. Sign in",
@@ -126,7 +126,6 @@
       "phone": "Phone",
       "email": "Email",
       "birthDate": "Birth Date",
-      "dateFormat": "Format: YYYY-MM-DD",
       "save": "Save"
     },
     "about": {
@@ -520,5 +519,21 @@
         "cancel": "Cancel"
       }
     }
+  },
+
+  "birthday": {
+    "title": "Happy Birthday!",
+    "message": "Yessenov University congratulates you and wishes you success in your studies and achieving all your goals!",
+    "dismiss": "Dismiss notification"
+  },
+
+  "news": {
+    "title": "News",
+    "description": "Latest news from the official Yessenov University website",
+    "viewAll": "View all news on yu.edu.kz",
+    "loading": "Loading news...",
+    "notFound": "No news found",
+    "retry": "Try again",
+    "readMore": "Read more"
   }
 }

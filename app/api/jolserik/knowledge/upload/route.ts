@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 
+interface KnowledgeBaseData {
+  filename: string;
+  category: string;
+  content: string;
+  chunks: string[];
+  filePath: string;
+}
+
+interface ProcessedContent {
+  text: string;
+  chunks: string[];
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -47,7 +60,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Обработка различных типов документов
-async function processDocument(filePath: string, mimeType: string) {
+async function processDocument(filePath: string, mimeType: string): Promise<ProcessedContent> {
   let text = ''
   
   if (mimeType === 'text/plain') {
@@ -94,12 +107,12 @@ function splitIntoChunks(text: string, chunkSize: number): string[] {
   return chunks
 }
 
-async function saveToKnowledgeBase(data: any) {
+async function saveToKnowledgeBase(data: KnowledgeBaseData): Promise<void> {
   // Здесь сохраняем в базу данных или JSON файл
   const fs = await import('fs/promises')
   const knowledgeFile = join(process.cwd(), 'knowledge_base', 'index.json')
   
-  let knowledge = []
+  let knowledge: (KnowledgeBaseData & { id: string; createdAt: string })[] = []
   try {
     const existing = await fs.readFile(knowledgeFile, 'utf-8')
     knowledge = JSON.parse(existing)

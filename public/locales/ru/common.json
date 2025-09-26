@@ -34,7 +34,7 @@
     "passwordPlaceholder": "Введите пароль",
     "forgotPassword": "Забыли пароль?",
     "signInButton": "Войти",
-    "anonymousLogin": "Войти как гость",
+    "anonymousLogin": "Войти анонимно в YU Otinish",
     "anonymousLoginDescription": "Войдите как гость для просмотра публичного контента без регистрации",
     "egovStep1": "1. Откройте приложение",
     "egovStep2": "2. Войдите в систему",
@@ -148,7 +148,6 @@
       "phone": "Телефон",
       "email": "Email",
       "birthDate": "Дата рождения",
-      "dateFormat": "Формат: ГГГГ-ММ-ДД",
       "save": "Сохранить"
     },
     "about": {
@@ -544,5 +543,15 @@
         "cancel": "Отмена"
       }
     }
+  },
+
+  "news": {
+    "title": "Новости",
+    "description": "Последние новости с официального сайта Yessenov University",
+    "viewAll": "Посмотреть все новости на yu.edu.kz",
+    "loading": "Загрузка новостей...",
+    "notFound": "Новости не найдены",
+    "retry": "Попробовать снова",
+    "readMore": "Читать далее"
   }
 }

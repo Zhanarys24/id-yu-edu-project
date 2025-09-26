@@ -692,12 +692,14 @@ export default function LoginPage() {
             <>
               <div className="border-t border-gray-200 my-8"></div>
 
-              <button 
-                className="w-3/4 border border-blue-600 text-blue-600 py-3 px-4 rounded-lg hover:bg-blue-50 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mobile-button"
-                onClick={handleAnonymousLogin}
+              <a 
+                href="https://otinish.yu.edu.kz/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-3/4 border border-blue-600 text-blue-600 py-3 px-4 rounded-lg hover:bg-blue-50 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mobile-button inline-block text-center"
               >
                 {t('login.anonymousLogin')}
-              </button>
+              </a>
 
               <div className="flex items-start mt-4 p-3 bg-gray-50 rounded-lg w-3/4">
                 <svg className="w-4 h-4 text-gray-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

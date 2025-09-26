@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_CONFIG, buildApiUrl, getApiHeaders } from '@/lib/config/api';
+import { MeetingRoom } from '@/lib/services/calendarService';
 
 export async function GET(req: NextRequest) {
   try {
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest) {
       console.log('✅ Meeting rooms loaded successfully:', data.results?.length || 0);
       
       // Обрабатываем ответ в формате {count, size, next, previous, results}
-      let rooms = [];
+      let rooms: MeetingRoom[] = [];
       if (data.results && Array.isArray(data.results)) {
         rooms = data.results;
       } else if (Array.isArray(data)) {
@@ -52,7 +53,7 @@ export async function GET(req: NextRequest) {
       
       // Дополнительная фильтрация по корпусу если указан
       if (campusId) {
-        rooms = rooms.filter(room => room.campus === parseInt(campusId));
+        rooms = rooms.filter((room: MeetingRoom) => room.campus === parseInt(campusId));
       }
       
       return NextResponse.json(rooms);

@@ -1,9 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { join } from 'path'
 
+interface KnowledgeDocument {
+  id: string;
+  filename: string;
+  category: string;
+  content: string;
+  chunks: string[];
+  filePath: string;
+  createdAt: string;
+}
+
+interface SearchResult {
+  content: string;
+  filename: string;
+  category: string;
+  score: number;
+}
+
+interface SearchRequest {
+  query: string;
+  limit?: number;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { query, limit = 5 } = await request.json()
+    const { query, limit = 5 }: SearchRequest = await request.json()
     
     // Загружаем базу знаний
     const knowledge = await loadKnowledgeBase()
@@ -30,7 +52,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function loadKnowledgeBase() {
+async function loadKnowledgeBase(): Promise<KnowledgeDocument[]> {
   const fs = await import('fs/promises')
   const knowledgeFile = join(process.cwd(), 'knowledge_base', 'index.json')
   
@@ -42,9 +64,9 @@ async function loadKnowledgeBase() {
   }
 }
 
-function searchInKnowledge(query: string, knowledge: any[], limit: number) {
+function searchInKnowledge(query: string, knowledge: KnowledgeDocument[], limit: number): SearchResult[] {
   const queryWords = query.toLowerCase().split(' ').filter(w => w.length > 2)
-  const results: any[] = []
+  const results: SearchResult[] = []
 
   for (const doc of knowledge) {
     for (const chunk of doc.chunks) {
@@ -74,7 +96,7 @@ function searchInKnowledge(query: string, knowledge: any[], limit: number) {
     .slice(0, limit)
 }
 
-async function generateAIResponse(query: string, context: any[]) {
+async function generateAIResponse(query: string, context: SearchResult[]): Promise<string | null> {
   const contextText = context.map(c => c.content).join('\n\n')
   
   try {

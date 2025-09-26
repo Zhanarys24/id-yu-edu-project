@@ -1,12 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+interface Contact {
+  phone?: string;
+  email?: string;
+  commandant?: string;
+}
+
+interface Facilities {
+  kitchen?: string;
+  laundry?: string;
+  library?: string;
+  medical?: string;
+  cafe?: string;
+  wifi?: string;
+  security?: string;
+}
+
+interface Pricing {
+  students?: string;
+  staff?: string;
+  oneTime?: string;
+}
+
+interface CampusLocation {
+  name: string;
+  type: string;
+  coordinates: Coordinates;
+  gis2_link: string;
+  description: string;
+  services?: string[];
+  facilities?: string[] | Facilities; // Поддерживаем оба типа
+  workingHours?: string;
+  contact?: Contact;
+  capacity?: number;
+  roomTypes?: string[];
+  cost?: string;
+  pricing?: Pricing;
+  departments?: Record<string, {
+    floor: number;
+    rooms?: string;
+    phone: string;
+  }>;
+}
+
+interface CampusResult extends CampusLocation {
+  id: string;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('query')?.toLowerCase() || '';
     
     // РЕАЛЬНЫЕ ДАННЫЕ ИЗ 2ГИС - Yessenov University
-    const campusLocations = {
+    const campusLocations: Record<string, CampusLocation> = {
       // ГЛАВНЫЙ КОРПУС
       'главный корпус': {
         name: 'Yessenov University',
@@ -191,7 +243,7 @@ export async function GET(req: NextRequest) {
     };
 
     // Поиск по запросу
-    const results: any[] = [];
+    const results: CampusResult[] = [];
     
     Object.entries(campusLocations).forEach(([key, location]) => {
       if (query === '' || 

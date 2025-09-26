@@ -10,12 +10,12 @@ interface ScheduleItem {
   building_name?: string;
   lesson_type?: string;
   status?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface ScheduleResponse {
   results?: ScheduleItem[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export async function GET(req: NextRequest) {

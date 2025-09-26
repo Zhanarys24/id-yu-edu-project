@@ -1,12 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { join } from 'path'
 
+interface KnowledgeDocument {
+  id: string;
+  filename: string;
+  category: string;
+  content: string;
+  chunks: string[];
+  filePath: string;
+  createdAt: string;
+}
+
+interface DocumentSummary {
+  id: string;
+  filename: string;
+  category: string;
+  chunks: string[];
+  createdAt: string;
+}
+
 export async function GET() {
   try {
     const fs = await import('fs/promises')
     const knowledgeFile = join(process.cwd(), 'knowledge_base', 'index.json')
     
-    let documents = []
+    let documents: KnowledgeDocument[] = []
     try {
       const data = await fs.readFile(knowledgeFile, 'utf-8')
       documents = JSON.parse(data)
@@ -16,7 +34,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      documents: documents.map((doc: any) => ({
+      documents: documents.map((doc: KnowledgeDocument): DocumentSummary => ({
         id: doc.id,
         filename: doc.filename,
         category: doc.category,
@@ -33,13 +51,14 @@ export async function GET() {
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const fs = await import('fs/promises')
     const knowledgeFile = join(process.cwd(), 'knowledge_base', 'index.json')
     
-    let documents = []
+    let documents: KnowledgeDocument[] = []
     try {
       const data = await fs.readFile(knowledgeFile, 'utf-8')
       documents = JSON.parse(data)
@@ -48,7 +67,7 @@ export async function DELETE(
     }
 
     // Находим и удаляем документ
-    const docIndex = documents.findIndex((doc: any) => doc.id === params.id)
+    const docIndex = documents.findIndex((doc: KnowledgeDocument) => doc.id === id)
     if (docIndex === -1) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 })
     }

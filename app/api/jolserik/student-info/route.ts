@@ -6,7 +6,33 @@ interface ProfileData {
   last_name?: string;
   username?: string;
   email?: string;
-  [key: string]: any;
+  student?: StudentData;
+  custom_data?: CustomData;
+  [key: string]: unknown;
+}
+
+interface StudentData {
+  course?: number;
+  year?: number;
+  level?: number;
+  current_course?: number;
+  study_year?: number;
+  faculty?: FacultyData | string;
+  group?: string;
+  [key: string]: unknown;
+}
+
+interface FacultyData {
+  name_ru?: string;
+  name_kk?: string;
+  name_en?: string;
+  [key: string]: unknown;
+}
+
+interface CustomData {
+  course?: number;
+  year?: number;
+  [key: string]: unknown;
 }
 
 interface AcademicData {
@@ -19,7 +45,7 @@ interface AcademicData {
   dormitory_place?: boolean;
   dormitory_building?: string;
   dormitory_room?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export async function GET(req: NextRequest) {
@@ -29,51 +55,46 @@ export async function GET(req: NextRequest) {
     const authCookie = req.cookies.get('auth')?.value;
     const backendSessionCookie = req.cookies.get('backend_session')?.value;
     
-    console.log('🔐 Auth cookie exists:', !!authCookie);
-    console.log('🔐 Backend session exists:', !!backendSessionCookie);
-    
-    if (!authCookie && !backendSessionCookie) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!authCookie) {
+      return NextResponse.json({ 
+        error: 'Authentication required',
+        isAuthenticated: false 
+      }, { status: 401 });
     }
     
+    // Подготавливаем заголовки
     const headers: Record<string, string> = {
+      'Authorization': `Bearer ${authCookie}`,
       'Content-Type': 'application/json',
-      'accept': 'application/json',
     };
     
-    if (authCookie) {
-      headers['Authorization'] = `Token ${authCookie}`;
-    }
     if (backendSessionCookie) {
       headers['Cookie'] = `backend_session=${backendSessionCookie}`;
     }
     
     // Получаем профиль пользователя
-    const profileUrl = 'https://id.yu.edu.kz/api/users/me/';
-    console.log('📡 Fetching profile from:', profileUrl);
+    const profileUrl = 'https://id.yu.edu.kz/api/v1/user/profile/';
+    console.log(' Fetching profile from:', profileUrl);
     
     const profileResponse = await fetch(profileUrl, { method: 'GET', headers });
+    console.log('👤 Profile API status:', profileResponse.status);
     
     if (!profileResponse.ok) {
-      console.log('❌ Profile API failed:', profileResponse.status);
-      return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 401 });
+      console.error('❌ Profile API failed:', profileResponse.status);
+      return NextResponse.json({ 
+        error: 'Failed to fetch profile',
+        isAuthenticated: false 
+      }, { status: profileResponse.status });
     }
     
     const profileData: ProfileData = await profileResponse.json();
-    console.log('👤 Profile data received:', JSON.stringify(profileData, null, 2));
-
-    // Добавьте эти строки для отладки:
-    console.log('🎓 Student field exists:', !!profileData.student);
-    console.log('�� Student field type:', typeof profileData.student);
-    if (profileData.student) {
-      console.log('🎓 Student field content:', JSON.stringify(profileData.student, null, 2));
-    }
+    console.log(' Profile data received:', JSON.stringify(profileData, null, 2));
 
     // Извлекаем данные студента из поля student
-    let studentData: any = {};
+    let studentData: StudentData = {};
     if (profileData.student && typeof profileData.student === 'object') {
       studentData = profileData.student;
-      console.log('🎓 Student data extracted:', JSON.stringify(studentData, null, 2));
+      console.log(' Student data extracted:', JSON.stringify(studentData, null, 2));
     }
     
     // Получаем академическую информацию студента
@@ -86,55 +107,56 @@ export async function GET(req: NextRequest) {
     let academicData: AcademicData = {};
     if (academicResponse.ok) {
       academicData = await academicResponse.json();
-      console.log('🎓 Academic data received:', JSON.stringify(academicData, null, 2));
+      console.log(' Academic data received:', JSON.stringify(academicData, null, 2));
     } else {
-      const errorText = await academicResponse.text();
-      console.log('❌ Academic API error:', errorText);
+      console.log('⚠️ Academic API not available, using profile data only');
     }
     
-    // Форматируем ответ для Jolserik AI с приоритетом данных из student
+    // Определяем курс студента
+    const course = extractCourseFromStudentData(studentData, profileData);
+    console.log('🎓 Extracted course:', course);
+    
+    // Определяем факультет
+    const faculty = getFacultyName(studentData.faculty || academicData.faculty);
+    console.log('🏛️ Faculty:', faculty);
+    
+    // Формируем итоговый ответ
     const studentInfo = {
-      success: true,
-      data: {
-        fullName: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-        studentNumber: profileData.username || '',
-        email: profileData.email || '',
-        faculty: getFacultyName(academicData.faculty || studentData.faculty) || extractFacultyFromEmail(profileData.email || '') || 'Не указан',
-        course: academicData.course || studentData.course || extractCourseFromStudentData(studentData, profileData) || 'Не указан',
-        group: academicData.group || studentData.group || 'Не указана',
-        gpa: academicData.gpa || studentData.gpa || 0,
-        scholarship: {
-          status: academicData.scholarship_status || studentData.scholarship_status || false,
-          amount: academicData.scholarship_amount || studentData.scholarship_amount || 0
-        },
-        dormitory: {
-          hasPlace: academicData.dormitory_place || studentData.dormitory_place || false,
-          building: academicData.dormitory_building || studentData.dormitory_building || 'Не указано',
-          room: academicData.dormitory_room || studentData.dormitory_room || 'Не указано'
-        },
-        debug: {
-          profileKeys: Object.keys(profileData),
-          academicKeys: Object.keys(academicData),
-          studentKeys: Object.keys(studentData),
-          academicApiWorked: academicResponse.ok,
-          hasStudentData: !!profileData.student
-        }
+      isAuthenticated: true,
+      firstName: profileData.first_name || 'Студент',
+      lastName: profileData.last_name || '',
+      username: profileData.username || '',
+      email: profileData.email || '',
+      faculty: faculty || 'Не указан',
+      course: course || 1,
+      group: studentData.group || academicData.group || 'Не указана',
+      gpa: academicData.gpa || 0,
+      scholarshipStatus: academicData.scholarship_status || false,
+      scholarshipAmount: academicData.scholarship_amount || 0,
+      dormitoryPlace: academicData.dormitory_place || false,
+      dormitoryBuilding: academicData.dormitory_building || '',
+      dormitoryRoom: academicData.dormitory_room || '',
+      rawData: {
+        profile: profileData,
+        student: studentData,
+        academic: academicData
       }
     };
     
     console.log('✅ Final student info:', JSON.stringify(studentInfo, null, 2));
+    
     return NextResponse.json(studentInfo);
     
   } catch (error) {
-    console.error('💥 Student info API error:', error);
+    console.error('❌ Student info error:', error);
     return NextResponse.json({ 
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Failed to fetch student information',
+      isAuthenticated: false 
     }, { status: 500 });
   }
 }
 
-function extractCourseFromStudentData(studentData: any, profileData: any): number | null {
+function extractCourseFromStudentData(studentData: StudentData, profileData: ProfileData): number | null {
   // Проверяем различные возможные поля в student данных
   const possibleFields = [
     studentData?.course,
@@ -153,49 +175,10 @@ function extractCourseFromStudentData(studentData: any, profileData: any): numbe
     }
   }
   
-  // Попробуем извлечь из email или username
-  const email = profileData?.email || '';
-  const username = profileData?.username || '';
-  
-  // Если в email есть год поступления (например 22 = 2022 = сейчас 3 курс)
-  const currentYear = new Date().getFullYear();
-  const yearMatch = email.match(/(\d{2})/);
-  if (yearMatch) {
-    const twoDigitYear = parseInt(yearMatch[1]);
-    const fullYear = twoDigitYear > 50 ? 1900 + twoDigitYear : 2000 + twoDigitYear;
-    const courseCalculated = currentYear - fullYear + 1;
-    if (courseCalculated > 0 && courseCalculated <= 6) {
-      return courseCalculated;
-    }
-  }
-  
   return null;
 }
 
-function extractFacultyFromEmail(email: string): string | null {
-  if (!email || typeof email !== 'string') return null;
-  
-  // Список сокращений факультетов по email
-  const facultyMap: Record<string, string> = {
-    'ng': 'Факультет нефти и газа',
-    'itfm': 'Факультет информационных технологий', 
-    'eco': 'Экономический факультет',
-    'law': 'Юридический факультет',
-    'med': 'Медицинский факультет',
-    'tech': 'Технический факультет'
-  };
-  
-  const lowerEmail = email.toLowerCase();
-  for (const [abbr, fullName] of Object.entries(facultyMap)) {
-    if (lowerEmail.includes(abbr)) {
-      return fullName;
-    }
-  }
-  
-  return null;
-}
-
-function getFacultyName(facultyData: any): string | null {
+function getFacultyName(facultyData: FacultyData | string | undefined): string | null {
   if (!facultyData) return null;
   
   // Если это объект с названиями

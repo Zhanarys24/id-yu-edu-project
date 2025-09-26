@@ -906,7 +906,7 @@ const generateWordHTML = (user: RegisteredUser, portfolioItems: PortfolioItem[])
         <div class="document-subtitle">Профессиональное портфолио преподавателя</div>
         
         <div class="user-name">${user.name}</div>
-        <div class="user-role">${user.role === 'super_admin' ? 'Супер-администратор' : user.role === 'admin_news' ? 'Администратор новостей' : user.role === 'admin_portfolio' ? 'Администратор портфолио' : user.role === 'admin_education' ? 'Администратор образования' : user.role === 'admin_events' ? 'Администратор событий' : user.role === 'admin_eservices' ? 'Администратор сервисов' : user.role === 'admin_yessenovai' ? 'Администратор Yessenov AI' : user.role === 'admin_gamification' ? 'Администратор геймификации' : user.role === 'student' ? 'Студент' : 'Пользователь'}</div>
+        <div class="user-role">${user.role === 'super_admin' ? 'Супер-администратор' : user.role === 'admin_news' ? 'Администратор новостей' : user.role === 'admin_portfolio' ? 'Администратор портфолио' : user.role === 'admin_events' ? 'Администратор событий' : user.role === 'admin_jolserik' ? 'Администратор Jolserik' : user.role === 'student' ? 'Студент' : user.role === 'teacher' ? 'Преподаватель' : 'Пользователь'}</div>
         
         <div class="date-info">
           <strong>Дата формирования документа:</strong><br>

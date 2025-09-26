@@ -15,6 +15,7 @@ import FileUpload from '@/components/FileUpload'
 import clsx from 'clsx'
 import { exportPortfolioToWord } from '@/lib/utils/wordExport'
 import { publicationsService, PublicationByYear, PublicationStats } from '@/lib/services/publicationsService'
+import { UserRole } from '@/lib/types/auth'
 
 function PortfolioContent() {
   const { t } = useTranslation('common')
@@ -56,7 +57,7 @@ function PortfolioContent() {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role,
+      role: user.role as UserRole,
       isActive: true,
       registeredAt: new Date().toISOString(),
       lastLogin: new Date().toISOString(),

@@ -33,7 +33,7 @@
       "passwordPlaceholder": "Құпия сөзді енгізіңіз",
       "forgotPassword": "Құпия сөзді ұмыттыңыз ба?",
       "signInButton": "Кіру",
-      "anonymousLogin": "Қонақ ретінде кіру",
+      "anonymousLogin": "YU Otinish-ке анонимді түрде кіру",
       "anonymousLoginDescription": "Тіркеусіз ашық мазмұнды көру үшін қонақ ретінде кіріңіз",
       "egovStep1": "1. Қосымшаны ашыңыз",
       "egovStep2": "2. Жүйеге кіріңіз",
@@ -146,7 +146,6 @@
       "phone": "Телефон",
       "email": "Email",
       "birthDate": "Туған күні",
-      "dateFormat": "Формат: ЖЖЖЖ-АА-КК",
       "save": "Сақтау"
     },
     "about": {
@@ -543,5 +542,21 @@
         "cancel": "Болдырмау"
       }
     }
+  },
+
+  "birthday": {
+    "title": "Туған күніңізбен!",
+    "message": "Yessenov University сізді құттықтайды және оқуда табыс тілейді!",
+    "dismiss": "Хабарламаны жабу"
+  },
+
+  "news": {
+    "title": "Жаңалықтар",
+    "description": "Yessenov University ресми сайтынан соңғы жаңалықтар",
+    "viewAll": "yu.edu.kz сайтында барлық жаңалықтарды көру",
+    "loading": "Жаңалықтар жүктелуде...",
+    "notFound": "Жаңалықтар табылмады",
+    "retry": "Қайталау",
+    "readMore": "Толығырақ оқу"
   }
 }

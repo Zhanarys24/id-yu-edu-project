@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const API_BASE_URL = process.env.API_BASE_URL || 'https://id.yu.edu.kz/api';
 
+interface Meeting {
+  id?: string | number;
+  pk?: string | number;
+  uuid?: string;
+  campus: string;
+  location: string;
+  date: string;
+  time_start: string;
+  time_end: string;
+  [key: string]: unknown; // Добавляем индексную сигнатуру для дополнительных свойств
+}
+
 export async function PUT(req: NextRequest) {
   try {
     console.log('=== UPDATE MEETING BY FIELDS API CALLED ===');
@@ -64,7 +76,7 @@ export async function PUT(req: NextRequest) {
           const meetings = data.results || data;
           
           // Ищем мероприятие по полям
-          foundMeeting = meetings.find((meeting: any) => {
+          foundMeeting = meetings.find((meeting: Meeting) => {
             return meeting.campus === searchFields.campus &&
                    meeting.location === searchFields.location &&
                    meeting.date === searchFields.date &&
@@ -73,7 +85,7 @@ export async function PUT(req: NextRequest) {
           });
           
           if (foundMeeting) {
-            // Проверяем, есть ли ID
+            // Проверяем, есть ли ID - используем безопасный доступ к свойствам
             meetingId = foundMeeting.id || foundMeeting.pk || foundMeeting.uuid;
             if (meetingId) {
               console.log(`✅ Найдено мероприятие с ID ${meetingId} в ${endpoint}`);

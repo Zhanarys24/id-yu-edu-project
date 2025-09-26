@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { 
-  Bell, X, Monitor, Calendar, GraduationCap, Coins,
+  Bell, X, Monitor, Calendar, GraduationCap, Coins, Bot,
   FileText, Settings, LogOut, BriefcaseBusiness,
   FileUser, BookMarked, Briefcase, Trophy, Search, Star
 } from 'lucide-react'
@@ -20,6 +20,13 @@ type AppNotification = {
   link?: string
   category?: 'news' | 'system' | 'message' | 'event' | 'birthday'
   createdAt: string
+}
+
+interface MenuItem {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  onClick?: () => void;
 }
 
 export default function Header() {
@@ -51,78 +58,6 @@ export default function Header() {
     try {
       const raw = localStorage.getItem('notifications')
       let loaded: AppNotification[] = raw ? JSON.parse(raw) : []
-
-      if (loaded.length === 0) {
-        // Seed with localized samples (varied categories)
-        const now = Date.now()
-        loaded = [
-          {
-            id: 'n1',
-            text: t('notifications.samples.newsHackathon', 'Вышла новая новость: Открыт набор на хакатон'),
-            read: false,
-            link: '/main/news',
-            category: 'news',
-            createdAt: new Date(now - 1 * 60_000).toISOString(),
-          },
-          {
-            id: 'n2',
-            text: t('notifications.samples.curatorMeeting', 'Напоминание: встреча с куратором завтра в 10:00'),
-            read: false,
-            link: '/main/calendar',
-            category: 'event',
-            createdAt: new Date(now - 30 * 60_000).toISOString(),
-          },
-          {
-            id: 'n3',
-            text: t('notifications.samples.eservicesStatus', 'E-услуги: ваш запрос на справку одобрен'),
-            read: false,
-            link: '/main/E-services',
-            category: 'system',
-            createdAt: new Date(now - 2 * 60 * 60_000).toISOString(),
-          },
-          {
-            id: 'n4',
-            text: t('notifications.samples.portfolioAchievement', 'Поздравляем! Новая запись в достижениях добавлена'),
-            read: true,
-            link: '/portfolio?tab=achievements',
-            category: 'system',
-            createdAt: new Date(now - 4 * 60 * 60_000).toISOString(),
-          },
-          {
-            id: 'n5',
-            text: t('notifications.samples.aiReply', 'YessenovAI: получен ответ на ваш запрос'),
-            read: true,
-            link: '/main/yessenovbot',
-            category: 'message',
-            createdAt: new Date(now - 6 * 60 * 60_000).toISOString(),
-          },
-          {
-            id: 'n6',
-            text: t('notifications.samples.calendarRoom', 'Календарь: аудитория 3.215 забронирована на 16:00'),
-            read: false,
-            link: '/main/calendar',
-            category: 'event',
-            createdAt: new Date(now - 8 * 60 * 60_000).toISOString(),
-          },
-          {
-            id: 'n7',
-            text: t('notifications.samples.settingsSecurity', 'Безопасность: рекомендуется обновить пароль аккаунта'),
-            read: true,
-            link: '/main/site-settings',
-            category: 'system',
-            createdAt: new Date(now - 12 * 60 * 60_000).toISOString(),
-          },
-          {
-            id: 'n8',
-            text: t('notifications.samples.newsGrant', 'Новость: объявлены дополнительные гранты на магистратуру'),
-            read: false,
-            link: '/main/news',
-            category: 'news',
-            createdAt: new Date(now - 1 * 24 * 60 * 60_000).toISOString(),
-          },
-        ]
-      }
-
       // Add birthday greeting from Yessenov University
       const today = new Date()
       const key = `birthday_greeted_${today.toDateString()}`
@@ -216,14 +151,12 @@ export default function Header() {
         { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
         { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
         { icon: <GraduationCap size={20} />, label: t('menu.applications'), href: '/main/applications' },
-        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
       ]
     : [
         { icon: <Monitor size={20} />, label: t('menu.news'), href: '/main/news' },
         { icon: <Calendar size={20} />, label: t('menu.calendar'), href: '/main/calendar' },
         { icon: <GraduationCap size={20} />, label: t('menu.applications'), href: '/main/applications' },
-        { icon: <FileText size={20} />, label: t('menu.eservices'), href: '/main/E-services' },
-        { label: t('menu.yessenovai'), href: '/main/yessenovbot' },
+        { icon: <Bot size={20} />, label: t('menu.yessenovai'), href: '/main/coming-soon/YessenovAI' },
         { icon: <Coins size={20} />, label: t('menu.YU-Gamification'), href: '/main/coming-soon/YU-Gamification' },
       ]
 
@@ -237,7 +170,7 @@ export default function Header() {
         { icon: <Briefcase size={18} />, label: t('portfolio.additional'), href: '/portfolio?tab=additional' },
       ]
 
-  const accountItems = user?.role === 'anonymous' 
+  const accountItems: MenuItem[] = user?.role === 'anonymous' 
     ? []
     : [
         { icon: <Settings size={20} />, label: t('account.settings'), href: '/main/site-settings' },
@@ -281,7 +214,7 @@ export default function Header() {
       if (slow) return
 
       const baseRoutes = ['/main/news','/main/calendar','/main/applications','/main/E-services','/main/site-settings']
-      const authOnly = ['/main/yessenovbot','/portfolio','/YU-Gamification','/admin']
+      const authOnly = ['/main/yessenovbot','/portfolio','/YU-Gamification','/hr-admin']
       const routes = user?.role === 'anonymous' ? baseRoutes : [...baseRoutes, ...authOnly]
 
       const unique = Array.from(new Set(routes))
@@ -437,7 +370,7 @@ export default function Header() {
       {isAppMapOpen && (
         <>
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center px-4 lg:pl-[320px] lg:pr-4"
             aria-modal="true"
             role="dialog"
             onClick={() => setIsAppMapOpen(false)}
@@ -493,28 +426,6 @@ export default function Header() {
                   </div>
                 </div>
 
-                {/* Портфолио - только для авторизованных пользователей */}
-                {portfolioItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2" suppressHydrationWarning>{t('groups.portfolio')}</h4>
-                    <div className="space-y-1">
-                      {portfolioItems
-                        .filter(i => i.label.toLowerCase().includes(query.toLowerCase()))
-                        .map(item => (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setIsAppMapOpen(false)}
-                            className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                          >
-                            <span className="text-gray-600 flex-shrink-0">{item.icon}</span>
-                            <span className="text-sm text-gray-700" suppressHydrationWarning>{item.label}</span>
-                          </Link>
-                        ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Аккаунт - только для авторизованных пользователей */}
                 {accountItems.length > 0 && (
                   <div className="mb-2">
@@ -523,20 +434,19 @@ export default function Header() {
                       {accountItems
                         .filter(i => i.label.toLowerCase().includes(query.toLowerCase()))
                         .map(item => (
-                          (item as any).onClick ? (
+                          item.onClick ? (
                             <button
                               key={item.label}
-                              onClick={(item as any).onClick}
+                              onClick={item.onClick}
                               className="flex items-center gap-2 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors w-full text-left"
                             >
-                              <span className="text-gray-600 flex-shrink-0">{(item as any).icon}</span>
+                              <span className="text-gray-600 flex-shrink-0">{item.icon}</span>
                               <span className="text-sm text-gray-700" suppressHydrationWarning>{item.label}</span>
                             </button>
                           ) : (
                             <Link
                               key={item.href}
                               href={item.href}
-                              onClick={() => setIsAppMapOpen(false)}
                               className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
                             >
                               <span className="text-gray-600 flex-shrink-0">{item.icon}</span>
@@ -556,8 +466,6 @@ export default function Header() {
                   <p className="text-gray-500 text-sm text-center py-4" suppressHydrationWarning>{t('appMap.nothingFound')}</p>
                 )}
               </div>
-
-
             </div>
           </div>
 

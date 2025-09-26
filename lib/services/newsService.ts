@@ -10,7 +10,6 @@ import {
   INITIAL_NEWS_TAGS
 } from '@/lib/types/news';
 import { RegisteredUser } from '@/lib/types/user';
-import { createExampleNews } from './exampleNewsData';
 
 class NewsService {
   private readonly STORAGE_KEY = 'news_database';
@@ -45,15 +44,13 @@ class NewsService {
       }
     }
 
-    // Если база данных пустая, создаем примеры новостей
-    const exampleNews = createExampleNews();
-    
+    // Возвращаем пустую базу данных без статичных новостей
     return {
-      news: exampleNews,
+      news: [],
       categories: INITIAL_NEWS_CATEGORIES,
       tags: INITIAL_NEWS_TAGS,
       clicks: [],
-      nextNewsId: exampleNews.length + 1,
+      nextNewsId: 1,
       nextCategoryId: INITIAL_NEWS_CATEGORIES.length + 1,
       nextTagId: INITIAL_NEWS_TAGS.length + 1,
       nextClickId: 1
