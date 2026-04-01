@@ -56,19 +56,32 @@ export async function POST(req: Request) {
       const response = NextResponse.json(filteredResponse, { status: res.status });
 
       if (token) {
+        // Наш внутренний токен
         response.cookies.set('auth', String(token), {
           httpOnly: false,
           sameSite: 'lax',
           path: '/',
           secure: process.env.NODE_ENV === 'production',
         });
+        
+        // 🔧 ГЛАВНОЕ: Устанавливаем sessionid для Platonus и других приложений
         if (backendSession) {
+          response.cookies.set('sessionid', backendSession, {
+            httpOnly: true,
+            sameSite: 'lax',
+            path: '/',
+            domain: process.env.NODE_ENV === 'production' ? '.id.yu.edu.kz' : undefined,
+            secure: process.env.NODE_ENV === 'production',
+          });
+          
+          // Также сохраняем для нашего использования
           response.cookies.set('backend_session', backendSession, {
             httpOnly: true,
             sameSite: 'lax',
             path: '/',
             secure: process.env.NODE_ENV === 'production',
           });
+          
           response.cookies.set('auth_mode', 'cookie', {
             httpOnly: true,
             sameSite: 'lax',

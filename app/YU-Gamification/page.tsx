@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, cloneElement } from "react"
 import Image from "next/image"
 import type { ReactNode, ReactElement } from "react"
-import { Trophy, Coins, Star, Award, ArrowRight, Zap, Target, Monitor, Newspaper, Calendar, Users, Gift, Crown, Medal, Flame, ShoppingBag, Home, ChevronRight, Sparkles, TrendingUp, Clock, BookOpen, Gamepad2 } from "lucide-react"
+import { Trophy, Coins, Star, Award, ArrowRight, Zap, Target, Monitor, Newspaper, Calendar, Users, Gift, Crown, Medal, Flame, ShoppingBag, Home, ChevronRight, Sparkles, TrendingUp, Clock, BookOpen, Gamepad2, QrCode, Menu, X } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import '@/i18n'
@@ -807,12 +807,16 @@ export default function DashboardPage() {
   ])
 
   // Navigation
-  type Tab = 'dashboard' | 'quests' | 'shop' | 'leaders' | 'events' | 'profile' | 'achievements'
+  type Tab = 'dashboard' | 'quests' | 'shop' | 'leaders' | 'events' | 'profile' | 'achievements' | 'qr'
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
 
   // Daily reward
   const [claimedToday, setClaimedToday] = useState<boolean>(false)
   const [claimInProgress, setClaimInProgress] = useState<boolean>(false)
+  
+  // Mobile navigation
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isSiteMapOpen, setIsSiteMapOpen] = useState(false)
   
   const claimDaily = () => {
     console.log('claimDaily called, claimedToday:', claimedToday, 'claimInProgress:', claimInProgress)
@@ -1064,6 +1068,249 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 relative overflow-hidden">
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
+        <div className="flex items-center justify-between px-4 py-3">
+          <button 
+            onClick={() => setActiveTab('profile')}
+            className="flex items-center gap-3 hover:bg-gray-50 rounded-lg p-1 transition-colors"
+          >
+            <div className="relative">
+              <ClientOnly fallback={
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                  {currentUserName.split(' ').map(n => n[0]).join('')}
+                </div>
+              }>
+                <Image
+                  src={normalizeAvatarUrl(avatar) || '/avatar.jpg'}
+                  alt="avatar"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              </ClientOnly>
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-gray-900 text-sm">{currentUserName.split(' ')[0]}</p>
+              <p className="text-xs text-gray-500">YU-Gamification</p>
+            </div>
+          </button>
+          <button
+            onClick={() => setIsSiteMapOpen(true)}
+            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
+            <Menu className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
+      </div>
+
+      {/* Site Map Modal */}
+      {isSiteMapOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div 
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setIsSiteMapOpen(false)}
+          />
+          <div className="bg-white w-full max-w-2xl max-h-[80vh] rounded-lg shadow-lg overflow-hidden relative z-10">
+            {/* Заголовок */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Карта YU-Gamification</h3>
+                <p className="text-xs text-gray-500">Навигация по всем разделам геймификации</p>
+              </div>
+              <button 
+                onClick={() => setIsSiteMapOpen(false)} 
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            {/* Контент с прокруткой */}
+            <div className="p-4 max-h-[60vh] overflow-y-auto">
+              {/* Основные разделы */}
+              <div className="mb-6">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Основные разделы</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => {
+                      setActiveTab('dashboard')
+                      setIsSiteMapOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-colors text-left"
+                  >
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Home className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-800 block">Главная</span>
+                      <span className="text-xs text-gray-500">Персональная панель</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('quests')
+                      setIsSiteMapOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-200 transition-colors text-left"
+                  >
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <Target className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-800 block">Квесты</span>
+                      <span className="text-xs text-gray-500">Задания и достижения</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('events')
+                      setIsSiteMapOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-purple-50 hover:border-purple-200 transition-colors text-left"
+                  >
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Calendar className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-800 block">События</span>
+                      <span className="text-xs text-gray-500">Мероприятия и активности</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('qr')
+                      setIsSiteMapOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-orange-50 hover:border-orange-200 transition-colors text-left"
+                  >
+                    <div className="p-2 bg-orange-100 rounded-lg">
+                      <QrCode className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-800 block">QR Сканирование</span>
+                      <span className="text-xs text-gray-500">Сканирование кодов</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('shop')
+                      setIsSiteMapOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-emerald-50 hover:border-emerald-200 transition-colors text-left"
+                  >
+                    <div className="p-2 bg-emerald-100 rounded-lg">
+                      <ShoppingBag className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-800 block">Магазин</span>
+                      <span className="text-xs text-gray-500">Обмен наград</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('leaders')
+                      setIsSiteMapOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-yellow-50 hover:border-yellow-200 transition-colors text-left"
+                  >
+                    <div className="p-2 bg-yellow-100 rounded-lg">
+                      <Trophy className="w-4 h-4 text-yellow-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-800 block">Рейтинг</span>
+                      <span className="text-xs text-gray-500">Таблица лидеров</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Дополнительные функции */}
+              <div className="mb-4">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Дополнительно</h4>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      setActiveTab('profile')
+                      setIsSiteMapOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition-colors text-left w-full"
+                  >
+                    <div className="p-2 bg-indigo-100 rounded-lg">
+                      <Users className="w-4 h-4 text-indigo-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-800 block">Профиль</span>
+                      <span className="text-xs text-gray-500">Настройки и информация</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      router.push('/main/news')
+                      setIsSiteMapOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left w-full"
+                  >
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Newspaper className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-800 block">Новости</span>
+                      <span className="text-xs text-gray-500">Последние обновления</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('achievements')
+                      setIsSiteMapOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left w-full"
+                  >
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Award className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-800 block">Достижения</span>
+                      <span className="text-xs text-gray-500">Коллекция наград</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Статистика */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Ваша статистика</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">{state.level}</div>
+                    <div className="text-xs text-gray-500">Уровень</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">{state.coins}</div>
+                    <div className="text-xs text-gray-500">YU-coins</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-600">{state.streak}</div>
+                    <div className="text-xs text-gray-500">Серия</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">#{userRank}</div>
+                    <div className="text-xs text-gray-500">Место</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Falling YU coins background */}
       <div className="absolute inset-0 pointer-events-none select-none z-0">
         {coins.map(c => {
@@ -1088,7 +1335,7 @@ export default function DashboardPage() {
           );
         })}
       </div>
-      <div className="max-w-7xl mx-auto p-6 relative z-10">
+      <div className="max-w-7xl mx-auto p-6 relative z-10 pt-20 lg:pt-6 pb-20 lg:pb-6">
         <div className="flex gap-8">
           {/* Enhanced Sidebar */}
           <aside className="hidden lg:block w-72">
@@ -1193,118 +1440,81 @@ export default function DashboardPage() {
           <div className="flex-1 space-y-8">
             {activeTab === 'dashboard' && (
               <>
-                {/* Hero Section */}
+                {/* Персонализированное приветствие - адаптивное */}
                 <div className="relative overflow-hidden">
                   <Card hover={false} className="border-0 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white shadow-2xl">
                     <div className="absolute inset-0">
                       <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
                       <div className="absolute bottom-10 right-10 w-24 h-24 bg-yellow-300/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
-                      <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-pink-300/15 rounded-full blur-xl animate-bounce"></div>
                     </div>
                     
-                    <CardContent className="relative z-10 p-8">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-6">
+                    <CardContent className="relative z-10 p-4 lg:p-8">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                        <div className="space-y-4">
                           <div className="space-y-2">
                             <div className="flex items-center gap-3">
                               <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                                <Crown className="w-8 h-8 text-yellow-300" />
+                                <Crown className="w-6 h-6 lg:w-8 lg:h-8 text-yellow-300" />
                               </div>
-                              <h1 className="text-4xl font-bold">Привет, {currentUserName.split(' ')[0]}!</h1>
+                              <h1 className="text-2xl lg:text-4xl font-bold">Привет, {currentUserName.split(' ')[0]}!</h1>
                             </div>
-                            <p className="text-xl text-white/80">Добро пожаловать в вашу геймификационную панель</p>
+                            <p className="text-lg lg:text-xl text-white/80">
+                              {(() => {
+                                const hour = new Date().getHours();
+                                const greetings = {
+                                  morning: ['Доброе утро', 'Солнечного дня', 'Отличного начала дня'],
+                                  afternoon: ['Добрый день', 'Продуктивного дня', 'Удачного дня'],
+                                  evening: ['Добрый вечер', 'Приятного вечера', 'Хорошего вечера']
+                                };
+                                const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+                                const greeting = greetings[timeOfDay][Math.floor(Math.random() * greetings[timeOfDay].length)];
+                                return `${greeting}! Готовы к новым достижениям?`;
+                              })()}
+                            </p>
                           </div>
                           
-                          <div className="grid grid-cols-3 gap-4">
-                            <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                          {/* Мобильная сетка статистики */}
+                          <div className="grid grid-cols-3 gap-3 lg:gap-6">
+                            <div className="bg-white/15 backdrop-blur-sm rounded-xl lg:rounded-2xl p-3 lg:p-4 border border-white/20">
                               <div className="flex items-center gap-2 mb-2">
-                                <Zap className="w-5 h-5 text-yellow-300" />
-                                <span className="text-white/90 text-sm font-medium">Уровень</span>
+                                <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-300" />
+                                <span className="text-white/90 text-xs lg:text-sm font-medium">Уровень</span>
                               </div>
-                              <p className="text-3xl font-bold">{state.level}</p>
+                              <p className="text-xl lg:text-3xl font-bold">{state.level}</p>
                             </div>
                             
-                            <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                            <div className="bg-white/15 backdrop-blur-sm rounded-xl lg:rounded-2xl p-3 lg:p-4 border border-white/20">
                               <div className="flex items-center gap-2 mb-2">
-                                <Image src="/YU-coin.png" alt="YU coin" width={28} height={28} className="w-12 h-12" />
-                                <span className="text-white/90 text-sm font-medium">YU-coins</span>
+                                <Image src="/YU-coin.png" alt="YU coin" width={20} height={20} className="w-5 h-5 lg:w-8 lg:h-8" />
+                                <span className="text-white/90 text-xs lg:text-sm font-medium">YU-coins</span>
                               </div>
                               <ClientOnly 
-                                fallback={<p className="text-3xl font-bold">50000</p>}
+                                fallback={<p className="text-xl lg:text-3xl font-bold">50000</p>}
                               >
-                              <p className="text-3xl font-bold">{animatedCoins}</p>
+                                <p className="text-xl lg:text-3xl font-bold">{animatedCoins}</p>
                               </ClientOnly>
                             </div>
                             
-                            <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                            <div className="bg-white/15 backdrop-blur-sm rounded-xl lg:rounded-2xl p-3 lg:p-4 border border-white/20">
                               <div className="flex items-center gap-2 mb-2">
-                                <Flame className="w-5 h-5 text-yellow-300" />
-                                <span className="text-white/90 text-sm font-medium">Серия</span>
+                                <Flame className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-300" />
+                                <span className="text-white/90 text-xs lg:text-sm font-medium">Серия</span>
                               </div>
-                              <p className="text-3xl font-bold">{state.streak}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-6">
-                            <div className="relative w-24 h-24">
-                              <svg viewBox="0 0 36 36" className="w-24 h-24 transform -rotate-90">
-                                <path
-                                  className="text-white/20"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                  fill="none"
-                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                />
-                                <path
-                                  className="text-yellow-300"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                  strokeDasharray={`${animatedLevel}, 100`}
-                                  strokeLinecap="round"
-                                  fill="none"
-                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                />
-                              </svg>
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">{animatedLevel}%</span>
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <p className="text-white/90 font-medium">Прогресс до следующего уровня</p>
-                              <Progress value={animatedLevel} className="w-64 h-3 bg-white/20" />
-                              <p className="text-white/70 text-sm">{state.xp} / {state.xpNeeded} XP</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-4">
-                            <button
-                              onClick={claimDaily}
-                              disabled={claimedToday}
-                              className={`px-6 py-3 rounded-2xl font-bold shadow-lg transition-all duration-200 ${
-                                claimedToday 
-                                  ? 'bg-white/30 text-white/60 cursor-not-allowed' 
-                                  : 'bg-white text-blue-700 hover:bg-gray-100 hover:shadow-xl transform hover:scale-105'
-                              }`}
-                            >
-                              {claimedToday ? 'Подарок получен' : '+50 YU-coins алу'}
-                            </button>
-                            
-                            <div className="text-white/80 text-sm">
-                              {claimedToday ? 'Возвращайтесь завтра!' : 'Ежедневная награда доступна'}
+                              <p className="text-xl lg:text-3xl font-bold">{state.streak}</p>
                             </div>
                           </div>
                         </div>
                         
-                        <div className="hidden xl:block">
-                          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                            <div className="text-center space-y-3">
-                              <div className="w-16 h-16 mx-auto bg-white/20 rounded-2xl flex items-center justify-center">
-                                <Trophy className="w-8 h-8 text-yellow-300" />
+                        {/* Рейтинг - показываем на мобильных тоже */}
+                        <div className="lg:hidden xl:block">
+                          <div className="bg-white/10 backdrop-blur-sm rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-white/20">
+                            <div className="text-center space-y-2 lg:space-y-3">
+                              <div className="w-12 h-12 lg:w-16 lg:h-16 mx-auto bg-white/20 rounded-xl lg:rounded-2xl flex items-center justify-center">
+                                <Trophy className="w-6 h-6 lg:w-8 lg:h-8 text-yellow-300" />
                               </div>
                               <div>
-                                <p className="text-white/90 text-sm font-medium">Ваше место</p>
-                                <p className="text-2xl font-bold text-yellow-300">#{userRank}</p>
+                                <p className="text-white/90 text-xs lg:text-sm font-medium">Ваше место</p>
+                                <p className="text-xl lg:text-2xl font-bold text-yellow-300">#{userRank}</p>
                               </div>
                               <p className="text-white/70 text-xs">из {leaderboard.length} студентов</p>
                             </div>
@@ -1315,166 +1525,113 @@ export default function DashboardPage() {
                   </Card>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                  <StatCard
-                    title="Активная серия"
-                    value={String(state.streak)}
-                    subtitle="дней подряд активности"
-                    icon={<Flame className="w-8 h-8" />}
-                    gradient="from-orange-400 to-red-500"
-                    trend="up"
-                  />
-                  <StatCard
-                    title="Завершенных квестов"
-                    value={String(quests.filter(q => q.completed).length)}
-                    subtitle="в текущем месяце"
-                    icon={<Target className="w-8 h-8" />}
-                    gradient="from-green-400 to-emerald-500"
-                    trend="up"
-                  />
-                  <StatCard
-                    title="Место в рейтинге"
-                    value={`#${userRank}`}
-                    subtitle={`из ${leaderboard.length} студентов`}
-                    icon={<Trophy className="w-8 h-8" />}
-                    gradient="from-amber-400 to-yellow-500"
-                    trend="up"
-                  />
-                  <StatCard
-                    title="До следующей награды"
-                    value="125"
-                    subtitle="YU-coins қалды"
-                    icon={<Gift className="w-8 h-8" />}
-                    gradient="from-purple-400 to-pink-500"
-                    trend="neutral"
-                  />
-                </div>
-
-                {/* Active Quests Section */}
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                        <Target className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-800">Активные квесты</h2>
-                        <p className="text-gray-500">Выполняйте задания и зарабатывайте награды</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      {(['all', 'active', 'completed'] as QuestFilter[]).map(f => (
-                        <button
-                          key={f}
-                          onClick={() => setFilter(f)}
-                          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                            filter === f 
-                              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
-                        >
-                          {f === 'all' ? 'Все' : f === 'active' ? 'Активные' : 'Завершенные'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {visibleQuests.map(quest => (
-                      <QuestCard
-                        key={quest.id}
-                        title={quest.title}
-                        description={quest.description}
-                        difficulty={quest.difficulty}
-                        category={quest.category}
-                        type={quest.type}
-                        progress={Math.round((quest.current / quest.total) * 100)}
-                        current={quest.current}
-                        total={quest.total}
-                        rewards={quest.rewards}
-                        icon={quest.icon}
-                        onAction={undefined} // Disable interaction in dashboard - use quests tab for actions
-                        disabled={true} // Always disabled in dashboard view
-                        completed={quest.completed}
-                        unlocked={quest.unlocked}
-                        deadline={quest.deadline}
-                        chainStep={quest.chainStep}
-                        requiredLevel={quest.requiredLevel}
-                        userLevel={state.level}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Quick Actions & Leaderboard */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                  {/* Quick Actions */}
-                  <div className="xl:col-span-1">
-                    <Card hover={false}>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Sparkles className="w-5 h-5 text-blue-500" />
-                          Быстрые действия
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <ActionButton
-                          icon={<ShoppingBag className="w-6 h-6" />}
-                          label="Магазин"
-                          subtitle="YU-coins жұмсау"
-                          color="from-green-400 to-emerald-500"
-                          onClick={() => router.push('/YU-Gamification/shop')}
-                          badge={shopItems.length}
-                        />
-                        <ActionButton
-                          icon={<Calendar className="w-6 h-6" />}
-                          label="События"
-                          subtitle="Активности"
-                          color="from-purple-400 to-pink-500"
-                          onClick={() => setActiveTab('events')}
-                          badge={2}
-                        />
-                        <ActionButton
-                          icon={<Users className="w-6 h-6" />}
-                          label="Профиль"
-                          subtitle="Настройки"
-                          color="from-blue-400 to-indigo-500"
-                          onClick={() => setActiveTab('profile')}
-                        />
-                      </CardContent>
-                    </Card>
-                  </div>
-                  
-                  {/* Leaderboard */}
-                  <Card hover={false} className="xl:col-span-2">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Trophy className="w-6 h-6 text-amber-500" />
-                        Таблица лидеров
+                {/* Интерактивная карта прогресса - адаптивная */}
+                <div className="space-y-4 lg:space-y-6">
+                  <Card hover={false}>
+                    <CardHeader className="pb-4">
+                      <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
+                        <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-blue-500" />
+                        Ваш прогресс
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      {leaderboard.slice(0, 6).map((leader, index) => (
-                        <LeaderItem
-                          key={index}
-                          rank={index + 1}
-                          name={leader.name}
-                          coins={leader.coins}
-                          isTop={index < 3}
-                          isUser={leader.name === currentUserName}
+                    <CardContent className="space-y-4 lg:space-y-6">
+                      {/* Основной прогресс-бар - адаптивный */}
+                      <div className="space-y-3 lg:space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <h3 className="text-base lg:text-lg font-semibold text-gray-800">До следующего уровня</h3>
+                          <span className="text-sm text-gray-500">{state.xp} / {state.xpNeeded} XP</span>
+                        </div>
+                        <div className="relative">
+                          <div className="w-full bg-gray-200 rounded-full h-3 lg:h-4">
+                            <div 
+                              className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 lg:h-4 rounded-full transition-all duration-1000 ease-out"
+                              style={{ width: `${animatedLevel}%` }}
+                            ></div>
+                          </div>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xs lg:text-sm font-bold text-white drop-shadow-lg">{animatedLevel}%</span>
+                          </div>
+                        </div>
+                      </div>
 
-                        />
-                      ))}
-                      
-                      <div className="pt-4 border-t border-gray-100">
-                        <button 
-                          onClick={() => setActiveTab('leaders')}
-                          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-2xl font-bold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
-                        >
-                          Посмотреть полный рейтинг
-                        </button>
+                      {/* Мини-карты прогресса - адаптивная сетка */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-3 lg:p-4 rounded-xl border border-green-200 hover:shadow-lg transition-all duration-200">
+                          <div className="flex items-center gap-2 lg:gap-3 mb-2">
+                            <div className="p-1.5 lg:p-2 bg-green-100 rounded-lg">
+                              <Target className="w-4 h-4 lg:w-5 lg:h-5 text-green-600" />
+                            </div>
+                            <span className="font-semibold text-green-800 text-sm lg:text-base">Квесты</span>
+                          </div>
+                          <div className="text-xl lg:text-2xl font-bold text-green-700">
+                            {quests.filter(q => q.completed).length}/{quests.length}
+                          </div>
+                          <div className="text-xs lg:text-sm text-green-600">
+                            {quests.filter(q => q.completed).length === quests.length 
+                              ? 'Все квесты завершены! 🎉' 
+                              : `Осталось ${quests.length - quests.filter(q => q.completed).length} квестов`
+                            }
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-3 lg:p-4 rounded-xl border border-blue-200 hover:shadow-lg transition-all duration-200">
+                          <div className="flex items-center gap-2 lg:gap-3 mb-2">
+                            <div className="p-1.5 lg:p-2 bg-blue-100 rounded-lg">
+                              <Award className="w-4 h-4 lg:w-5 lg:h-5 text-blue-600" />
+                            </div>
+                            <span className="font-semibold text-blue-800 text-sm lg:text-base">Достижения</span>
+                          </div>
+                          <div className="text-xl lg:text-2xl font-bold text-blue-700">3</div>
+                          <div className="text-xs lg:text-sm text-blue-600">
+                            {state.level >= 5 ? 'Отличный прогресс! 🏆' : 'Продолжайте в том же духе!'}
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-3 lg:p-4 rounded-xl border border-purple-200 hover:shadow-lg transition-all duration-200 sm:col-span-2 lg:col-span-1">
+                          <div className="flex items-center gap-2 lg:gap-3 mb-2">
+                            <div className="p-1.5 lg:p-2 bg-purple-100 rounded-lg">
+                              <Calendar className="w-4 h-4 lg:w-5 lg:h-5 text-purple-600" />
+                            </div>
+                            <span className="font-semibold text-purple-800 text-sm lg:text-base">Активность</span>
+                          </div>
+                          <div className="text-xl lg:text-2xl font-bold text-purple-700">{state.streak}</div>
+                          <div className="text-xs lg:text-sm text-purple-600">
+                            {state.streak >= 7 ? 'Недельная серия! 🔥' : 
+                             state.streak >= 3 ? 'Хорошая серия!' : 
+                             'Начните серию сегодня!'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Ежедневная награда - адаптивная */}
+                      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-3 lg:p-4 rounded-xl border border-yellow-200">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-1.5 lg:p-2 bg-yellow-100 rounded-lg">
+                              <Gift className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-yellow-800 text-sm lg:text-base">Ежедневная награда</h4>
+                              <p className="text-xs lg:text-sm text-yellow-600">
+                                {claimedToday 
+                                  ? 'Уже получена сегодня! Возвращайтесь завтра 🎁' 
+                                  : 'Доступна для получения! Не упустите шанс 💰'
+                                }
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={claimDaily}
+                            disabled={claimedToday}
+                            className={`px-4 lg:px-6 py-2 rounded-xl font-bold text-sm lg:text-base transition-all duration-200 ${
+                              claimedToday 
+                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                : 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:shadow-lg transform hover:scale-105'
+                            }`}
+                          >
+                            {claimedToday ? 'Получено' : '+50 YU-coins'}
+                          </button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -1482,27 +1639,26 @@ export default function DashboardPage() {
               </>
             )}
 
-            {/* Other Tabs */}
             {activeTab === 'quests' && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl">
-                    <Target className="w-7 h-7 text-white" />
+              <div className="space-y-4 lg:space-y-6">
+                <div className="flex items-center gap-3 mb-4 lg:mb-6">
+                  <div className="p-2 lg:p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl">
+                    <Target className="w-5 h-5 lg:w-7 lg:h-7 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-gray-800">Все квесты</h2>
-                    <p className="text-gray-500">Выполняйте задания и получайте награды</p>
+                    <h2 className="text-xl lg:text-3xl font-bold text-gray-800">Все квесты</h2>
+                    <p className="text-sm lg:text-base text-gray-500">Выполняйте задания и получайте награды</p>
                   </div>
                 </div>
                 
-                <div className="space-y-4 mb-6">
-                  {/* Статус фильтры */}
-                  <div className="flex gap-3">
+                <div className="space-y-3 lg:space-y-4 mb-4 lg:mb-6">
+                  {/* Статус фильтры - адаптивные */}
+                  <div className="flex flex-col sm:flex-row gap-2 lg:gap-3">
                   {(['all', 'active', 'completed'] as QuestFilter[]).map(f => (
                     <button
                       key={f}
                       onClick={() => setFilter(f)}
-                      className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-200 ${
+                      className={`px-4 lg:px-6 py-2 lg:py-3 rounded-xl lg:rounded-2xl font-semibold text-sm lg:text-base transition-all duration-200 ${
                         filter === f 
                           ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
                           : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
@@ -1516,8 +1672,8 @@ export default function DashboardPage() {
                   ))}
                   </div>
                   
-                  {/* Категория фильтры */}
-                  <div className="flex flex-wrap gap-2">
+                  {/* Категория фильтры - адаптивные */}
+                  <div className="flex flex-wrap gap-1.5 lg:gap-2">
                     {(['all', 'academic', 'social', 'achievement', 'daily', 'event', 'normal', 'weekly', 'urgent', 'chain'] as CategoryFilter[]).map(cat => {
                       const categoryLabels: Record<CategoryFilter, { label: string; icon: string }> = {
                         all: { label: 'Все категории', icon: '📋' },
@@ -1539,14 +1695,16 @@ export default function DashboardPage() {
                         <button
                           key={cat}
                           onClick={() => setCategoryFilter(cat)}
-                          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                          className={`px-2 lg:px-4 py-1.5 lg:py-2 rounded-lg lg:rounded-xl text-xs lg:text-sm font-semibold transition-all duration-200 ${
                             categoryFilter === cat 
                               ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
-                          {config.icon} {config.label}
-                          <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-white/20">
+                          <span className="hidden sm:inline">{config.icon} </span>
+                          <span className="sm:hidden">{config.icon}</span>
+                          <span className="hidden sm:inline">{config.label}</span>
+                          <span className="ml-1 lg:ml-2 px-1 lg:px-1.5 py-0.5 text-xs rounded-full bg-white/20">
                             {count}
                           </span>
                         </button>
@@ -1555,7 +1713,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
                   {visibleQuests.map(quest => (
                     <QuestCard
                       key={quest.id}
@@ -1584,26 +1742,26 @@ export default function DashboardPage() {
             )}
 
             {activeTab === 'shop' && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl">
-                    <ShoppingBag className="w-7 h-7 text-white" />
+              <div className="space-y-4 lg:space-y-6">
+                <div className="flex items-center gap-3 mb-4 lg:mb-6">
+                  <div className="p-2 lg:p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl lg:rounded-2xl">
+                    <ShoppingBag className="w-5 h-5 lg:w-7 lg:h-7 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-gray-800">Магазин наград</h2>
-                    <p className="text-gray-500">Обменяйте собранные YU-coins на полезные подарки</p>
+                    <h2 className="text-xl lg:text-3xl font-bold text-gray-800">Магазин наград</h2>
+                    <p className="text-sm lg:text-base text-gray-500">Обменяйте собранные YU-coins на полезные подарки</p>
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 rounded-2xl p-6 mb-6">
-                  <div className="flex items-center justify-between">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 rounded-xl lg:rounded-2xl p-4 lg:p-6 mb-4 lg:mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex items-center justify-center">
-                        <Image src="/YU-coin.png" alt="YU coin" width={32} height={32} className="w-12 h-12" />
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl lg:rounded-2xl flex items-center justify-center">
+                        <Image src="/YU-coin.png" alt="YU coin" width={24} height={24} className="w-6 h-6 lg:w-8 lg:h-8" />
                       </div>
                       <div>
-                        <p className="text-gray-600 text-sm font-medium">Ваш баланс</p>
-                        <p className="text-3xl font-bold text-gray-800">{state.coins} YU-coins</p>
+                        <p className="text-gray-600 text-xs lg:text-sm font-medium">Ваш баланс</p>
+                        <p className="text-2xl lg:text-3xl font-bold text-gray-800">{state.coins} YU-coins</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -1613,7 +1771,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
                   {shopItems.map(item => (
                     <Card key={item.id} className="group hover:shadow-xl">
                       <CardContent className="p-6">
@@ -1655,7 +1813,7 @@ export default function DashboardPage() {
             )}
 
             {activeTab === 'leaders' && (
-              <div className="space-y-8">
+              <div className="space-y-4 lg:space-y-8">
                 {/* Header */}
                 <div className="relative overflow-hidden">
                   <Card hover={false} className="border-0 bg-gradient-to-br from-amber-600 via-yellow-600 to-orange-600 text-white shadow-2xl">
@@ -2509,6 +2667,101 @@ export default function DashboardPage() {
             )}
 
 
+            {/* QR Code Tab */}
+            {activeTab === 'qr' && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl">
+                    <QrCode className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-bold text-gray-800">QR Сканирование</h2>
+                    <p className="text-gray-500">Сканируйте QR коды для получения наград</p>
+                  </div>
+                </div>
+                
+                {/* QR Scanner Skeleton */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <div className="text-center space-y-6">
+                    <div className="w-32 h-32 mx-auto bg-gray-100 rounded-2xl flex items-center justify-center">
+                      <QrCode className="w-16 h-16 text-gray-400" />
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-semibold text-gray-800">Сканер QR кодов</h3>
+                      <p className="text-gray-600 max-w-md mx-auto">
+                        Наведите камеру на QR код для получения наград и участия в активностях
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                      <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Coins className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <h4 className="font-semibold text-blue-800">Награды</h4>
+                        </div>
+                        <p className="text-sm text-blue-600">Получайте YU-coins за сканирование</p>
+                      </div>
+                      
+                      <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <Target className="w-4 h-4 text-green-600" />
+                          </div>
+                          <h4 className="font-semibold text-green-800">Квесты</h4>
+                        </div>
+                        <p className="text-sm text-green-600">Выполняйте задания через QR</p>
+                      </div>
+                      
+                      <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <Calendar className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <h4 className="font-semibold text-purple-800">События</h4>
+                        </div>
+                        <p className="text-sm text-purple-600">Участвуйте в мероприятиях</p>
+                      </div>
+                      
+                      <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <Award className="w-4 h-4 text-orange-600" />
+                          </div>
+                          <h4 className="font-semibold text-orange-800">Достижения</h4>
+                        </div>
+                        <p className="text-sm text-orange-600">Разблокируйте новые награды</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                          <QrCode className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <h4 className="text-lg font-semibold text-orange-800">Как использовать</h4>
+                      </div>
+                      <div className="space-y-2 text-sm text-orange-700">
+                        <p>1. Наведите камеру на QR код</p>
+                        <p>2. Дождитесь автоматического сканирования</p>
+                        <p>3. Получите награду и XP</p>
+                        <p>4. Проверьте обновления в профиле</p>
+                      </div>
+                    </div>
+                    
+                    <button 
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      onClick={() => showToast('QR сканер будет доступен в следующем обновлении! 📱', 'success')}
+                    >
+                      Запустить сканер
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* потом как нибудь решим */}
             {/* {activeTab === 'achievements' && (
               <AchievementSystem userStats={state} />
@@ -2536,6 +2789,71 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200">
+        <div className="flex justify-around py-2">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+              activeTab === 'dashboard' 
+                ? 'text-blue-600 bg-blue-50' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Home className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium">Главная</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('events')}
+            className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+              activeTab === 'events' 
+                ? 'text-blue-600 bg-blue-50' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Calendar className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium">События</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('qr')}
+            className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+              activeTab === 'qr' 
+                ? 'text-blue-600 bg-blue-50' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <QrCode className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium">QR Code</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('shop')}
+            className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+              activeTab === 'shop' 
+                ? 'text-blue-600 bg-blue-50' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <ShoppingBag className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium">Магазин</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+              activeTab === 'profile' 
+                ? 'text-blue-600 bg-blue-50' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Users className="w-5 h-5 mb-1" />
+            <span className="text-xs font-medium">Профиль</span>
+          </button>
+        </div>
+      </div>
 
       <style jsx>{`
         @keyframes slideIn {

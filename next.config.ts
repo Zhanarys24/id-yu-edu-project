@@ -33,6 +33,12 @@ const nextConfig: NextConfig = {
         hostname: 'yu.edu.kz',
         pathname: '/wp-content/uploads/**',
       },
+      // API домен для аватаров
+      {
+        protocol: 'https',
+        hostname: 'api.yu.edu.kz',
+        pathname: '/uploads/**',
+      },
       // Handle uploads hostname specifically
       {
         protocol: 'http',
